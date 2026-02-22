@@ -91,6 +91,9 @@ function init() {
   // render()
 }
 
+/**
+ * FILTER THE SELECTED NSA
+ */
 function buildNSASelect() {
   const selectedPeriod = el.periodSelect.value
   const query = (el.searchTitle.value || '').trim().toLowerCase()
@@ -108,7 +111,7 @@ function buildNSASelect() {
       return titleEng.includes(query) || titleSpa.includes(query)
     })
   }
-  console.log(`filtered`, filtered)
+  //console.log(`filtered`, filtered)
 
   const sorted = filtered.sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
 
