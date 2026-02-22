@@ -151,7 +151,7 @@ function render() {
   const filteredWorkplans = showWps ? filterByTitle(allWorkplans, query) : []
 
   // add aqui tratativa se todos os 3 relacionamentos foram encontrados
-  renderProfile2(nsa) // NSA Profile
+  renderNSAProfile(nsa) // NSA Profile
 
   // renderActivities(filteredActivities, showActs) // activities
   renderWorkplans(filteredWorkplans, showWps) // workplans
@@ -168,7 +168,6 @@ function filterByTitle(list, query) {
       .includes(query)
   )
 }
-
 
 function renderActivities(list, enabled) {
   if (!enabled) {
@@ -272,11 +271,11 @@ function renderFinancialCharts(nsa) {
   })
 }
 
-function renderProfile2(nsa) {
+function renderNSAProfile(nsa) {
   console.log(nsa)
   const infoEl = document.getElementById('nsa-info')
   el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleSPA || '-'
-  
+
   el.nsaSubtitle.innerText = `ID: ${nsa.ID} • ${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}`
 
   if (!infoEl) return
@@ -294,21 +293,13 @@ function renderProfile2(nsa) {
       <dd>${nsa.NSAYearOfEstablishment || '-'}</dd>
   
       <dt>${UI[currentLang].orgType}</dt>
-      <dd>${
-        currentLang === 'en'
-          ? nsa.NSAOrganizationTypeENG || '-'
-          : nsa.NSAOrganizationTypeSPA || '-'
-      }</dd>
+      <dd>${currentLang === 'en' ? nsa.NSAOrganizationTypeENG || '-' : nsa.NSAOrganizationTypeSPA || '-'}</dd>
   
       <dt>${UI[currentLang].period}</dt>
       <dd>${nsa.CollaborationPeriod || '-'}</dd>
   
       <dt>${UI[currentLang].typeOfSubmission}</dt>
-      <dd>${
-        currentLang === 'en'
-          ? nsa.TypeOfSubmissionENG || '-'
-          : nsa.TypeOfSubmissionSPA || '-'
-      }</dd>
+      <dd>${currentLang === 'en' ? nsa.TypeOfSubmissionENG || '-' : nsa.TypeOfSubmissionSPA || '-'}</dd>
     </dl>
   </div>`
 
@@ -325,62 +316,34 @@ function renderProfile2(nsa) {
       <dd>${nsa.NSAFocalpoint || '-'}</dd>
   
       <dt>${UI[currentLang].nsaFocalRole}</dt>
-      <dd>${
-        currentLang === 'en'
-          ? nsa.NSAFocalpointRoleENG || '-'
-          : nsa.NSAFocalpointRoleSPA || '-'
-      }</dd>  
+      <dd>${currentLang === 'en' ? nsa.NSAFocalpointRoleENG || '-' : nsa.NSAFocalpointRoleSPA || '-'}</dd>  
       <dt>${UI[currentLang].contactEmail}</dt>
       <dd>${nsa.NSAContactEmail || '-'}</dd>
     </dl>
   </div>`
 
+  // Objectives and Main work activities
+  const description = `
+  <div class="field">
+    <h3>${UI[currentLang].descTitle}</h3>
+    <h5>${UI[currentLang].objectives}</h5>
+
+    <p class="kv">
+     <dt>${currentLang === 'en' ? nsa.NSAObjectivesENG : nsa.NSAObjectivesSPA}</dt>
+    </p>
+  
+  </div>
+  `
+
   // chaves que são “textão” (colapsáveis)
   const longKeys = new Set(['NSAObjectives', 'NSAWorkFields', 'NSABoardMembers', 'NSAOrganizationBodies'])
-
-  const entries = Object.entries(nsa)
-    .filter(([k]) => {
-      if (k.endsWith('ENG') && currentLang !== 'en') return false
-      if (k.endsWith('SPA') && currentLang !== 'es') return false
-      return true
-    })
-    .map(([k, v]) => [k.replace(/ENG|SPA$/, ''), v])
-    .filter(([, v]) => v && String(v).trim() !== '')
-    // não repetir os financeiros aqui
-    .filter(([k]) => !k.startsWith('Fin'))
-
-  const shortFields = entries.filter(([k]) => !longKeys.has(k))
-  const longFields = entries.filter(([k]) => longKeys.has(k))
 
   infoEl.innerHTML = `
     <div class="nsa-grid">
     ${infoIdentity}
     ${infoPoints}
-      ${shortFields
-        .map(
-          ([k, v]) => `
-        <div class="field">
-          <div class="label">${k}</div>
-          <div class="value">${escapeHtml(String(v))}</div>
-        </div>
-      `
-        )
-        .join('')}
+    ${description}
     </div>
-
-    <div style="height:12px"></div>
-
-    ${longFields
-      .map(
-        ([k, v]) => `
-      <details class="section" open>
-        <summary>${k}</summary>
-        <div class="content clamp" data-full="0">${escapeHtml(String(v))}</div>
-        <button class="btn btn-ghost" type="button" onclick="toggleClamp(this)">Ver mais</button>
-      </details>
-    `
-      )
-      .join('')}
   `
 }
 
@@ -398,13 +361,7 @@ function applyLanguage() {
   setText('uiDisclaimerTitle', t.disclaimerTitle)
   setText('searchNSA', t.search)
   setText('nsa-select-input', t.selectInput)
-
   el.searchTitle.placeholder = t.searchPh
-}
-
-function formatMetric(v) {
-  if (!v || String(v).trim() === '') return '0'
-  return v
 }
 
 function toNumber(value) {
