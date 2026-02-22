@@ -1,3 +1,5 @@
+@import url('./modal.css');
+
 * {
   margin: 0;
   padding: 0;
@@ -81,6 +83,11 @@ body {
 
 .input:focus {
   border-color: #b8c9dc;
+}
+
+.search-open-btn {
+  text-align: left;
+  cursor: pointer;
 }
 
 .filters {
@@ -185,6 +192,7 @@ body {
   border-left: 6px solid var(--warn-border);
   border-radius: 10px;
   font-size: 13px;
+  margin-block: 10px;
 }
 
 img.brand-logo {
@@ -369,4 +377,14 @@ img.brand-logo {
 }
 .kv a:hover {
   text-decoration: underline;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.search-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
 }

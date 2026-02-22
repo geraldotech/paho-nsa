@@ -20,7 +20,11 @@
             alt="OPAS"
             class="brand-logo" />
         </div>
-        <div class="brand-title" id="brand-title">NSA Portal</div>
+        <div
+          class="brand-title"
+          id="brand-title">
+          NSA Portal
+        </div>
       </div>
 
       <div class="controls">
@@ -37,16 +41,16 @@
 
         <label
           class="label"
-          for="search-title"
+          for="search-open"
           id="searchNSA"
           >Search NSA
         </label>
-        <input
-          id="search-title"
-          class="input"
-          type="text"
-          id="searchInput"
-          placeholder="..." />
+        <button
+          id="search-open"
+          class="input search-open-btn"
+          type="button">
+          Click to search...
+        </button>
 
         <label
           class="label"
@@ -99,7 +103,7 @@
     <!-- MAIN -->
     <main class="main">
       <section
-        class="callout"
+        class="disclaimer"
         id="landingDisclaimer">
         <strong id="uiDisclaimerTitle">Note:</strong>
         <span id="uiDisclaimerText"></span>
@@ -110,7 +114,7 @@
         <p id="nsa-subtitle"></p>
       </header>
 
-      <!-- NSA profile -->
+      <!-- NSA profile starts -->
       <section class="card">
         <h2 id="profileTitle">NSA Profile</h2>
         <div id="nsa-metrics"></div>
@@ -119,12 +123,12 @@
 
       <!-- financial -->
       <div class="card">
-        <h2>Financial Overview</h2>
+        <h2 id="uiFinTitle">Financial Overview</h2>
         <div class="chart-wrapper">
           <canvas id="financialBarChart"></canvas>
         </div>
       </div>
-
+      <!-- NSA profile ends -->
 
       <!-- Collaboration with PAHO -->
       <section class="card">
@@ -138,10 +142,48 @@
         <div id="workplans"></div>
       </section>
 
-      <section class="disclaimer">
-        <p id="disclaimer-text"></p>
-      </section>
+      <!-- FOOTER -->
+      <footer>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi veniam distinctio ipsa earum assumenda dolorum? Excepturi necessitatibus debitis quaerat aliquam, eos assumenda dolores,
+          aliquid quibusdam minus possimus aut nemo veniam?
+        </p>
+      </footer>
     </main>
+
+    <!-- MODAL SEARCH -->
+    <div
+      id="search-modal"
+      class="search-modal hidden"
+      aria-hidden="true">
+      <div
+        class="search-modal-backdrop"
+        data-close-search></div>
+      <div
+        class="search-modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="searchNSA">
+        <div class="search-modal-header">
+          <input
+            id="search-modal-input"
+            class="search-modal-input"
+            type="text"
+            placeholder="Type at least 3 characters to search"
+            autocomplete="off" />
+          <button
+            id="search-close"
+            class="search-close"
+            type="button"
+            aria-label="Close search">
+            Esc
+          </button>
+        </div>
+        <div
+          id="search-modal-results"
+          class="search-results"></div>
+      </div>
+    </div>
 
     <script
       src="./assets/js/app.js"

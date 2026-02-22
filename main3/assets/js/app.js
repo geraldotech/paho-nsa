@@ -8,6 +8,7 @@ import UI from './ui-language.js'
 let currentLang = 'en'
 let currentId = null // '62'
 let barChart = null
+const MIN_SEARCH_CHARS = 1
 
 // plugin: escreve o valor acima de cada barra
 const valueLabelsPlugin = {
@@ -36,7 +37,11 @@ const valueLabelsPlugin = {
 const el = {
   langToggle: document.getElementById('lang-toggle'),
   nsaSelect: document.getElementById('nsa-select'),
-  searchTitle: document.getElementById('search-title'),
+  searchOpen: document.getElementById('search-open'),
+  searchModal: document.getElementById('search-modal'),
+  searchModalInput: document.getElementById('search-modal-input'),
+  searchModalResults: document.getElementById('search-modal-results'),
+  searchClose: document.getElementById('search-close'),
   filterActivities: document.getElementById('filter-activities'),
   filterWorkplans: document.getElementById('filter-workplans'),
   clear: document.getElementById('clear-filters'),
@@ -58,6 +63,7 @@ init()
 function init() {
   buildNSASelect()
   buildPeriodSelect()
+  updateSearchTriggerLabel()
 
   el.langToggle.addEventListener('click', () => {
     currentLang = currentLang === 'en' ? 'es' : 'en'
@@ -75,12 +81,19 @@ function init() {
   })
 
   // search / filtros
-  el.searchTitle.addEventListener('input', buildNSASelect)
+  el.searchOpen.addEventListener('click', openSearchModal)
+  el.searchClose.addEventListener('click', closeSearchModal)
+  el.searchModal.addEventListener('click', (event) => {
+    if (event.target.hasAttribute('data-close-search')) closeSearchModal()
+  })
+  el.searchModalInput.addEventListener('input', onSearchModalInput)
+  el.searchModalResults.addEventListener('click', onSearchResultClick)
+  document.addEventListener('keydown', onSearchGlobalKeys)
+
   el.filterActivities.addEventListener('change', render)
   el.filterWorkplans.addEventListener('change', render)
 
   el.clear.addEventListener('click', () => {
-    el.searchTitle.value = ''
     el.filterActivities.checked = true
     el.filterWorkplans.checked = true
     render()
@@ -96,22 +109,12 @@ function init() {
  */
 function buildNSASelect() {
   const selectedPeriod = el.periodSelect.value
-  const query = (el.searchTitle.value || '').trim().toLowerCase()
 
   let filtered = [...nasas]
 
   if (selectedPeriod) {
     filtered = filtered.filter((n) => n.CollaborationPeriod === selectedPeriod)
   }
-
-  if (query) {
-    filtered = filtered.filter((n) => {
-      const titleEng = String(n.TitleENG || '').toLowerCase()
-      const titleSpa = String(n.TitleSPA || '').toLowerCase()
-      return titleEng.includes(query) || titleSpa.includes(query)
-    })
-  }
-  //console.log(`filtered`, filtered)
 
   const sorted = filtered.sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
 
@@ -128,6 +131,7 @@ function buildNSASelect() {
   }
 
   el.nsaSelect.value = currentId
+  updateSearchTriggerLabel()
   render()
 }
 
@@ -145,16 +149,21 @@ function render() {
     return
   }
 
-  const query = (el.searchTitle.value || '').trim().toLowerCase()
   const showActs = el.filterActivities.checked
   const showWps = el.filterWorkplans.checked
 
   const allActivities = activity.filter((a) => String(a.ParentID) === String(currentId))
   const allWorkplans = workplan.filter((w) => String(w.ParentID) === String(currentId))
-  const filteredActivities = showActs ? filterByTitle(allActivities, query) : []
-  const filteredWorkplans = showWps ? filterByTitle(allWorkplans, query) : []
+  const filteredActivities = showActs ? allActivities : []
+  const filteredWorkplans = showWps ? allWorkplans : []
 
   // add aqui tratativa se todos os 3 relacionamentos foram encontrados
+
+  console.log(`========================`)
+  console.log('nsa', nsa)
+  console.log('allActivities',allActivities)
+  console.log('allWorkplans',allWorkplans)
+
   renderNSAProfile(nsa) // NSA Profile
 
   // renderActivities(filteredActivities, showActs) // activities
@@ -162,41 +171,6 @@ function render() {
   renderFinancialCharts(nsa) // financial
 
   applyLanguage()
-}
-
-function filterByTitle(list, query) {
-  if (!query) return list
-  return list.filter((x) =>
-    String(x.Title || '')
-      .toLowerCase()
-      .includes(query)
-  )
-}
-
-function renderActivities(list, enabled) {
-  if (!enabled) {
-    el.activities.innerHTML = `<p class="meta">Activities filter is off.</p>`
-    return
-  }
-
-  if (!list.length) {
-    el.activities.innerHTML = `<p class="meta">No activities found for this filter.</p>`
-    return
-  }
-
-  el.activities.innerHTML = list
-    .map((a) => {
-      const desc = currentLang === 'en' ? a.DescriptionENG : a.DescriptionSPA
-      const res = currentLang === 'en' ? a.DirectResultsENG : a.DirectResultsSPA
-      return `
-        <div class="item">
-          <h3>${escapeHtml(a.Title || '-')}</h3>
-          <p>${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
-          ${res ? `<p class="meta"><strong>Results:</strong> ${escapeHtml(res).replace(/\n/g, '<br/>')}</p>` : ''}
-        </div>
-      `
-    })
-    .join('')
 }
 
 function renderWorkplans(list, enabled) {
@@ -232,12 +206,113 @@ function renderWorkplans(list, enabled) {
  */
 function buildPeriodSelect() {
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
-  const unique = [...new Set(periods)].sort() // just unique values
+  const unique = [...new Set(periods)].sort() // unique values
 
   el.periodSelect.innerHTML = `
     <option value="">All Periods</option>
     ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
   `
+}
+
+function openSearchModal() {
+  el.searchModal.classList.remove('hidden')
+  el.searchModal.setAttribute('aria-hidden', 'false')
+  el.searchModalInput.value = ''
+  renderSearchModalResults([], '')
+  el.searchModalInput.focus()
+}
+
+function closeSearchModal() {
+  el.searchModal.classList.add('hidden')
+  el.searchModal.setAttribute('aria-hidden', 'true')
+}
+
+function onSearchModalInput(event) {
+  const query = String(event.target.value || '')
+    .trim()
+    .toLowerCase()
+  const results = findNSAsByQuery(query)
+  renderSearchModalResults(results, query)
+}
+
+function onSearchResultClick(event) {
+  const button = event.target.closest('button[data-id]')
+  if (!button) return
+
+  currentId = button.dataset.id
+  buildNSASelect()
+  closeSearchModal()
+}
+
+function onSearchGlobalKeys(event) {
+  if (event.key !== 'Escape') return
+  if (el.searchModal.classList.contains('hidden')) return
+  closeSearchModal()
+}
+
+/**
+ * FIND NSA QUERY
+ * @return array list
+ */
+function findNSAsByQuery(query) {
+  if (!query || query.length < MIN_SEARCH_CHARS) return []
+
+  const period = el.periodSelect.value
+  let pool = [...nasas]
+
+  if (period) {
+    pool = pool.filter((n) => n.CollaborationPeriod === period)
+  }
+
+  return pool
+    .filter((n) => {
+      const id = String(n.ID || '').toLowerCase()
+      const titleEng = String(n.TitleENG || '').toLowerCase()
+      const titleSpa = String(n.TitleSPA || '').toLowerCase()
+      return id.includes(query) || titleEng.includes(query) || titleSpa.includes(query)
+    })
+    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
+}
+
+/**
+ * LIST MODAL SEARCH RESULTS
+ */
+function renderSearchModalResults(results, query) {
+  const t = UI[currentLang]
+  if (!query || query.length < MIN_SEARCH_CHARS) {
+    // el.searchModalResults.innerHTML = `<div class="search-message">${escapeHtml(t.searchMinChars)}</div>`
+    el.searchModalResults.innerHTML = `<div class="search-message"></div>`
+    return
+  }
+
+  if (!results.length) {
+    el.searchModalResults.innerHTML = `<div class="search-message">${escapeHtml(t.searchNoResults)}</div>`
+    return
+  }
+
+  el.searchModalResults.innerHTML = results
+    .map((n) => {
+      const title = currentLang === 'en' ? n.TitleENG || n.TitleSPA || '-' : n.TitleSPA || n.TitleENG || '-'
+      return `
+        <button class="search-result-item" type="button" data-id="${escapeHtml(String(n.ID))}">
+          <span class="search-result-id">#${escapeHtml(String(n.ID))}</span>${escapeHtml(title)}
+          <span class="search-result-sub">${escapeHtml(n.CollaborationPeriod || '-')}</span>
+        </button>
+      `
+    })
+    .join('')
+}
+
+function updateSearchTriggerLabel() {
+  const t = UI[currentLang]
+  const nsa = nasas.find((n) => String(n.ID) === String(currentId))
+  if (!nsa) {
+    el.searchOpen.textContent = t.searchOpen
+    return
+  }
+
+  const title = currentLang === 'en' ? nsa.TitleENG || nsa.TitleSPA || '-' : nsa.TitleSPA || nsa.TitleENG || '-'
+  el.searchOpen.textContent = `${nsa.ID} - ${title}`
 }
 
 /**
@@ -360,7 +435,7 @@ function renderNSAProfile(nsa) {
   </div>
   `
 
-  // textos longs para colapsár
+  // textos longs
   const longKeys = new Set(['NSAObjectives', 'NSAWorkFields', 'NSABoardMembers', 'NSAOrganizationBodies'])
 
   infoEl.innerHTML = `
@@ -389,7 +464,10 @@ function applyLanguage() {
   setText('nsa-select-input', t.selectInput)
   setText('brand-title', t.brandTitle)
   setText('profileTitle', t.profileTitle)
-  el.searchTitle.placeholder = t.searchPh
+  setText('uiFinTitle', t.navFinancials)
+
+  el.searchModalInput.placeholder = t.searchMinChars
+  updateSearchTriggerLabel()
 }
 
 function toNumber(value) {
