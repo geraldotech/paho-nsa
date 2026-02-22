@@ -13,8 +13,8 @@
   <body>
     <!-- SIDEBAR FIXA -->
     <aside class="sidebar">
-      <div class="brand">        
-        <div class="logo-box">         
+      <div class="brand">
+        <div class="logo-box">
           <img
             src="./assets/img/logo-pt-br.png"
             alt="OPAS"
@@ -24,12 +24,29 @@
       </div>
 
       <div class="controls">
-        <label class="label" id="uiLanguageLabel">Language</label>
+        <label
+          class="label"
+          id="uiLanguageLabel"
+          >Language</label
+        >
         <button
           id="lang-toggle"
           class="btn">
           ES
         </button>
+
+        <label
+          class="label"
+          for="search-title"
+          id="searchNSA"
+          >Search NSA
+        </label>
+        <input
+          id="search-title"
+          class="input"
+          type="text"
+          id="searchInput"
+          placeholder="..." />
 
         <label
           class="label"
@@ -45,23 +62,13 @@
 
         <label
           class="label"
+          id="nsa-select-input"
           for="nsa-select"
           >Select NSA</label
         >
         <select
           id="nsa-select"
           class="input"></select>
-
-        <label
-          class="label"
-          for="search-title"
-          >Search by Title</label
-        >
-        <input
-          id="search-title"
-          class="input"
-          type="text"
-          placeholder="" />
 
         <div class="filters">
           <label class="check">
@@ -91,7 +98,9 @@
 
     <!-- MAIN -->
     <main class="main">
-      <section class="callout" id="landingDisclaimer">
+      <section
+        class="callout"
+        id="landingDisclaimer">
         <strong id="uiDisclaimerTitle">Note:</strong>
         <span id="uiDisclaimerText"></span>
       </section>
@@ -100,18 +109,39 @@
         <h1 id="nsa-title"></h1>
         <p id="nsa-subtitle"></p>
       </header>
-      <!-- tudo sobre o nsa -->
+
+      <!-- NSA profile -->
       <section class="card">
         <h2>NSA Profile</h2>
         <div id="nsa-metrics"></div>
         <div id="nsa-info"></div>
       </section>
 
-      <section class="card">
+      <!-- financial -->
+      <div class="card">
+        <h2>Financial Overview</h2>
+        <div class="chart-wrapper">
+          <canvas id="financialBarChart"></canvas>
+        </div>
+
+        <!--   <div class="chart-wrapper small">
+                <canvas id="financialDonutChart"></canvas>
+              </div> -->
+      </div>
+
+      <!--  <section class="card">
         <h2>Activities</h2>
         <div id="activities"></div>
       </section>
+ -->
 
+      <!-- Collaboration with PAHO -->
+      <section class="card">
+        <h2>Collaboration with PAHO</h2>
+        <div id="collaboation-paho"></div>
+      </section>
+
+      <!-- work plans -->
       <section class="card">
         <h2>Work Plans</h2>
         <div id="workplans"></div>
@@ -120,17 +150,6 @@
       <section class="disclaimer">
         <p id="disclaimer-text"></p>
       </section>
-
-      <div class="card">
-        <h2>Financial Overview</h2>
-        <div class="chart-wrapper">
-          <canvas id="financialBarChart"></canvas>
-        </div>
-
-        <!--   <div class="chart-wrapper small">
-          <canvas id="financialDonutChart"></canvas>
-        </div> -->
-      </div>
     </main>
 
     <script

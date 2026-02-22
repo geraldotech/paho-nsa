@@ -148,6 +148,12 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
+.card h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+}
+
 .card h2 {
   margin-bottom: 12px;
   color: var(--brand);
@@ -240,79 +246,89 @@ img.brand-logo {
 }
 
 /* ===== KPI CARDS (mini-cards) ===== */
-.metric-card{
+.metric-card {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 12px 14px;
   background: linear-gradient(135deg, #f7fbff, #ffffff);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
-.metric-card .k{
+.metric-card .k {
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 6px;
 }
 
-.metric-card .v{
+.metric-card .v {
   font-size: 18px;
   font-weight: 800;
   color: var(--brand);
 }
 
 /* grid KPI mais compacto */
-.metrics-grid{
+.metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(160px, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
-@media (max-width: 1100px){ .metrics-grid{ grid-template-columns: repeat(2, 1fr);} }
-@media (max-width: 520px){ .metrics-grid{ grid-template-columns: 1fr;} }
+@media (max-width: 1100px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ===== INFO GRID (reduz altura) ===== */
-.nsa-grid{
+.nsa-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-.field{
+.field {
   border: 1px solid var(--border);
   border-radius: 12px;
   background: #fff;
   padding: 10px 12px;
 }
 
-.field .label{
+.field .label {
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 6px;
 }
 
-.field .value{
+.field .value {
   font-size: 14px;
   word-break: break-word;
 }
 
 /* ===== SEÇÕES COLAPSÁVEIS ===== */
-.section{
+.section {
   border: 1px solid var(--border);
   border-radius: 12px;
   background: #fff;
   padding: 10px 12px;
 }
 
-.section summary{
+.section summary {
   cursor: pointer;
   font-weight: 800;
   color: var(--brand);
   list-style: none;
 }
 
-.section summary::-webkit-details-marker{ display: none; }
+.section summary::-webkit-details-marker {
+  display: none;
+}
 
-.section .content{
+.section .content {
   margin-top: 10px;
   white-space: pre-wrap;
   line-height: 1.5;
@@ -320,9 +336,36 @@ img.brand-logo {
 }
 
 /* reduz “textão” por padrão (evita página enorme) */
-.clamp{
+.clamp {
   display: -webkit-box;
   -webkit-line-clamp: 6;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 6px 12px;
+  margin-top: 8px;
+}
+
+.kv dt {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.kv dd {
+  margin: 0;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.kv a {
+  color: var(--brand);
+  text-decoration: none;
+}
+.kv a:hover {
+  text-decoration: underline;
 }

@@ -57,13 +57,21 @@ init()
  */
 function init() {
   buildNSASelect()
+
   buildPeriodSelect()
 
-  el.langToggle.addEventListener('click', () => {
-    currentLang = currentLang === 'en' ? 'es' : 'en'
-    el.langToggle.innerText = currentLang === 'en' ? 'ES' : 'EN'
+  const langEN = document.getElementById('lang-en')
+  const langES = document.getElementById('lang-es')
+
+  function setLang(next) {
+    currentLang = next
+    langEN.classList.toggle('is-active', currentLang === 'en')
+    langES.classList.toggle('is-active', currentLang === 'es')
     render()
-  })
+  }
+
+  langEN.addEventListener('click', () => setLang('en'))
+  langES.addEventListener('click', () => setLang('es'))
 
   el.nsaSelect.addEventListener('change', (e) => {
     currentId = e.target.value
@@ -88,7 +96,7 @@ function init() {
 
   // seta default no select
   el.nsaSelect.value = currentId
-  // render()
+  render()
 }
 
 function buildNSASelect() {
@@ -130,7 +138,6 @@ function buildNSASelect() {
 function render() {
   const nsa = nasas.find((n) => String(n.ID) === String(currentId))
 
-  // se nao encontrar a NSA nao filtra os demais
   if (!nsa) {
     el.nsaTitle.innerText = 'NSA not found'
     el.nsaSubtitle.innerText = ''
@@ -147,18 +154,13 @@ function render() {
 
   const allActivities = activity.filter((a) => String(a.ParentID) === String(currentId))
   const allWorkplans = workplan.filter((w) => String(w.ParentID) === String(currentId))
+
   const filteredActivities = showActs ? filterByTitle(allActivities, query) : []
   const filteredWorkplans = showWps ? filterByTitle(allWorkplans, query) : []
 
-  // add aqui tratativa se todos os 3 relacionamentos foram encontrados
-
-  //renderNSA(nsa, allActivities.length, allWorkplans.length)
-  renderProfile2(nsa) // NSA Profile
-  // renderProfile(nsa) // NSA Profile
-
-  // renderActivities(filteredActivities, showActs) // activities
-  renderWorkplans(filteredWorkplans, showWps) // workplans
-  renderFinancialCharts(nsa) // financial
+  renderNSA(nsa, allActivities.length, allWorkplans.length)
+  renderActivities(filteredActivities, showActs)
+  renderWorkplans(filteredWorkplans, showWps)
 
   applyLanguage()
 }
@@ -172,7 +174,134 @@ function filterByTitle(list, query) {
   )
 }
 
+function renderNSA(nsa) {
+  if (!nsa) return
 
+  // título
+  el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleSPA || '-'
+  el.nsaSubtitle.innerText = `ID: ${nsa.ID} • ${nsa.CollaborationPeriod || '-'}`
+
+  const metricsEl = document.getElementById('nsa-metrics')
+  const infoEl = document.getElementById('nsa-info')
+  if (!metricsEl || !infoEl) return
+
+  // base métricas
+  const baseMetrics = [
+    ['FinAnnualIncomeYear', nsa.FinAnnualIncomeYear],
+    ['FinAnnualIncome', nsa.FinAnnualIncome],
+    ['FinAnnualExpenses', nsa.FinAnnualExpenses],
+    ['FinAssets', nsa.FinAssets],
+  ]
+
+  //  mini-cards (fallback = 0)
+  metricsEl.innerHTML = `
+    <div class="metrics-grid">
+      ${baseMetrics
+        .map(
+          ([k, v]) => `
+        <div class="metric-card">
+          <div class="k">${k}</div>
+          <div class="v">${formatMetric(v)}</div>
+        </div>
+      `
+        )
+        .join('')}
+    </div>
+  `
+
+  // demais campos respeitando idioma
+  const entries = Object.entries(nsa)
+    .filter(([k]) => {
+      if (k.endsWith('ENG') && currentLang !== 'en') return false
+      if (k.endsWith('SPA') && currentLang !== 'es') return false
+
+      // evita duplicar métricas
+      if (k.startsWith('Fin')) return false
+
+      return true
+    })
+    .map(([k, v]) => [k.replace(/ENG|SPA$/, ''), v])
+    .filter(([, v]) => v && String(v).trim() !== '')
+
+  console.log(entries)
+
+  infoEl.innerHTML = entries
+    .map(
+      ([k, v]) => `
+    <div class="block">
+      <h3>${k}</h3>
+      <div class="pre">${v}</div>
+    </div>
+  `
+    )
+    .join('')
+
+  renderFinancialCharts(nsa)
+  renderInfo(nsa)
+  renderNSAProfile(nsa)
+}
+
+function pick(obj, keys) {
+  for (const k of keys) {
+    const v = obj?.[k]
+    if (v !== undefined && v !== null && String(v).trim() !== '') return v
+  }
+  return ''
+}
+
+function renderKV(elId, rows) {
+  const box = document.getElementById(elId)
+  if (!box) return
+
+  box.innerHTML = rows
+    .map(({ label, value, asLink }) => {
+      const safe = escapeHtml(String(value || '—'))
+      const vHtml =
+        asLink && value
+          ? `<a href="${escapeHtml(String(value))}" target="_blank" rel="noopener noreferrer">${safe}</a>`
+          : safe
+
+      return `
+        <div class="kv-row">
+          <div class="kv-k">${escapeHtml(label)}</div>
+          <div class="kv-v">${vHtml}</div>
+        </div>
+      `
+    })
+    .join('')
+}
+
+function renderNSAProfile(nsa) {
+  console.warn(`Here`, nsa)
+  // 🔥 Ajuste aqui conforme os nomes reais das tuas keys
+  const website = pick(nsa, ['Website', 'NSAWebsite', 'WebsiteURL', 'NSASite'])
+  const foundationYear = pick(nsa, ['FoundationYear', 'YearFounded', 'NSAFoundationYear'])
+  const orgType = pick(nsa, ['OrganizationType', 'NSAOrganizationType', 'TypeOfOrganization'])
+  const period = pick(nsa, ['CollaborationPeriod'])
+  const submission = pick(nsa, ['SubmissionType', 'TypeOfSubmission', 'Submission', 'FormType'])
+
+  const pahoFocal = pick(nsa, ['PAHOFocalPoint', 'OPSFocalPoint', 'PAHOTechnicalFocalPoint'])
+  const nsaFocal = pick(nsa, ['NSAFocalPoint', 'FocalPointNSA', 'NSAPointFocal'])
+  const role = pick(nsa, ['FocalPointRole', 'NSAFocalPointRole', 'Role'])
+  const email = pick(nsa, ['ContactEmail', 'Email', 'NSAFocalPointEmail'])
+
+  // Identity card
+  renderKV('nsa-identity', [
+    { label: 'Website', value: website, asLink: true },
+    { label: 'Foundation year', value: foundationYear || '—' },
+    { label: 'Organization type', value: orgType || '—' },
+    { label: 'Collaboration period', value: period || '—' },
+    { label: 'Type of submission', value: submission || '—' },
+  ])
+
+  // Focal points card
+  renderKV('nsa-focal', [
+    { label: 'PAHO focal point', value: pahoFocal || '—' },
+    { label: 'NSA focal point', value: nsaFocal || '—' },
+    { label: 'Focal point role', value: role || '—' },
+    { label: 'Contact email', value: email || '—' },
+  ])
+}
 function renderActivities(list, enabled) {
   if (!enabled) {
     el.activities.innerHTML = `<p class="meta">Activities filter is off.</p>`
@@ -275,119 +404,7 @@ function renderFinancialCharts(nsa) {
   })
 }
 
-function renderProfile2(nsa) {
-   console.log(nsa)
-  const infoEl = document.getElementById('nsa-info')
-  el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleSPA || '-'
-  
-  el.nsaSubtitle.innerText = `ID: ${nsa.ID} • ${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}`
-
-  if (!infoEl) return
-
-  // infoIdentity
-  const infoIdentity = `
-  <div class="field">
-    <h3 id="uiIdentityTitle">${UI[currentLang].identityTitle}</h3>
-  
-    <dl class="kv">
-      <dt>${UI[currentLang].website}</dt>
-      <dd><a href="${nsa.NSAWebsite}" target="_blank" >${nsa.NSAWebsite}</a></dd>
-  
-      <dt>${UI[currentLang].foundationYear}</dt>
-      <dd>${nsa.NSAYearOfEstablishment || '-'}</dd>
-  
-      <dt>${UI[currentLang].orgType}</dt>
-      <dd>${
-        currentLang === 'en'
-          ? nsa.NSAOrganizationTypeENG || '-'
-          : nsa.NSAOrganizationTypeSPA || '-'
-      }</dd>
-  
-      <dt>${UI[currentLang].period}</dt>
-      <dd>${nsa.CollaborationPeriod || '-'}</dd>
-  
-      <dt>${UI[currentLang].typeOfSubmission}</dt>
-      <dd>${
-        currentLang === 'en'
-          ? nsa.TypeOfSubmissionENG || '-'
-          : nsa.TypeOfSubmissionSPA || '-'
-      }</dd>
-    </dl>
-  </div>`
-
-  // infoPoints
-  const infoPoints = `
-  <div class="field">
-    <h3>${UI[currentLang].focalTitle}</h3>
-  
-    <dl class="kv">
-      <dt>${UI[currentLang].pahoFocal}</dt>
-      <dd>${nsa.PAHOFocalPoint || '-'}</dd>
-  
-      <dt>${UI[currentLang].nsaFocal}</dt>
-      <dd>${nsa.NSAFocalpoint || '-'}</dd>
-  
-      <dt>${UI[currentLang].nsaFocalRole}</dt>
-      <dd>${
-        currentLang === 'en'
-          ? nsa.NSAFocalpointRoleENG || '-'
-          : nsa.NSAFocalpointRoleSPA || '-'
-      }</dd>  
-      <dt>${UI[currentLang].contactEmail}</dt>
-      <dd>${nsa.NSAContactEmail || '-'}</dd>
-    </dl>
-  </div>`
-
-  // chaves que são “textão” (colapsáveis)
-  const longKeys = new Set(['NSAObjectives', 'NSAWorkFields', 'NSABoardMembers', 'NSAOrganizationBodies'])
-
-  const entries = Object.entries(nsa)
-    .filter(([k]) => {
-      if (k.endsWith('ENG') && currentLang !== 'en') return false
-      if (k.endsWith('SPA') && currentLang !== 'es') return false
-      return true
-    })
-    .map(([k, v]) => [k.replace(/ENG|SPA$/, ''), v])
-    .filter(([, v]) => v && String(v).trim() !== '')
-    // não repetir os financeiros aqui
-    .filter(([k]) => !k.startsWith('Fin'))
-
-  const shortFields = entries.filter(([k]) => !longKeys.has(k))
-  const longFields = entries.filter(([k]) => longKeys.has(k))
-
-  infoEl.innerHTML = `
-    <div class="nsa-grid">
-    ${infoIdentity}
-    ${infoPoints}
-      ${shortFields
-        .map(
-          ([k, v]) => `
-        <div class="field">
-          <div class="label">${k}</div>
-          <div class="value">${escapeHtml(String(v))}</div>
-        </div>
-      `
-        )
-        .join('')}
-    </div>
-
-    <div style="height:12px"></div>
-
-    ${longFields
-      .map(
-        ([k, v]) => `
-      <details class="section" open>
-        <summary>${k}</summary>
-        <div class="content clamp" data-full="0">${escapeHtml(String(v))}</div>
-        <button class="btn btn-ghost" type="button" onclick="toggleClamp(this)">Ver mais</button>
-      </details>
-    `
-      )
-      .join('')}
-  `
-}
-
-function renderProfile(nsa) {
+function renderInfo(nsa) {
   const infoEl = document.getElementById('nsa-info')
   if (!infoEl) return
 
@@ -445,15 +462,12 @@ function setText(id, text) {
 }
 
 function applyLanguage() {
-  console.log(`k`)
   const t = UI[currentLang]
   setText('uiLanguageLabel', t.language)
   setText('uiPeriodLabel', t.period)
   setText('uiDisclaimerText', t.disclaimer)
   setText('uiDisclaimerTitle', t.disclaimerTitle)
   setText('searchNSA', t.search)
-  setText('nsa-select-input', t.selectInput)
-
   el.searchTitle.placeholder = t.searchPh
 }
 

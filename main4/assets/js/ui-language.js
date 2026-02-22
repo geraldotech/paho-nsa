@@ -66,7 +66,6 @@ export default {
     workFields: 'Main work activities',
     board: 'Governing body members',
     bodies: 'Organization bodies & affiliations',
-    selectInput: 'Select NSA'
   },
   es: {
     disclaimer:
@@ -133,6 +132,5 @@ export default {
     workFields: 'Áreas de trabajo',
     board: 'Miembros del órgano de gobernanza',
     bodies: 'Órganos y afiliaciones',
-    selectInput: 'Selecione NSA'
   },
 }
