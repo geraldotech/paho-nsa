@@ -17,6 +17,7 @@
   --brand: #004b87;
   --warn-bg: #fff8e1;
   --warn-border: #ffc107;
+  --line: #e5e7eb;
 }
 
 body {
@@ -33,7 +34,7 @@ body {
   height: 100vh;
   background: var(--card);
   border-right: 1px solid var(--border);
-  padding: 18px 16px;
+  padding: 18px 10px;
   overflow: auto;
 }
 
@@ -167,8 +168,10 @@ body {
 }
 
 .item {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: #fff;
 }
 
 .item:last-child {
@@ -297,6 +300,7 @@ img.brand-logo {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  margin-top: 10px;
 }
 
 .field {
@@ -387,4 +391,9 @@ img.brand-logo {
   position: fixed;
   inset: 0;
   z-index: 1000;
+}
+
+.muted {
+  color: var(--muted);
+  margin: 6px 0 0;
 }

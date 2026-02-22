@@ -54,6 +54,16 @@
 
         <label
           class="label"
+          id="nsa-select-input"
+          for="nsa-select"
+          >Select NSA</label
+        >
+        <select
+          id="nsa-select"
+          class="input"></select>
+
+        <label
+          class="label"
           for="period-select"
           id="uiPeriodLabel"
           >Collaboration Period</label
@@ -63,16 +73,6 @@
           class="input">
           <option value="">All Periods</option>
         </select>
-
-        <label
-          class="label"
-          id="nsa-select-input"
-          for="nsa-select"
-          >Select NSA</label
-        >
-        <select
-          id="nsa-select"
-          class="input"></select>
 
         <div class="filters">
           <label class="check">
@@ -117,6 +117,9 @@
       <!-- NSA profile starts -->
       <section class="card">
         <h2 id="profileTitle">NSA Profile</h2>
+        <p
+          class="muted"
+          id="profileSubtitle"></p>
         <div id="nsa-metrics"></div>
         <div id="nsa-info"></div>
       </section>
@@ -138,7 +141,10 @@
 
       <!-- work plans -->
       <section class="card">
-        <h2>Work Plans</h2>
+        <h2 id="wpTitle">Work Plans</h2>
+        <p
+          class="muted"
+          id="wpSubtitle"></p>
         <div id="workplans"></div>
       </section>
 

@@ -158,21 +158,27 @@ function render() {
   const filteredWorkplans = showWps ? allWorkplans : []
 
   // add aqui tratativa se todos os 3 relacionamentos foram encontrados
-
-  console.log(`========================`)
+/*   console.log(`========================`)
   console.log('nsa', nsa)
   console.log('allActivities',allActivities)
-  console.log('allWorkplans',allWorkplans)
+  console.log('allWorkplans',allWorkplans) */
 
-  renderNSAProfile(nsa) // NSA Profile
+  /* === NSA PROFILE === */
+  renderNSAProfile(nsa) 
+  renderFinancialCharts(nsa) // financial
 
   // renderActivities(filteredActivities, showActs) // activities
-  renderWorkplans(filteredWorkplans, showWps) // workplans
-  renderFinancialCharts(nsa) // financial
+
+  /* === NSA workplans === */
+  renderWorkplans(filteredWorkplans, showWps)
 
   applyLanguage()
 }
 
+/**
+ * RENDER WORKPLANS
+ * @return html
+ */
 function renderWorkplans(list, enabled) {
   if (!enabled) {
     el.workplans.innerHTML = `<p class="meta">Workplans filter is off.</p>`
@@ -184,17 +190,21 @@ function renderWorkplans(list, enabled) {
     return
   }
 
+ // console.log(list)
+
   el.workplans.innerHTML = list
     .map((w) => {
       const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
       const dur = currentLang === 'en' ? w.DurationENG : w.DurationSPA
+      const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
 
       return `
         <div class="item">
           <h3>${escapeHtml(w.Title || '-')}</h3>
           <p>${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
           ${dur ? `<p class="meta"><strong>Duration:</strong> ${escapeHtml(dur)}</p>` : ''}
-          <p>${w.ResponsibleEntity}</p>
+          <p>${UI[currentLang].thResp}: ${w.ResponsibleEntity}</p>
+          <p>HealthAgenda: ${HealthAgenda ?? ''}</p>
         </div>
       `
     })
@@ -405,13 +415,11 @@ function renderNSAProfile(nsa) {
   <div class="field">
     <h3>${UI[currentLang].descTitle}</h3>
     <h5>${UI[currentLang].objectives}</h5>
-
     <p class="kv">
      <dt>${currentLang === 'en' ? nsa.NSAObjectivesENG : nsa.NSAObjectivesSPA}</dt>
     </p>
 
     <h5>${UI[currentLang].workFields}</h5>
-
       <p class="kv">
      <dt>${currentLang === 'en' ? nsa.NSAWorkFieldsENG : nsa.NSAWorkFieldsSPA}</dt>
     </p>
@@ -428,7 +436,6 @@ function renderNSAProfile(nsa) {
     </p>
 
     <h5>${UI[currentLang].bodies}</h5>
-
       <p class="kv">
      <dt>${currentLang === 'en' ? nsa.NSAOrganizationBodiesENG : nsa.NSAOrganizationBodiesENG}</dt>
     </p>
@@ -465,6 +472,8 @@ function applyLanguage() {
   setText('brand-title', t.brandTitle)
   setText('profileTitle', t.profileTitle)
   setText('uiFinTitle', t.navFinancials)
+  setText('wpTitle', t.wpTitle)
+ setText('profileSubtitle', t.wpSubtitle)
 
   el.searchModalInput.placeholder = t.searchMinChars
   updateSearchTriggerLabel()
