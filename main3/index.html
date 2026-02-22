@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>NSA Profile</title>
+    <link
+      rel="stylesheet"
+      href="./assets/css/styles.css" />
+  </head>
+  <body>
+    <!-- SIDEBAR FIXA -->
+    <aside class="sidebar">
+      <div class="brand">        
+        <div class="logo-box">         
+          <img
+            src="./assets/img/logo-pt-br.png"
+            alt="OPAS"
+            class="brand-logo" />
+        </div>
+        <div class="brand-title">NSA Portal</div>
+      </div>
+
+      <div class="controls">
+        <label class="label" id="uiLanguageLabel">Language</label>
+        <button
+          id="lang-toggle"
+          class="btn">
+          ES
+        </button>
+
+        <label
+          class="label"
+          for="period-select"
+          id="uiPeriodLabel"
+          >Collaboration Period</label
+        >
+        <select
+          id="period-select"
+          class="input">
+          <option value="">All Periods</option>
+        </select>
+
+        <label
+          class="label"
+          for="nsa-select"
+          >Select NSA</label
+        >
+        <select
+          id="nsa-select"
+          class="input"></select>
+
+        <label
+          class="label"
+          for="search-title"
+          >Search by Title</label
+        >
+        <input
+          id="search-title"
+          class="input"
+          type="text"
+          placeholder="" />
+
+        <div class="filters">
+          <label class="check">
+            <input
+              id="filter-activities"
+              type="checkbox"
+              checked />
+            <span>Activities</span>
+          </label>
+
+          <label class="check">
+            <input
+              id="filter-workplans"
+              type="checkbox"
+              checked />
+            <span>Workplans</span>
+          </label>
+        </div>
+
+        <button
+          id="clear-filters"
+          class="btn btn-ghost">
+          Clear
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <section class="callout" id="landingDisclaimer">
+        <strong id="uiDisclaimerTitle">Note:</strong>
+        <span id="uiDisclaimerText"></span>
+      </section>
+
+      <header class="header">
+        <h1 id="nsa-title"></h1>
+        <p id="nsa-subtitle"></p>
+      </header>
+      <!-- tudo sobre o nsa -->
+      <section class="card">
+        <h2>NSA Profile</h2>
+        <div id="nsa-metrics"></div>
+        <div id="nsa-info"></div>
+      </section>
+
+      <section class="card">
+        <h2>Activities</h2>
+        <div id="activities"></div>
+      </section>
+
+      <section class="card">
+        <h2>Work Plans</h2>
+        <div id="workplans"></div>
+      </section>
+
+      <section class="disclaimer">
+        <p id="disclaimer-text"></p>
+      </section>
+
+      <div class="card">
+        <h2>Financial Overview</h2>
+        <div class="chart-wrapper">
+          <canvas id="financialBarChart"></canvas>
+        </div>
+
+        <!--   <div class="chart-wrapper small">
+          <canvas id="financialDonutChart"></canvas>
+        </div> -->
+      </div>
+    </main>
+
+    <script
+      src="./assets/js/app.js"
+      type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </body>
+</html>
