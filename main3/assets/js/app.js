@@ -82,7 +82,7 @@ function init() {
 }
 
 /**
- * FILTER THE SELECTED NSA
+ * FILTER SELECTED NSA
  */
 function buildNSASelect() {
   const selectedPeriod = el.periodSelect.value
@@ -112,6 +112,10 @@ function buildNSASelect() {
   render()
 }
 
+
+/**
+ * RENDER THE NSA
+ */
 function render() {
   const nsa = nasas.find((n) => String(n.ID) === String(currentId))
 
