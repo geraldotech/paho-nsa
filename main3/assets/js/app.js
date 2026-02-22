@@ -108,6 +108,7 @@ function buildNSASelect() {
       return titleEng.includes(query) || titleSpa.includes(query)
     })
   }
+  console.log(`filtered`, filtered)
 
   const sorted = filtered.sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
 
@@ -272,7 +273,6 @@ function renderFinancialCharts(nsa) {
 }
 
 function renderNSAProfile(nsa) {
-  console.log(nsa)
   const infoEl = document.getElementById('nsa-info')
   el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleSPA || '-'
 
@@ -331,11 +331,33 @@ function renderNSAProfile(nsa) {
     <p class="kv">
      <dt>${currentLang === 'en' ? nsa.NSAObjectivesENG : nsa.NSAObjectivesSPA}</dt>
     </p>
-  
+
+    <h5>${UI[currentLang].workFields}</h5>
+
+      <p class="kv">
+     <dt>${currentLang === 'en' ? nsa.NSAWorkFieldsENG : nsa.NSAWorkFieldsSPA}</dt>
+    </p>
+  </div>
+  `
+  // Governance & formal relations
+  const formalRelations = `
+  <div class="field">
+    <h3>${UI[currentLang].governanceTitle}</h3>
+    <h5>${UI[currentLang].board}</h5>
+
+    <p class="kv">
+     <dt>${currentLang === 'en' ? nsa.NSABoardMembersENG : nsa.NSABoardMembersSPA}</dt>
+    </p>
+
+    <h5>${UI[currentLang].bodies}</h5>
+
+      <p class="kv">
+     <dt>${currentLang === 'en' ? nsa.NSAOrganizationBodiesENG : nsa.NSAOrganizationBodiesENG}</dt>
+    </p>
   </div>
   `
 
-  // chaves que são “textão” (colapsáveis)
+  // textos longs para colapsár
   const longKeys = new Set(['NSAObjectives', 'NSAWorkFields', 'NSABoardMembers', 'NSAOrganizationBodies'])
 
   infoEl.innerHTML = `
@@ -343,6 +365,7 @@ function renderNSAProfile(nsa) {
     ${infoIdentity}
     ${infoPoints}
     ${description}
+    ${formalRelations}
     </div>
   `
 }
@@ -361,6 +384,8 @@ function applyLanguage() {
   setText('uiDisclaimerTitle', t.disclaimerTitle)
   setText('searchNSA', t.search)
   setText('nsa-select-input', t.selectInput)
+  setText('brand-title', t.brandTitle)
+  setText('profileTitle', t.profileTitle)
   el.searchTitle.placeholder = t.searchPh
 }
 

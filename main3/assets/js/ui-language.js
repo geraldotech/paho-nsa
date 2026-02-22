@@ -66,7 +66,9 @@ export default {
     workFields: 'Main work activities',
     board: 'Governing body members',
     bodies: 'Organization bodies & affiliations',
-    selectInput: 'Select NSA'
+    selectInput: 'Select NSA',
+    brandTitle: 'Non-State Actors Official Relations Portal'
+
   },
   es: {
     disclaimer:
@@ -133,6 +135,7 @@ export default {
     workFields: 'Áreas de trabajo',
     board: 'Miembros del órgano de gobernanza',
     bodies: 'Órganos y afiliaciones',
-    selectInput: 'Selecione NSA'
+    selectInput: 'Selecione NSA',
+    brandTitle: 'Agentes No Estatales Portal de Relaciones Oficiales'
   },
 }
