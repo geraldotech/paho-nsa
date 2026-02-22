@@ -5,7 +5,11 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0" />
-    <title>NSA Profile</title>
+    <title>NSA Profile - Official Relations Portal</title>
+    <link
+      rel="icon"
+      href="./assets/img/favicon.ico"
+      type="image/vnd.microsoft.icon" />
     <link
       rel="stylesheet"
       href="./assets/css/styles.css" />
@@ -16,7 +20,8 @@
       <div class="brand">
         <div class="logo-box">
           <img
-            src="./assets/img/logo-pt-br.png"
+            id="logobrand"
+            src="./assets/img/logo-en.png"
             alt="OPAS"
             class="brand-logo" />
         </div>
@@ -127,6 +132,7 @@
       <!-- financial -->
       <div class="card">
         <h2 id="uiFinTitle">Financial Overview</h2>
+        <p class="muted" id="uiFinSubtitle"></p>
         <div class="chart-wrapper">
           <canvas id="financialBarChart"></canvas>
         </div>

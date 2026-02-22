@@ -10,29 +10,6 @@ let currentId = null // '62'
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 
-// plugin: escreve o valor acima de cada barra
-const valueLabelsPlugin = {
-  id: 'valueLabelsPlugin',
-  afterDatasetsDraw(chart, args, pluginOptions) {
-    const { ctx } = chart
-    ctx.save()
-    ctx.font = '12px Arial'
-    ctx.fillStyle = '#333'
-    ctx.textAlign = 'center'
-
-    chart.data.datasets.forEach((dataset, di) => {
-      const meta = chart.getDatasetMeta(di)
-      meta.data.forEach((bar, i) => {
-        const value = dataset.data[i]
-        const label = formatNumber(value)
-        ctx.fillText(label, bar.x, bar.y - 8) // 8px acima da barra
-      })
-    })
-
-    ctx.restore()
-  },
-}
-
 /* == UI - Elements == */
 const el = {
   langToggle: document.getElementById('lang-toggle'),
@@ -158,13 +135,14 @@ function render() {
   const filteredWorkplans = showWps ? allWorkplans : []
 
   // add aqui tratativa se todos os 3 relacionamentos foram encontrados
-/*   console.log(`========================`)
+  console.log(`========================`)
   console.log('nsa', nsa)
-  console.log('allActivities',allActivities)
-  console.log('allWorkplans',allWorkplans) */
+  console.log('allActivities', allActivities)
+  console.log('allWorkplans', allWorkplans)
+  console.log(`========================`)
 
   /* === NSA PROFILE === */
-  renderNSAProfile(nsa) 
+  renderNSAProfile(nsa)
   renderFinancialCharts(nsa) // financial
 
   // renderActivities(filteredActivities, showActs) // activities
@@ -190,7 +168,7 @@ function renderWorkplans(list, enabled) {
     return
   }
 
- // console.log(list)
+  // console.log(list)
 
   el.workplans.innerHTML = list
     .map((w) => {
@@ -326,9 +304,32 @@ function updateSearchTriggerLabel() {
 }
 
 /**
- * FINANCIAL CHARTS
+ * FINANCIAL ECHARTS
  */
 function renderFinancialCharts(nsa) {
+  // plugin e charts
+  const valueLabelsPlugin = {
+    id: 'valueLabelsPlugin',
+    afterDatasetsDraw(chart, args, pluginOptions) {
+      const { ctx } = chart
+      ctx.save()
+      ctx.font = '12px Arial'
+      ctx.fillStyle = '#333'
+      ctx.textAlign = 'center'
+
+      chart.data.datasets.forEach((dataset, di) => {
+        const meta = chart.getDatasetMeta(di)
+        meta.data.forEach((bar, i) => {
+          const value = dataset.data[i]
+          const label = formatNumber(value)
+          ctx.fillText(label, bar.x, bar.y - 8) // 8px acima da barra
+        })
+      })
+
+      ctx.restore()
+    },
+  }
+
   const income = toNumber(nsa.FinAnnualIncome)
   const expenses = toNumber(nsa.FinAnnualExpenses)
   const assets = toNumber(nsa.FinAssets)
@@ -341,7 +342,7 @@ function renderFinancialCharts(nsa) {
   barChart = new Chart(canvas, {
     type: 'bar',
     data: {
-      labels: ['Income', 'Expenses', 'Assets'],
+      labels: [UI[currentLang].annualIncome, UI[currentLang].annualExpenses, UI[currentLang].assets],
       datasets: [
         {
           label: 'USD',
@@ -442,9 +443,6 @@ function renderNSAProfile(nsa) {
   </div>
   `
 
-  // textos longs
-  const longKeys = new Set(['NSAObjectives', 'NSAWorkFields', 'NSABoardMembers', 'NSAOrganizationBodies'])
-
   infoEl.innerHTML = `
     <div class="nsa-grid">
     ${infoIdentity}
@@ -473,10 +471,13 @@ function applyLanguage() {
   setText('profileTitle', t.profileTitle)
   setText('uiFinTitle', t.navFinancials)
   setText('wpTitle', t.wpTitle)
- setText('profileSubtitle', t.wpSubtitle)
+  setText('profileSubtitle', t.wpSubtitle)
+  setText('uiFinSubtitle', t.finSubtitle)
 
   el.searchModalInput.placeholder = t.searchMinChars
   updateSearchTriggerLabel()
+
+  updateBrandLogo()
 }
 
 function toNumber(value) {
@@ -492,6 +493,18 @@ function formatNumber(n) {
 /** evita quebrar HTML / XSS */
 function escapeHtml(str) {
   return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;')
+}
+
+function updateBrandLogo() {
+  const logo = document.getElementById('logobrand')
+  if (!logo) return
+
+  const map = {
+    en: './assets/img/logo-en.png',
+    es: './assets/img/logo-esp.png',
+  }
+
+  logo.src = map[currentLang] || map.en
 }
 
 // botão “ver mais / ver menos”
