@@ -151,10 +151,7 @@ function render() {
   const filteredWorkplans = showWps ? filterByTitle(allWorkplans, query) : []
 
   // add aqui tratativa se todos os 3 relacionamentos foram encontrados
-
-  //renderNSA(nsa, allActivities.length, allWorkplans.length)
   renderProfile2(nsa) // NSA Profile
-  // renderProfile(nsa) // NSA Profile
 
   // renderActivities(filteredActivities, showActs) // activities
   renderWorkplans(filteredWorkplans, showWps) // workplans
@@ -276,7 +273,7 @@ function renderFinancialCharts(nsa) {
 }
 
 function renderProfile2(nsa) {
-   console.log(nsa)
+  console.log(nsa)
   const infoEl = document.getElementById('nsa-info')
   el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleSPA || '-'
   
@@ -387,57 +384,6 @@ function renderProfile2(nsa) {
   `
 }
 
-function renderProfile(nsa) {
-  const infoEl = document.getElementById('nsa-info')
-  if (!infoEl) return
-
-  // chaves que são “textão” (colapsáveis)
-  const longKeys = new Set(['NSAObjectives', 'NSAWorkFields', 'NSABoardMembers', 'NSAOrganizationBodies'])
-
-  const entries = Object.entries(nsa)
-    .filter(([k]) => {
-      if (k.endsWith('ENG') && currentLang !== 'en') return false
-      if (k.endsWith('SPA') && currentLang !== 'es') return false
-      return true
-    })
-    .map(([k, v]) => [k.replace(/ENG|SPA$/, ''), v])
-    .filter(([, v]) => v && String(v).trim() !== '')
-    // não repetir os financeiros aqui
-    .filter(([k]) => !k.startsWith('Fin'))
-
-  const shortFields = entries.filter(([k]) => !longKeys.has(k))
-  const longFields = entries.filter(([k]) => longKeys.has(k))
-
-  infoEl.innerHTML = `
-    <div class="nsa-grid">
-      ${shortFields
-        .map(
-          ([k, v]) => `
-        <div class="field">
-          <div class="label">${k}</div>
-          <div class="value">${escapeHtml(String(v))}</div>
-        </div>
-      `
-        )
-        .join('')}
-    </div>
-
-    <div style="height:12px"></div>
-
-    ${longFields
-      .map(
-        ([k, v]) => `
-      <details class="section" open>
-        <summary>${k}</summary>
-        <div class="content clamp" data-full="0">${escapeHtml(String(v))}</div>
-        <button class="btn btn-ghost" type="button" onclick="toggleClamp(this)">Ver mais</button>
-      </details>
-    `
-      )
-      .join('')}
-  `
-}
-
 /* == Functions - UI Functions  == */
 function setText(id, text) {
   const el = document.getElementById(id)
@@ -445,7 +391,6 @@ function setText(id, text) {
 }
 
 function applyLanguage() {
-  console.log(`k`)
   const t = UI[currentLang]
   setText('uiLanguageLabel', t.language)
   setText('uiPeriodLabel', t.period)
