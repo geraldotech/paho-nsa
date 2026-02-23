@@ -9,7 +9,7 @@ let currentLang = 'en'
 let currentId = null // '62'
 let barChart = null
 const MIN_SEARCH_CHARS = 1
-const DEBUG = true
+const DEBUG = false
 
 /* == UI - Elements == */
 const el = {
@@ -126,11 +126,7 @@ function render() {
     el.disclaimer.innerText = DISCLAIMER[currentLang]
     return
   }
-
-  /* const showActs = el.filterActivities.checked
-   */
   const showWps = true // el.filterWorkplans.checked
-
   const allActivities = activity.filter((a) => String(a.ParentID) === String(currentId))
   const allWorkplans = workplan.filter((w) => String(w.ParentID) === String(currentId))
   // const filteredActivities = showActs ? allActivities : []
@@ -155,7 +151,6 @@ function render() {
   // renderActivities(filteredActivities, showActs) // activities
 
   /* === NSA workplans === */
-  //renderWorkplans(filteredWorkplans, showWps)
   renderWorkplans(filteredWorkplans, true)
 
   applyLanguage()
@@ -175,8 +170,6 @@ function renderWorkplans(list, enabled) {
     el.workplans.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
     return
   }
-
-  // console.log(list)
 
   el.workplans.innerHTML = list
     .map((w) => {
@@ -314,61 +307,6 @@ function updateSearchTriggerLabel() {
 /**
  * FINANCIAL ECHARTS
  */
-function renderFinancialCharts22(nsa) {
-  // plugin e charts
-  const valueLabelsPlugin = {
-    id: 'valueLabelsPlugin',
-    afterDatasetsDraw(chart, args, pluginOptions) {
-      const { ctx } = chart
-      ctx.save()
-      ctx.font = '12px Arial'
-      ctx.fillStyle = '#333'
-      ctx.textAlign = 'center'
-
-      chart.data.datasets.forEach((dataset, di) => {
-        const meta = chart.getDatasetMeta(di)
-        meta.data.forEach((bar, i) => {
-          const value = dataset.data[i]
-          const label = formatNumber(value)
-          ctx.fillText(label, bar.x, bar.y - 8) // 8px acima da barra
-        })
-      })
-
-      ctx.restore()
-    },
-  }
-
-  const income = toNumber(nsa.FinAnnualIncome)
-  const expenses = toNumber(nsa.FinAnnualExpenses)
-  const assets = toNumber(nsa.FinAssets)
-
-  const canvas = document.getElementById('financialBarChart')
-  if (!canvas) return
-
-  if (barChart) barChart.destroy()
-
-  barChart = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: [UI[currentLang].annualIncome, UI[currentLang].annualExpenses, UI[currentLang].assets],
-      datasets: [
-        {
-          label: 'USD',
-          data: [income, expenses, assets],
-          backgroundColor: ['#2ecc71', '#e74c3c', '#3498db'],
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-      },
-    },
-    plugins: [valueLabelsPlugin],
-  })
-}
-
 function renderFinancialCharts(nsa) {
   const canvas = document.getElementById('financialBarChart')
   if (!canvas) return
@@ -575,10 +513,9 @@ function applyLanguage() {
   setText('uiFinSubtitle', t.finSubtitle)
   setText('collabTitle', t.collabTitle)
   setText('collabSubtitle', t.collabSubtitle)
-
   el.searchModalInput.placeholder = t.searchMinChars
-  updateSearchTriggerLabel()
 
+  updateSearchTriggerLabel()
   updateBrandLogo()
 }
 
