@@ -1,7 +1,7 @@
 /* === Imports === */
-import nasas from '../database/nsas.js' // ID
-import activity from '../database/activity.js' // ParentID
-import workplan from '../database/workplan.js' // ParentID
+import nasas from '../database2/nsa.js' // ID
+import activity from '../database2/activity.js' // ParentID
+import workplan from '../database2/workplan.js' // ParentID
 import UI from './ui-language.js'
 
 /* === State === */
