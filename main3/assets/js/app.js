@@ -9,6 +9,7 @@ let currentLang = 'en'
 let currentId = null // '62'
 let barChart = null
 const MIN_SEARCH_CHARS = 1
+const DEBUG = true
 
 /* == UI - Elements == */
 const el = {
@@ -67,9 +68,6 @@ function init() {
   el.searchModalResults.addEventListener('click', onSearchResultClick)
   document.addEventListener('keydown', onSearchGlobalKeys)
 
-  el.filterActivities.addEventListener('change', render)
-  el.filterWorkplans.addEventListener('change', render)
-
   el.clear.addEventListener('click', () => {
     el.filterActivities.checked = true
     el.filterWorkplans.checked = true
@@ -112,7 +110,6 @@ function buildNSASelect() {
   render()
 }
 
-
 /**
  * RENDER THE NSA
  */
@@ -130,20 +127,26 @@ function render() {
     return
   }
 
-  const showActs = el.filterActivities.checked
-  const showWps = el.filterWorkplans.checked
+  /* const showActs = el.filterActivities.checked
+   */
+  const showWps = true // el.filterWorkplans.checked
 
   const allActivities = activity.filter((a) => String(a.ParentID) === String(currentId))
   const allWorkplans = workplan.filter((w) => String(w.ParentID) === String(currentId))
-  const filteredActivities = showActs ? allActivities : []
+  // const filteredActivities = showActs ? allActivities : []
   const filteredWorkplans = showWps ? allWorkplans : []
 
   // add aqui tratativa se todos os 3 relacionamentos foram encontrados
-  console.log(`========================`)
-  console.log('nsa', nsa)
-  console.log('allActivities', allActivities)
-  console.log('allWorkplans', allWorkplans)
-  console.log(`========================`)
+  if (DEBUG) {
+    console.log(`========================`)
+    console.log('nsa', nsa)
+    console.log('allActivities', allActivities)
+    console.log('allWorkplans', allWorkplans)
+    console.log(`========================`)
+  }
+  if (allWorkplans.length === 0) {
+    alert('sem allWorkplans')
+  }
 
   /* === NSA PROFILE === */
   renderNSAProfile(nsa)
@@ -152,7 +155,8 @@ function render() {
   // renderActivities(filteredActivities, showActs) // activities
 
   /* === NSA workplans === */
-  renderWorkplans(filteredWorkplans, showWps)
+  //renderWorkplans(filteredWorkplans, showWps)
+  renderWorkplans(filteredWorkplans, true)
 
   applyLanguage()
 }
@@ -310,7 +314,7 @@ function updateSearchTriggerLabel() {
 /**
  * FINANCIAL ECHARTS
  */
-function renderFinancialCharts(nsa) {
+function renderFinancialCharts22(nsa) {
   // plugin e charts
   const valueLabelsPlugin = {
     id: 'valueLabelsPlugin',
@@ -359,6 +363,98 @@ function renderFinancialCharts(nsa) {
       responsive: true,
       plugins: {
         legend: { display: false },
+      },
+    },
+    plugins: [valueLabelsPlugin],
+  })
+}
+
+function renderFinancialCharts(nsa) {
+  const canvas = document.getElementById('financialBarChart')
+  if (!canvas) return
+
+  const wrapper = canvas.closest('.chart-wrapper') || canvas.parentElement
+
+  // remove msg antiga sempre que renderizar
+  const oldMsg = wrapper.querySelector('.no-financial-data')
+  if (oldMsg) oldMsg.remove()
+
+  const income = toNumber(nsa.FinAnnualIncome)
+  const expenses = toNumber(nsa.FinAnnualExpenses)
+  const assets = toNumber(nsa.FinAssets)
+
+  const values = [income, expenses, assets]
+
+  // 👇 IMPORTANTE: evite “fingir 0” quando o dado vem vazio
+  // Se teu toNumber("") retorna 0, isso engana. Então detecta vazio aqui:
+  const raw = [nsa.FinAnnualIncome, nsa.FinAnnualExpenses, nsa.FinAssets]
+  const hasAnyRaw = raw.some((v) => String(v ?? '').trim() !== '')
+
+  if (!hasAnyRaw) {
+    if (barChart) barChart.destroy()
+    barChart = null
+
+    const msg = document.createElement('div')
+    msg.className = 'no-financial-data'
+    msg.textContent = 'No financial data reported.'
+    wrapper.appendChild(msg)
+    return
+  }
+
+  // plugin e charts (seu plugin, só com guarda pra não escrever "undefined")
+  const valueLabelsPlugin = {
+    id: 'valueLabelsPlugin',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart
+      ctx.save()
+      ctx.font = '12px Arial'
+      ctx.fillStyle = '#333'
+      ctx.textAlign = 'center'
+
+      chart.data.datasets.forEach((dataset, di) => {
+        const meta = chart.getDatasetMeta(di)
+        meta.data.forEach((bar, i) => {
+          const value = dataset.data[i]
+          if (value === null || value === undefined) return
+          const label = formatNumber(value)
+          ctx.fillText(label, bar.x, bar.y - 8)
+        })
+      })
+
+      ctx.restore()
+    },
+  }
+
+  if (barChart) barChart.destroy()
+
+  barChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: [UI[currentLang].annualIncome, UI[currentLang].annualExpenses, UI[currentLang].assets],
+      datasets: [
+        {
+          label: 'USD',
+          data: values,
+          backgroundColor: ['#2ecc71', '#e74c3c', '#3498db'],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false, // 👈 ajuda muito em layout com wrapper alto
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `USD ${formatNumber(ctx.raw)}`,
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: (v) => formatNumber(v) },
+        },
       },
     },
     plugins: [valueLabelsPlugin],
@@ -477,6 +573,8 @@ function applyLanguage() {
   setText('wpTitle', t.wpTitle)
   setText('profileSubtitle', t.wpSubtitle)
   setText('uiFinSubtitle', t.finSubtitle)
+  setText('collabTitle', t.collabTitle)
+  setText('collabSubtitle', t.collabSubtitle)
 
   el.searchModalInput.placeholder = t.searchMinChars
   updateSearchTriggerLabel()

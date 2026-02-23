@@ -79,41 +79,30 @@
           <option value="">All Periods</option>
         </select>
 
-        <div class="filters">
-          <label class="check">
-            <input
-              id="filter-activities"
-              type="checkbox"
-              checked />
-            <span>Activities</span>
-          </label>
-
-          <label class="check">
-            <input
-              id="filter-workplans"
-              type="checkbox"
-              checked />
-            <span>Workplans</span>
-          </label>
-        </div>
-
         <button
           id="clear-filters"
           class="btn btn-ghost">
           Clear
         </button>
+
+        <p>On this page</p>
+        <h2></h2>
+        <ul>
+          <li>
+            <a href="#profileTitle">Profile</a>
+          </li>
+          <li>
+            <a href="#uiFinTitle">Financial</a>
+          </li>
+          <li>
+            <a href="#wpTitle">Workplans</a>
+          </li>
+        </ul>
       </div>
     </aside>
 
     <!-- MAIN -->
     <main class="main">
-      <section
-        class="disclaimer"
-        id="landingDisclaimer">
-        <strong id="uiDisclaimerTitle">Note:</strong>
-        <span id="uiDisclaimerText"></span>
-      </section>
-
       <header class="header">
         <h1 id="nsa-title"></h1>
         <p id="nsa-subtitle"></p>
@@ -132,17 +121,27 @@
       <!-- financial -->
       <div class="card">
         <h2 id="uiFinTitle">Financial Overview</h2>
-        <p class="muted" id="uiFinSubtitle"></p>
+        <p
+          class="muted"
+          id="uiFinSubtitle"></p>
         <div class="chart-wrapper">
           <canvas id="financialBarChart"></canvas>
         </div>
       </div>
       <!-- NSA profile ends -->
 
+      <!-- disclaimer -->
+      <section
+        class="disclaimer"
+        id="landingDisclaimer">
+        <strong id="uiDisclaimerTitle">Note:</strong>
+        <span id="uiDisclaimerText"></span>
+      </section>
+
       <!-- Collaboration with PAHO -->
       <section class="card">
-        <h2>Collaboration with PAHO</h2>
-        <div id="collaboation-paho"></div>
+        <h2 id="collabTitle">Collaboration with PAHO</h2>
+        <div id="collabSubtitle"></div>
       </section>
 
       <!-- work plans -->
@@ -155,11 +154,8 @@
       </section>
 
       <!-- FOOTER -->
-      <footer>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi veniam distinctio ipsa earum assumenda dolorum? Excepturi necessitatibus debitis quaerat aliquam, eos assumenda dolores,
-          aliquid quibusdam minus possimus aut nemo veniam?
-        </p>
+      <footer class="app-footer">
+        <p>© 2026 Pan American Health Organization (PAHO) • Non-State Actors Portal</p>
       </footer>
     </main>
 

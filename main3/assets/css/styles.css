@@ -36,6 +36,7 @@ body {
   border-right: 1px solid var(--border);
   padding: 18px 10px;
   overflow: auto;
+  padding-top: 0;
 }
 
 .brand {
@@ -127,7 +128,7 @@ body {
 .main {
   margin-left: var(--sidebar-w);
   padding: 22px;
-  max-width: 1200px;
+ /*  max-width: 1200px; */
 }
 
 .header {
@@ -396,4 +397,26 @@ img.brand-logo {
 .muted {
   color: var(--muted);
   margin: 6px 0 0;
+}
+
+.chart-wrapper{
+  position: relative;
+  min-height: 280px; /* pode ser 320px se preferir */
+}
+.no-financial-data{
+  padding: 16px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+/* footer */
+.app-footer{
+  margin-top: 40px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
 }
