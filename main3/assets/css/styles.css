@@ -303,23 +303,90 @@ img.brand-logo {
   gap: 12px;
   margin-top: 10px;
 }
-
-.field {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: #fff;
-  padding: 10px 12px;
+/* ===== CARD BASE (teu .field atual) ===== */
+.field{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:18px 18px 16px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
 
-.field .label {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 6px;
+/* título principal */
+.field h3{
+  margin:0 0 14px;
+  font-size:16px;
+  font-weight:600;
+  color:#0f172a;
 }
 
-.field .value {
-  font-size: 14px;
-  word-break: break-word;
+/* subtítulos */
+.field h5{
+  margin:18px 0 6px;
+  font-size:12px;
+  font-weight:600;
+  color:#64748b;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+/* primeiro h5 não precisa espaçamento grande */
+.field h5:first-of-type{
+  margin-top:0;
+}
+
+/* ===== TEXTO (teu .kv atual) ===== */
+.field .kv{
+  margin:0;
+  font-size:14px;
+  line-height:1.6;
+  color:#111827;
+
+  /* respeita \n vindos do JSON */
+  white-space:pre-line;
+
+  /* quebra links grandes */
+  word-break:break-word;
+}
+
+/* ===== LIMITE VISUAL (sem JS ainda) ===== */
+/* evita textão gigante quebrando layout */
+.field .kv{
+  max-height:160px;
+  overflow:auto;
+  padding-right:6px;
+}
+
+/* scrollbar leve */
+.field .kv::-webkit-scrollbar{
+  width:6px;
+}
+.field .kv::-webkit-scrollbar-thumb{
+  background:#e5e7eb;
+  border-radius:10px;
+}
+
+/* ===== SEPARAÇÃO ENTRE SEÇÕES ===== */
+.field h5 + .kv{
+  padding-bottom:12px;
+/*   border-bottom:1px dashed #e5e7eb; */
+}
+
+.field h5:last-of-type + .kv{
+  border-bottom:none;
+  padding-bottom:0;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width:768px){
+  .field{
+    padding:14px;
+  }
+
+  .field .kv{
+    font-size:13px;
+    max-height:140px;
+  }
 }
 
 /* ===== SEÇÕES COLAPSÁVEIS ===== */

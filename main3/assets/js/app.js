@@ -9,7 +9,7 @@ let currentLang = 'en'
 let currentId = null // '62'
 let barChart = null
 const MIN_SEARCH_CHARS = 1
-const DEBUG = false
+const DEBUG = true
 
 /* == UI - Elements == */
 const el = {
@@ -23,14 +23,13 @@ const el = {
   filterActivities: document.getElementById('filter-activities'),
   filterWorkplans: document.getElementById('filter-workplans'),
   clear: document.getElementById('clear-filters'),
-
   nsaTitle: document.getElementById('nsa-title'),
   nsaSubtitle: document.getElementById('nsa-subtitle'),
   nsaInfo: document.getElementById('nsa-info'),
-  activities: document.getElementById('activities'),
   workplans: document.getElementById('workplans'),
   disclaimer: document.getElementById('disclaimer-text'),
   periodSelect: document.getElementById('period-select'),
+  activities: document.getElementById('nsa-activities'),
 }
 
 init()
@@ -148,7 +147,8 @@ function render() {
   renderNSAProfile(nsa)
   renderFinancialCharts(nsa) // financial
 
-  // renderActivities(filteredActivities, showActs) // activities
+  /* === NSA Activities === */
+  renderActivities(allActivities) // activities
 
   /* === NSA workplans === */
   renderWorkplans(filteredWorkplans, true)
@@ -184,6 +184,36 @@ function renderWorkplans(list, enabled) {
           ${dur ? `<p class="meta"><strong>Duration:</strong> ${escapeHtml(dur)}</p>` : ''}
           <p>${UI[currentLang].thResp}: ${w.ResponsibleEntity}</p>
           <p>HealthAgenda: ${HealthAgenda ?? ''}</p>
+        </div>
+      `
+    })
+    .join('')
+}
+
+/**
+ * RENDER renderActivities
+ * @return html
+ */
+function renderActivities(list) {
+  if (!list.length) {
+    el.activities.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
+    return
+  }
+
+  console.log(`list`, list)
+
+  el.activities.innerHTML = list
+    .map((w) => {
+      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
+      const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
+
+      return `
+        <div class="item">
+          <h3>${escapeHtml(w.Title || '-')}</h3>         
+          <h5>${UI[currentLang].thEntity}</h5> 
+          <p>${w.Entity}</p>         
+          <h5>${UI[currentLang].thResults}</h5>
+          <p>${directResults}</p>          
         </div>
       `
     })
@@ -481,6 +511,7 @@ function renderNSAProfile(nsa) {
   </div>
   `
 
+  // injecta os cars n DOM
   infoEl.innerHTML = `
     <div class="nsa-grid">
     ${infoIdentity}
