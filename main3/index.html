@@ -50,13 +50,10 @@
           id="searchNSA"
           >Search NSA
         </label>
-        <button
-          id="search-open"
-          class="input search-open-btn"
-          type="button">
-          Click to search...
-        </button>
-
+        <input
+          id="searchInput"
+          class="input"
+          placeholder="Type a name..." />
         <label
           class="label"
           id="nsa-select-input"
@@ -77,6 +74,20 @@
           id="period-select"
           class="input">
           <option value="">All Periods</option>
+        </select>
+
+        <label
+          class="label"
+          for="period-select"
+          id="organization-type"
+          >Organization type</label
+        >
+        <select
+          id="organization-type-input"
+          class="input">
+          <option value="">All</option>
+          <option value="Non-governmental Organizations">Non-governmental Organizations</option>
+          <option value="Philanthropic Foundation">Philanthropic Foundation</option>
         </select>
 
         <button
@@ -161,7 +172,7 @@
     </main>
 
     <!-- MODAL SEARCH -->
-    <div
+    <!--   <div
       id="search-modal"
       class="search-modal hidden"
       aria-hidden="true">
@@ -192,7 +203,7 @@
           id="search-modal-results"
           class="search-results"></div>
       </div>
-    </div>
+    </div> -->
 
     <script
       src="./assets/js/app.js"

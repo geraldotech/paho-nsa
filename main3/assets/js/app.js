@@ -5,7 +5,7 @@ const workplan = await fetchJson('./assets/database/workplan.json')
 
 /* === State === */
 let currentLang = 'en'
-let currentId = 6;
+let currentId = 6
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true
@@ -14,11 +14,6 @@ const DEBUG = true
 const el = {
   langToggle: document.getElementById('lang-toggle'),
   nsaSelect: document.getElementById('nsa-select'),
-  searchOpen: document.getElementById('search-open'),
-  searchModal: document.getElementById('search-modal'),
-  searchModalInput: document.getElementById('search-modal-input'),
-  searchModalResults: document.getElementById('search-modal-results'),
-  searchClose: document.getElementById('search-close'),
   filterActivities: document.getElementById('filter-activities'),
   filterWorkplans: document.getElementById('filter-workplans'),
   clear: document.getElementById('clear-filters'),
@@ -39,7 +34,6 @@ init()
 function init() {
   buildNSASelect()
   buildPeriodSelect()
-  updateSearchTriggerLabel()
 
   el.langToggle.addEventListener('click', () => {
     currentLang = currentLang === 'en' ? 'es' : 'en'
@@ -55,16 +49,6 @@ function init() {
   el.periodSelect.addEventListener('change', () => {
     buildNSASelect()
   })
-
-  // search / filtros
-  el.searchOpen.addEventListener('click', openSearchModal)
-  el.searchClose.addEventListener('click', closeSearchModal)
-  el.searchModal.addEventListener('click', (event) => {
-    if (event.target.hasAttribute('data-close-search')) closeSearchModal()
-  })
-  el.searchModalInput.addEventListener('input', onSearchModalInput)
-  el.searchModalResults.addEventListener('click', onSearchResultClick)
-  document.addEventListener('keydown', onSearchGlobalKeys)
 
   el.clear.addEventListener('click', () => {
     el.filterActivities.checked = true
@@ -104,15 +88,18 @@ function buildNSASelect() {
   }
 
   el.nsaSelect.value = currentId
-  updateSearchTriggerLabel()
   render()
+}
+
+function buildNSAOrganizationType(){
+
 }
 
 /**
  * RENDER THE NSA
  */
 function render() {
- // console.log(nasas.find(v => v.id == 6))
+  // console.log(nasas.find(v => v.id == 6))
   const nsa = nasas.find((n) => Number(n.id) === Number(currentId))
 
   // se nao encontrar a NSA nao filtra os demais
@@ -122,7 +109,7 @@ function render() {
     el.nsaInfo.innerHTML = ''
     el.activities.innerHTML = ''
     el.workplans.innerHTML = ''
-  //  el.disclaimer.innerText = DISCLAIMER[currentLang]
+    //  el.disclaimer.innerText = DISCLAIMER[currentLang]
     return
   }
   const showWps = true // el.filterWorkplans.checked
@@ -139,7 +126,7 @@ function render() {
     console.log('allWorkplans', allWorkplans)
     console.log(`========================`)
   }
-/*   if (allWorkplans.length === 0) {
+  /*   if (allWorkplans.length === 0) {
     alert('sem allWorkplans')
   } */
 
@@ -231,106 +218,6 @@ function buildPeriodSelect() {
   `
 }
 
-function openSearchModal() {
-  el.searchModal.classList.remove('hidden')
-  el.searchModal.setAttribute('aria-hidden', 'false')
-  el.searchModalInput.value = ''
-  renderSearchModalResults([], '')
-  el.searchModalInput.focus()
-}
-
-function closeSearchModal() {
-  el.searchModal.classList.add('hidden')
-  el.searchModal.setAttribute('aria-hidden', 'true')
-}
-
-function onSearchModalInput(event) {
-  const query = String(event.target.value || '')
-    .trim()
-    .toLowerCase()
-  const results = findNSAsByQuery(query)
-  renderSearchModalResults(results, query)
-}
-
-function onSearchResultClick(event) {
-  const button = event.target.closest('button[data-id]')
-  if (!button) return
-
-  currentId = button.dataset.id
-  buildNSASelect()
-  closeSearchModal()
-}
-
-function onSearchGlobalKeys(event) {
-  if (event.key !== 'Escape') return
-  if (el.searchModal.classList.contains('hidden')) return
-  closeSearchModal()
-}
-
-/**
- * FIND NSA QUERY
- * @return array list
- */
-function findNSAsByQuery(query) {
-  if (!query || query.length < MIN_SEARCH_CHARS) return []
-
-  const period = el.periodSelect.value
-  let pool = [...nasas]
-
-  if (period) {
-    pool = pool.filter((n) => n.CollaborationPeriod === period)
-  }
-
-  return pool
-    .filter((n) => {
-      const id = String(n.id || '').toLowerCase()
-      const titleEng = String(n.TitleENG || '').toLowerCase()
-      const titleSpa = String(n.TitleSPA || '').toLowerCase()
-      return id.includes(query) || titleEng.includes(query) || titleSpa.includes(query)
-    })
-    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
-}
-
-/**
- * LIST MODAL SEARCH RESULTS
- */
-function renderSearchModalResults(results, query) {
-  const t = UI[currentLang]
-  if (!query || query.length < MIN_SEARCH_CHARS) {
-    // el.searchModalResults.innerHTML = `<div class="search-message">${escapeHtml(t.searchMinChars)}</div>`
-    el.searchModalResults.innerHTML = `<div class="search-message"></div>`
-    return
-  }
-
-  if (!results.length) {
-    el.searchModalResults.innerHTML = `<div class="search-message">${escapeHtml(t.searchNoResults)}</div>`
-    return
-  }
-
-  el.searchModalResults.innerHTML = results
-    .map((n) => {
-      const title = currentLang === 'en' ? n.TitleENG || n.TitleSPA || '-' : n.TitleSPA || n.TitleENG || '-'
-      return `
-        <button class="search-result-item" type="button" data-id="${escapeHtml(String(n.id))}">
-          <span class="search-result-id">#${escapeHtml(String(n.id))}</span>${escapeHtml(title)}
-          <span class="search-result-sub">${escapeHtml(n.CollaborationPeriod || '-')}</span>
-        </button>
-      `
-    })
-    .join('')
-}
-
-function updateSearchTriggerLabel() {
-  const t = UI[currentLang]
-  const nsa = nasas.find((n) => String(n.id) === String(currentId))
-  if (!nsa) {
-    el.searchOpen.textContent = t.searchOpen
-    return
-  }
-
-  const title = currentLang === 'en' ? nsa.TitleENG || nsa.TitleSPA || '-' : nsa.TitleSPA || nsa.TitleENG || '-'
-  el.searchOpen.textContent = `${title}`
-}
 
 /**
  * FINANCIAL ECHARTS
@@ -407,7 +294,7 @@ function renderFinancialCharts(nsa) {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false, 
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -429,10 +316,11 @@ function renderFinancialCharts(nsa) {
 
 function renderNSAProfile(nsa) {
   const infoEl = document.getElementById('nsa-info')
-  el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleSPA || '-'
+  el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleENGSPA || '-'
 
-/*   el.nsaSubtitle.innerText = `${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}` */
-  el.nsaSubtitle.innerText = `${nsa.NSAOrganizationType}`
+  /*   el.nsaSubtitle.innerText = `${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}` */
+  //el.nsaSubtitle.innerText = `${nsa.NSAOrganizationType}`
+  el.nsaSubtitle.innerText = `${nsa.TypeOfSubmission}`
 
   if (!infoEl) return
 
@@ -505,7 +393,7 @@ function renderNSAProfile(nsa) {
 
     <h5>${UI[currentLang].bodies}</h5>
       <p class="kv">
-     <dt>${currentLang === 'en' ? nsa.NSAOrganizationBodiesENG : nsa.NSAOrganizationBodiesENG}</dt>
+     <dt>${currentLang === 'en' ? nsa.NSAOrganizationBodiesENG : nsa.NSAOrganizationBodiesSPA}</dt>
     </p>
   </div>
   `
@@ -543,9 +431,7 @@ function applyLanguage() {
   setText('uiFinSubtitle', t.finSubtitle)
   setText('collabTitle', t.collabTitle)
   setText('collabSubtitle', t.collabSubtitle)
-  el.searchModalInput.placeholder = t.searchMinChars
 
-  updateSearchTriggerLabel()
   updateBrandLogo()
 }
 
@@ -590,7 +476,6 @@ window.toggleClamp = function (btn) {
     btn.textContent = 'Ver menos'
   }
 }
-
 
 /**
  * Busca dados JSON de uma URL com tratamento completo de erros
