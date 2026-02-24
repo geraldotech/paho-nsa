@@ -515,3 +515,11 @@ img.brand-logo {
 .none {
   display: none;
 }
+
+.language-link {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}

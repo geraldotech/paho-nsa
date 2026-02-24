@@ -37,10 +37,18 @@ function init() {
   // buildNSASelect()
   buildPeriodSelect()
 
-  el.langToggle.addEventListener('click', () => {
-    currentLang = currentLang === 'en' ? 'es' : 'en'
-    el.langToggle.innerText = currentLang === 'en' ? 'ES' : 'EN'
-    render()
+  const langToggle = document.querySelectorAll('.lang-toggle')
+
+  langToggle.forEach((val) => {
+    val.addEventListener('click', (e) => {
+      
+      const clickLang = e.target.dataset.lan
+     // console.log(clickLang)
+    //  currentLang = currentLang === 'en' ? 'es' : 'en'
+      currentLang = clickLang
+    //  el.langToggle.innerText = currentLang === 'en' ? 'ES' : 'EN'
+      render()
+    })
   })
 
   el.searchInput.addEventListener('input', handleSearchInput)
