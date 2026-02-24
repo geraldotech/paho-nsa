@@ -35,7 +35,7 @@ body {
   background: var(--card);
   border-right: 1px solid var(--border);
   padding: 18px 10px;
-  overflow: auto;
+  overflow: hidden;
   padding-top: 0;
 }
 
@@ -85,6 +85,36 @@ body {
 
 .input:focus {
   border-color: #b8c9dc;
+}
+
+.search-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.search-results:empty {
+  display: none;
+}
+
+.search-results li {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.search-results li:last-child {
+  border-bottom: none;
+}
+
+.search-results li:hover {
+  background: #f1f5f9;
 }
 
 .search-open-btn {

@@ -13,6 +13,8 @@ const DEBUG = true
 /* == UI - Elements == */
 const el = {
   langToggle: document.getElementById('lang-toggle'),
+  searchInput: document.getElementById('searchInput'),
+  searchResults: document.getElementById('search-results'),
   nsaSelect: document.getElementById('nsa-select'),
   filterActivities: document.getElementById('filter-activities'),
   filterWorkplans: document.getElementById('filter-workplans'),
@@ -32,7 +34,7 @@ init()
  * ELEMENTOS INICIAIS
  */
 function init() {
-  buildNSASelect()
+ // buildNSASelect()
   buildPeriodSelect()
 
   el.langToggle.addEventListener('click', () => {
@@ -41,13 +43,18 @@ function init() {
     render()
   })
 
-  el.nsaSelect.addEventListener('change', (e) => {
+/*   el.nsaSelect.addEventListener('change', (e) => {
     currentId = e.target.value
+    clearSearchResults()
     render()
   })
+ */
+  el.searchInput.addEventListener('input', handleSearchInput)
+  el.searchResults.addEventListener('click', onSearchResultClick)
 
   el.periodSelect.addEventListener('change', () => {
-    buildNSASelect()
+ //   buildNSASelect()
+    clearSearchResults()
   })
 
   el.clear.addEventListener('click', () => {
@@ -57,23 +64,15 @@ function init() {
   })
 
   // seta default no select
-  el.nsaSelect.value = currentId
+ // el.nsaSelect.value = String(currentId)
   // render()
 }
 
 /**
  * FILTER SELECTED NSA
  */
-function buildNSASelect() {
-  const selectedPeriod = el.periodSelect.value
-
-  let filtered = [...nasas]
-
-  if (selectedPeriod) {
-    filtered = filtered.filter((n) => n.CollaborationPeriod === selectedPeriod)
-  }
-
-  const sorted = filtered.sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
+/* function buildNSASelect() {
+  const sorted = getFilteredNasas().sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
 
   el.nsaSelect.innerHTML = sorted
     .map((n) => {
@@ -83,15 +82,74 @@ function buildNSASelect() {
     .join('')
 
   // se o atual não existir mais no filtro, seleciona o primeiro
-  if (!sorted.find((n) => n.id === currentId)) {
+  if (!sorted.find((n) => Number(n.id) === Number(currentId))) {
     currentId = sorted.length ? sorted[0].id : ''
   }
 
-  el.nsaSelect.value = currentId
+  el.nsaSelect.value = String(currentId)
   render()
 }
-
+ */
 function buildNSAOrganizationType() {}
+
+function getFilteredNasas() {
+  const selectedPeriod = el.periodSelect.value
+  let filtered = [...nasas]
+
+  if (selectedPeriod) {
+    filtered = filtered.filter((n) => n.CollaborationPeriod === selectedPeriod)
+  }
+
+  return filtered
+}
+
+function handleSearchInput(event) {
+  const term = String(event.target.value || '').trim().toLowerCase()
+
+  if (term.length < MIN_SEARCH_CHARS) {
+    clearSearchResults()
+    return
+  }
+
+  const matches = getFilteredNasas()
+    .filter((n) => {
+      const titleEng = String(n.TitleENG || '').toLowerCase()
+      const titleEngSpa = String(n.TitleENGSPA || '').toLowerCase()
+      return titleEng.includes(term) || titleEngSpa.includes(term)
+    })
+    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
+    .slice(0, 30)
+
+  renderSearchResults(matches)
+}
+
+function renderSearchResults(results) {
+  if (!results.length) {
+    el.searchResults.innerHTML = `<li>No results found</li>`
+    return
+  }
+
+  el.searchResults.innerHTML = results
+    .map((n) => {
+      const label = n.TitleENG || n.TitleENGSPA || n.Title || 'Untitled'
+      return `<li data-id="${n.id}">${escapeHtml(label)}</li>`
+    })
+    .join('')
+}
+
+function clearSearchResults() {
+  el.searchResults.innerHTML = ''
+}
+
+function onSearchResultClick(event) {
+  const item = event.target.closest('li[data-id]')
+  if (!item) return
+
+  currentId = Number(item.dataset.id)
+  clearSearchResults()
+  el.searchInput.value = ''
+  render()
+}
 
 /**
  * RENDER THE NSA
