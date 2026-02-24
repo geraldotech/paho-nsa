@@ -128,7 +128,7 @@ body {
 .main {
   margin-left: var(--sidebar-w);
   padding: 22px;
- /*  max-width: 1200px; */
+  /*  max-width: 1200px; */
 }
 
 .header {
@@ -304,88 +304,88 @@ img.brand-logo {
   margin-top: 10px;
 }
 /* ===== CARD BASE (teu .field atual) ===== */
-.field{
-  background:#fff;
-  border:1px solid #e5e7eb;
-  border-radius:14px;
-  padding:18px 18px 16px;
-  box-shadow:0 1px 2px rgba(0,0,0,.04);
+.field {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 /* título principal */
-.field h3{
-  margin:0 0 14px;
-  font-size:16px;
-  font-weight:600;
-  color:#0f172a;
+.field h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 /* subtítulos */
-.field h5{
-  margin:18px 0 6px;
-  font-size:12px;
-  font-weight:600;
-  color:#64748b;
-  text-transform:uppercase;
-  letter-spacing:.04em;
+.field h5 {
+  margin: 18px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* primeiro h5 não precisa espaçamento grande */
-.field h5:first-of-type{
-  margin-top:0;
+.field h5:first-of-type {
+  margin-top: 0;
 }
 
 /* ===== TEXTO (teu .kv atual) ===== */
-.field .kv{
-  margin:0;
-  font-size:14px;
-  line-height:1.6;
-  color:#111827;
+.field .kv {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #111827;
 
   /* respeita \n vindos do JSON */
-  white-space:pre-line;
+  white-space: pre-line;
 
   /* quebra links grandes */
-  word-break:break-word;
+  word-break: break-word;
 }
 
 /* ===== LIMITE VISUAL (sem JS ainda) ===== */
 /* evita textão gigante quebrando layout */
-.field .kv{
-  max-height:160px;
-  overflow:auto;
-  padding-right:6px;
+.field .kv {
+  max-height: 160px;
+  overflow: auto;
+  padding-right: 6px;
 }
 
 /* scrollbar leve */
-.field .kv::-webkit-scrollbar{
-  width:6px;
+.field .kv::-webkit-scrollbar {
+  width: 6px;
 }
-.field .kv::-webkit-scrollbar-thumb{
-  background:#e5e7eb;
-  border-radius:10px;
+.field .kv::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
 }
 
 /* ===== SEPARAÇÃO ENTRE SEÇÕES ===== */
-.field h5 + .kv{
-  padding-bottom:12px;
-/*   border-bottom:1px dashed #e5e7eb; */
+.field h5 + .kv {
+  padding-bottom: 12px;
+  /*   border-bottom:1px dashed #e5e7eb; */
 }
 
-.field h5:last-of-type + .kv{
-  border-bottom:none;
-  padding-bottom:0;
+.field h5:last-of-type + .kv {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 /* ===== RESPONSIVO ===== */
-@media (max-width:768px){
-  .field{
-    padding:14px;
+@media (max-width: 768px) {
+  .field {
+    padding: 14px;
   }
 
-  .field .kv{
-    font-size:13px;
-    max-height:140px;
+  .field .kv {
+    font-size: 13px;
+    max-height: 140px;
   }
 }
 
@@ -460,11 +460,11 @@ img.brand-logo {
   margin: 6px 0 0;
 }
 
-.chart-wrapper{
+.chart-wrapper {
   position: relative;
   min-height: 280px; /* pode ser 320px se preferir */
 }
-.no-financial-data{
+.no-financial-data {
   padding: 16px;
   text-align: center;
   color: #666;
@@ -472,7 +472,7 @@ img.brand-logo {
 }
 
 /* footer */
-.app-footer{
+.app-footer {
   margin-top: 40px;
   padding: 16px 24px;
   border-top: 1px solid #e5e7eb;
@@ -480,4 +480,8 @@ img.brand-logo {
   font-size: 13px;
   color: #6b7280;
   text-align: center;
+}
+
+.none {
+  display: none;
 }

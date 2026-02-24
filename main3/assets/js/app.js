@@ -5,7 +5,7 @@ const workplan = await fetchJson('./assets/database/workplan.json')
 
 /* === State === */
 let currentLang = 'en'
-let currentId = 6
+let currentId = 45 // 6
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true
@@ -91,9 +91,7 @@ function buildNSASelect() {
   render()
 }
 
-function buildNSAOrganizationType(){
-
-}
+function buildNSAOrganizationType() {}
 
 /**
  * RENDER THE NSA
@@ -132,7 +130,16 @@ function render() {
 
   /* === NSA PROFILE === */
   renderNSAProfile(nsa)
-  renderFinancialCharts(nsa) // financial
+
+  // if has Progress Report - not show financial report
+  if (nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')) {
+    // nao exi
+    document.getElementById('financial_card').classList.add('none')
+  } else {
+    document.getElementById('financial_card').classList.remove('none')
+    renderFinancialCharts(nsa) // financial
+  }
+
 
   /* === NSA Activities === */
   renderActivities(allActivities) // activities
@@ -217,7 +224,6 @@ function buildPeriodSelect() {
     ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
   `
 }
-
 
 /**
  * FINANCIAL ECHARTS
