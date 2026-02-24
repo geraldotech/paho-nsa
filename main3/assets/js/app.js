@@ -3,7 +3,6 @@ const nasas = await fetchJson('./assets/database/nsa.json')
 const activity = await fetchJson('./assets/database/activity.json') // Collaboration with PAHO
 const workplan = await fetchJson('./assets/database/workplan.json')
 
-
 /* === State === */
 let currentLang = 'en'
 let currentId = 6;
@@ -408,7 +407,7 @@ function renderFinancialCharts(nsa) {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false, // 👈 ajuda muito em layout com wrapper alto
+      maintainAspectRatio: false, 
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -432,7 +431,8 @@ function renderNSAProfile(nsa) {
   const infoEl = document.getElementById('nsa-info')
   el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleSPA || '-'
 
-  el.nsaSubtitle.innerText = `ID: ${nsa.id} • ${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}`
+/*   el.nsaSubtitle.innerText = `${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}` */
+  el.nsaSubtitle.innerText = `${nsa.NSAOrganizationType}`
 
   if (!infoEl) return
 
@@ -484,7 +484,7 @@ function renderNSAProfile(nsa) {
     <h3>${UI[currentLang].descTitle}</h3>
     <h5>${UI[currentLang].objectives}</h5>
     <p class="kv">
-     <dt>${currentLang === 'en' ? nsa.NSAObjectivesENG : nsa.NSAObjectivesSPA}</dt>
+     <dt>${currentLang === 'en' ? nsa.NSAObjetivesENG : nsa.NSAObjectives}</dt>
     </p>
 
     <h5>${UI[currentLang].workFields}</h5>
