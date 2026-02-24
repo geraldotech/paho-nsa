@@ -45,7 +45,7 @@ body {
 
 .logo-box {
   height: 120px;
-  border: 1px dashed var(--border);
+/*   border: 1px dashed var(--border); */
   border-radius: 10px;
   display: grid;
   place-items: center;

@@ -34,7 +34,7 @@ init()
  * ELEMENTOS INICIAIS
  */
 function init() {
- // buildNSASelect()
+  // buildNSASelect()
   buildPeriodSelect()
 
   el.langToggle.addEventListener('click', () => {
@@ -43,17 +43,11 @@ function init() {
     render()
   })
 
-/*   el.nsaSelect.addEventListener('change', (e) => {
-    currentId = e.target.value
-    clearSearchResults()
-    render()
-  })
- */
   el.searchInput.addEventListener('input', handleSearchInput)
   el.searchResults.addEventListener('click', onSearchResultClick)
 
   el.periodSelect.addEventListener('change', () => {
- //   buildNSASelect()
+    //   buildNSASelect()
     clearSearchResults()
   })
 
@@ -64,13 +58,13 @@ function init() {
   })
 
   // seta default no select
- // el.nsaSelect.value = String(currentId)
-  // render()
+  render()
 }
 
 /**
  * FILTER SELECTED NSA
  */
+
 /* function buildNSASelect() {
   const sorted = getFilteredNasas().sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
 
@@ -104,7 +98,9 @@ function getFilteredNasas() {
 }
 
 function handleSearchInput(event) {
-  const term = String(event.target.value || '').trim().toLowerCase()
+  const term = String(event.target.value || '')
+    .trim()
+    .toLowerCase()
 
   if (term.length < MIN_SEARCH_CHARS) {
     clearSearchResults()
@@ -197,7 +193,6 @@ function render() {
     document.getElementById('financial_card').classList.remove('none')
     renderFinancialCharts(nsa) // financial
   }
-
 
   /* === NSA Activities === */
   renderActivities(allActivities) // activities
@@ -584,7 +579,7 @@ async function fetchJson(url) {
 
     return data
   } catch (error) {
-    console.error('❌ fetchJson erro:', error.message)
+    console.error('fetchJson erro:', error.message)
     return null
   }
 }
