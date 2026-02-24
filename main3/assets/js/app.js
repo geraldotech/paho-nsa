@@ -1,12 +1,12 @@
-/* === Imports === */
-import nasas from '../database2/nsa.js' // ID
-import activity from '../database2/activity.js' // ParentID
-import workplan from '../database2/workplan.js' // ParentID
 import UI from './ui-language.js'
+const nasas = await fetchJson('./assets/database/nsa.json')
+const activity = await fetchJson('./assets/database/activity.json') // Collaboration with PAHO
+const workplan = await fetchJson('./assets/database/workplan.json')
+
 
 /* === State === */
 let currentLang = 'en'
-let currentId = null // '62'
+let currentId = 6;
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true
@@ -94,14 +94,14 @@ function buildNSASelect() {
 
   el.nsaSelect.innerHTML = sorted
     .map((n) => {
-      const label = `${n.ID} — ${n.TitleENG || n.TitleSPA || 'Untitled'}`
-      return `<option value="${n.ID}">${escapeHtml(label)}</option>`
+      const label = `${n.TitleENG || n.TitleSPA || 'Untitled'}`
+      return `<option value="${n.id}">${escapeHtml(label)}</option>`
     })
     .join('')
 
   // se o atual não existir mais no filtro, seleciona o primeiro
-  if (!sorted.find((n) => n.ID === currentId)) {
-    currentId = sorted.length ? sorted[0].ID : ''
+  if (!sorted.find((n) => n.id === currentId)) {
+    currentId = sorted.length ? sorted[0].id : ''
   }
 
   el.nsaSelect.value = currentId
@@ -113,7 +113,8 @@ function buildNSASelect() {
  * RENDER THE NSA
  */
 function render() {
-  const nsa = nasas.find((n) => String(n.ID) === String(currentId))
+ // console.log(nasas.find(v => v.id == 6))
+  const nsa = nasas.find((n) => Number(n.id) === Number(currentId))
 
   // se nao encontrar a NSA nao filtra os demais
   if (!nsa) {
@@ -122,7 +123,7 @@ function render() {
     el.nsaInfo.innerHTML = ''
     el.activities.innerHTML = ''
     el.workplans.innerHTML = ''
-    el.disclaimer.innerText = DISCLAIMER[currentLang]
+  //  el.disclaimer.innerText = DISCLAIMER[currentLang]
     return
   }
   const showWps = true // el.filterWorkplans.checked
@@ -139,9 +140,9 @@ function render() {
     console.log('allWorkplans', allWorkplans)
     console.log(`========================`)
   }
-  if (allWorkplans.length === 0) {
+/*   if (allWorkplans.length === 0) {
     alert('sem allWorkplans')
-  }
+  } */
 
   /* === NSA PROFILE === */
   renderNSAProfile(nsa)
@@ -199,8 +200,6 @@ function renderActivities(list) {
     el.activities.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
     return
   }
-
-  console.log(`list`, list)
 
   el.activities.innerHTML = list
     .map((w) => {
@@ -285,7 +284,7 @@ function findNSAsByQuery(query) {
 
   return pool
     .filter((n) => {
-      const id = String(n.ID || '').toLowerCase()
+      const id = String(n.id || '').toLowerCase()
       const titleEng = String(n.TitleENG || '').toLowerCase()
       const titleSpa = String(n.TitleSPA || '').toLowerCase()
       return id.includes(query) || titleEng.includes(query) || titleSpa.includes(query)
@@ -313,8 +312,8 @@ function renderSearchModalResults(results, query) {
     .map((n) => {
       const title = currentLang === 'en' ? n.TitleENG || n.TitleSPA || '-' : n.TitleSPA || n.TitleENG || '-'
       return `
-        <button class="search-result-item" type="button" data-id="${escapeHtml(String(n.ID))}">
-          <span class="search-result-id">#${escapeHtml(String(n.ID))}</span>${escapeHtml(title)}
+        <button class="search-result-item" type="button" data-id="${escapeHtml(String(n.id))}">
+          <span class="search-result-id">#${escapeHtml(String(n.id))}</span>${escapeHtml(title)}
           <span class="search-result-sub">${escapeHtml(n.CollaborationPeriod || '-')}</span>
         </button>
       `
@@ -324,14 +323,14 @@ function renderSearchModalResults(results, query) {
 
 function updateSearchTriggerLabel() {
   const t = UI[currentLang]
-  const nsa = nasas.find((n) => String(n.ID) === String(currentId))
+  const nsa = nasas.find((n) => String(n.id) === String(currentId))
   if (!nsa) {
     el.searchOpen.textContent = t.searchOpen
     return
   }
 
   const title = currentLang === 'en' ? nsa.TitleENG || nsa.TitleSPA || '-' : nsa.TitleSPA || nsa.TitleENG || '-'
-  el.searchOpen.textContent = `${nsa.ID} - ${title}`
+  el.searchOpen.textContent = `${title}`
 }
 
 /**
@@ -433,7 +432,7 @@ function renderNSAProfile(nsa) {
   const infoEl = document.getElementById('nsa-info')
   el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleSPA || '-'
 
-  el.nsaSubtitle.innerText = `ID: ${nsa.ID} • ${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}`
+  el.nsaSubtitle.innerText = `ID: ${nsa.id} • ${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}`
 
   if (!infoEl) return
 
@@ -589,5 +588,54 @@ window.toggleClamp = function (btn) {
     content.classList.remove('clamp')
     content.setAttribute('data-full', '1')
     btn.textContent = 'Ver menos'
+  }
+}
+
+
+/**
+ * Busca dados JSON de uma URL com tratamento completo de erros
+ * @param {string} url - Endpoint ou arquivo JSON
+ * @returns {Promise<object|null>} - Retorna dados ou null em caso de erro
+ */
+async function fetchJson(url) {
+  try {
+    // Validação básica de URL
+    if (!url || typeof url !== 'string') {
+      throw new Error('URL inválida ou não informada')
+    }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    // Trata HTTP errors (404, 500…)
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`Recurso não encontrado (404): ${url}`)
+      }
+
+      if (response.status >= 500) {
+        throw new Error(`Erro interno do servidor (${response.status})`)
+      }
+
+      throw new Error(`Erro HTTP: ${response.status}`)
+    }
+
+    // Verifica se é JSON válido
+    const contentType = response.headers.get('content-type')
+
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Resposta não é um JSON válido')
+    }
+
+    const data = await response.json()
+
+    return data
+  } catch (error) {
+    console.error('❌ fetchJson erro:', error.message)
+    return null
   }
 }
