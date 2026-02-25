@@ -365,7 +365,7 @@ function renderFinancialCharts(nsa) {
         {
           label: 'USD',
           data: values,
-          backgroundColor: ['#2ecc71', '#e74c3c', '#3498db'],
+          backgroundColor: ['#3498db', '#236192', '#ff671f'],
         },
       ],
     },
