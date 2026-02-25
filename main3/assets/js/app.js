@@ -56,7 +56,7 @@ function init() {
   el.searchResults.addEventListener('click', onSearchResultClick)
 
   el.periodSelect.addEventListener('change', () => {
-    //   buildNSASelect()
+      buildNSASelect()
     clearSearchResults()
   })
 
@@ -74,7 +74,7 @@ function init() {
  * FILTER SELECTED NSA
  */
 
-/* function buildNSASelect() {
+function buildNSASelect() {
   const sorted = getFilteredNasas().sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
 
   el.nsaSelect.innerHTML = sorted
@@ -92,8 +92,7 @@ function init() {
   el.nsaSelect.value = String(currentId)
   render()
 }
- */
-function buildNSAOrganizationType() {}
+ 
 
 function getFilteredNasas() {
   const selectedPeriod = el.periodSelect.value
