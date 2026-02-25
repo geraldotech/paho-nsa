@@ -26,6 +26,8 @@ const el = {
   disclaimer: document.getElementById('disclaimer-text'),
   periodSelect: document.getElementById('period-select'),
   activities: document.getElementById('nsa-activities'),
+  workplansCard: document.getElementById('workplans-card'),
+  financialCard: document.getElementById('financial_card'),
 }
 
 init()
@@ -191,18 +193,28 @@ function render() {
 
   /* === NSA PROFILE === */
   renderNSAProfile(nsa)
+  const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
 
-  // if has Progress Report - not show financial report
-  if (nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')) {
+  /**
+   * when is Progress Report:
+   *  not show financial report card
+   * Workplan for the next three years hide tudo
+   *  só mostrar o ano mais recente
+   */
+  if (isProcessReportType) {
     // nao exibir
-    document.getElementById('financial_card').classList.add('none')
+    el.financialCard.classList.add('none')
+    el.workplansCard.classList.add('none')
   } else {
-    document.getElementById('financial_card').classList.remove('none')
+    el.financialCard.classList.remove('none')
+    el.workplansCard.classList.add('none')
     renderFinancialCharts(nsa) // Financial information
   }
 
-  /* === NSA Activities === */
-  renderActivities(allActivities) // activities
+  /* === NSA Collaboration with PAHO === */
+
+  // só mostrar o ano mais recente
+  renderActivities(allActivities)
 
   /* === NSA workplans === */
   renderWorkplans(filteredWorkplans, true)
@@ -286,8 +298,7 @@ function buildPeriodSelect() {
 }
 
 /**
- * FINANCIAL  information
-ECHARTS
+ * FINANCIAL  information - ECHARTS
  */
 function renderFinancialCharts(nsa) {
   const canvas = document.getElementById('financialBarChart')
@@ -467,7 +478,6 @@ function renderNSAProfile(nsa) {
     </p>
   </div>
   `
-
   // injecta os cars n DOM
   infoEl.innerHTML = `
     <div class="nsa-grid">
@@ -508,7 +518,6 @@ function applyLanguage() {
   setText('CollaborationNav', t.navCollaboration)
   setText('WorkplansNav', t.navWorkplan)
   setText('navTitle', t.navTitle)
-
 
   updateBrandLogo()
 }
