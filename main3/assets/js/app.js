@@ -183,8 +183,8 @@ function render() {
   if (DEBUG) {
     console.log(`========================`)
     console.log('nsa', nsa)
-    console.log('allActivities', allActivities)
-    console.log('allWorkplans', allWorkplans)
+    console.log('Collaboration with PAHO activities', allActivities)
+    console.log('Workplans', allWorkplans)
     console.log(`========================`)
   }
   /*   if (allWorkplans.length === 0) {
@@ -196,13 +196,12 @@ function render() {
   const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
 
   /**
-   * when is Progress Report:
-   *  not show financial report card
+   * @see when is Progress Report:
+   * not show financial report card
    * Workplan for the next three years hide tudo
-   *  só mostrar o ano mais recente
+   * só mostrar o ano mais recente
    */
   if (isProcessReportType) {
-    // nao exibir
     el.financialCard.classList.add('none')
     el.workplansCard.classList.add('none')
   } else {
@@ -212,8 +211,6 @@ function render() {
   }
 
   /* === NSA Collaboration with PAHO === */
-
-  // só mostrar o ano mais recente
   renderActivities(allActivities)
 
   /* === NSA workplans === */
