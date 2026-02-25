@@ -21,7 +21,7 @@
 
 body {
   background: var(--bg);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
   color: var(--text);
 }
 
@@ -45,7 +45,7 @@ body {
 
 .logo-box {
   height: 120px;
-/*   border: 1px dashed var(--border); */
+  /*   border: 1px dashed var(--border); */
   border-radius: 10px;
   display: grid;
   place-items: center;
@@ -203,6 +203,7 @@ body {
   border-radius: 14px;
   padding: 12px;
   background: #fff;
+  margin-block: 8px;
 }
 
 .item:last-child {
@@ -342,7 +343,7 @@ img.brand-logo {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.field_fiscal{
+.field_fiscal {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
@@ -531,4 +532,6 @@ img.brand-logo {
   gap: 2px;
   margin-bottom: 5px;
   cursor: pointer;
+  position: sticky;
+  top: 0;
 }
