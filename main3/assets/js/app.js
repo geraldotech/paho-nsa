@@ -502,6 +502,14 @@ function applyLanguage() {
   setText('collabTitle', t.collabTitle)
   setText('collabSubtitle', t.collabSubtitle)
 
+  // navigation
+  setText('profileTitlenav', t.navProfile)
+  setText('financialnav', t.navFinancials)
+  setText('CollaborationNav', t.navCollaboration)
+  setText('WorkplansNav', t.navWorkplan)
+  setText('navTitle', t.navTitle)
+
+
   updateBrandLogo()
 }
 
