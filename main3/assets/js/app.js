@@ -514,6 +514,10 @@ function applyLanguage() {
   setText('CollaborationNav', t.navCollaboration)
   setText('WorkplansNav', t.navWorkplan)
   setText('navTitle', t.navTitle)
+  setText('organization-type', t.orgType)
+  setText('organization-all', t.all)
+  
+  el.searchInput.placeholder = t.searchPh
 
   updateBrandLogo()
 }
