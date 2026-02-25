@@ -1,5 +1,4 @@
-/* @import url('./modal.css'); */
-
+@import url('./sidebar.css');
 * {
   margin: 0;
   padding: 0;
@@ -17,31 +16,48 @@
   --warn-bg: #fff8e1;
   --warn-border: #ffc107;
   --line: #e5e7eb;
+  --sidebarbackground: #ffffff;  /* sidebar */
 
   --paho-light-blue: #009dde;
   --paho-dark-blue: #236192;
   --paho-orange: #f6711f;
+
+  --paho-primary: #0b5c7a;   /* azul oscuro */
+  --paho-primary-2: #0a4b63; /* darker */
 }
 
 body {
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    'Apple Color Emoji',
+    'Segoe UI Emoji';
   color: var(--text);
   background: var(--bg);
 }
 
 /* SIDEBAR FIXA */
- .sidebar {
+.sidebar {
   position: fixed;
   top: 0;
   left: 0;
   width: var(--sidebar-w);
   height: 100vh;
-  background: var(--card);
+/*   background: var(--card); */
+background: linear-gradient(180deg, var(--paho-primary), var(--paho-primary-2));
   border-right: 1px solid var(--border);
   padding: 18px 10px;
   overflow: hidden;
   padding-top: 0;
-}
+  display: flex;
+  flex-direction: column;
+} 
+
 /* .sidebar {
   position: fixed;
   top: 0;
@@ -54,18 +70,19 @@ body {
   overflow: hidden;
   padding-top: 0;
   color: #fff;
-} */
-
+}
+ */
 .brand {
   margin-bottom: 18px;
 }
 
 .logo-box {
+  display: flex;
   height: 120px;
-/*   border: 1px dashed var(--border); */
+  /*   border: 1px dashed var(--border); */
   border-radius: 10px;
-  display: grid;
-  place-items: center;
+/*   display: grid;
+  place-items: center; */
   margin-bottom: 10px;
 }
 
@@ -76,18 +93,21 @@ body {
 
 .brand-title {
   font-weight: 800;
-  color: var(--brand);
+  color: var(--sidebarbackground);
 }
 
 .controls {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-top: 10px;
+  flex: 1;
+  min-height: 0;
 }
 
 .label {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--sidebarbackground);
   margin-top: 6px;
 }
 
@@ -113,6 +133,11 @@ body {
   background: #fff;
   max-height: 220px;
   overflow-y: auto;
+}
+
+#search-results {
+  flex: 0 1 220px;
+  min-height: 0;
 }
 
 .search-results:empty {
@@ -174,7 +199,7 @@ body {
 /* MAIN (empurra por causa da sidebar fixa) */
 .main {
   margin-left: var(--sidebar-w);
-  padding: 22px;
+  padding: 12px;
   /*  max-width: 1200px; */
 }
 
@@ -202,7 +227,7 @@ body {
   padding: 18px;
   margin-bottom: 16px;
   border-radius: 12px;
-/*   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); */
+  /*   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); */
 }
 
 .card h3 {
@@ -361,7 +386,7 @@ img.brand-logo {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.field_fiscal{
+.field_fiscal {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
@@ -541,7 +566,7 @@ img.brand-logo {
 }
 
 .none {
-  display: none;
+  display: none !important;
 }
 
 .language-link {
@@ -551,5 +576,83 @@ img.brand-logo {
   margin-bottom: 5px;
   cursor: pointer;
   position: sticky;
-    top: 0;
+  top: 0;
 }
+
+/* Container do "On this page" */
+.on-this-page {
+  padding: 1rem 0;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+/* Título */
+.on-this-page h4 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #236192;
+  font-weight: 600;
+}
+
+/* Lista */
+.on-this-page ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+
+/* Link base */
+.on-this-page a {
+  display: block;
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid transparent;
+  color: var(--sidebarbackground);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+/* Hover */
+.on-this-page a:hover {
+  background-color: rgba(52, 152, 219, 0.08);
+  color: var(--sidebarbackground);
+  border-left: 3px solid #3498db;
+}
+
+/* Link ativo (quando estiver na seção atual) */
+.on-this-page a.active {
+  background-color: rgba(35, 97, 146, 0.08);
+  color: #236192;
+  border-left: 3px solid #ff671f;
+  font-weight: 600;
+}
+
+#navTitle{
+    font-weight: 800;
+    color: var(--sidebarbackground);
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+/* === OPTIONS DO SELECT === */
+/* Dropdown aberto */
+
+/* 
+select.input option {
+  background-color: #236192; 
+  color: #ffffff;
+}
+
+select.input option:hover {
+  background-color: #3498db;
+} */
+
+/* select.input option:checked {
+  background-color: #ff671f;
+  color: #ffffff;
+}
+ */

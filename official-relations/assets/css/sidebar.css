@@ -1,0 +1,62 @@
+
+
+ .logo-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 4px;
+}
+
+/* Logo menor */
+.brand-logo {
+  height: auto;
+  object-fit: contain;
+}
+
+/* Texto ao lado */
+.brand-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brand);
+  line-height: 1.2;
+}
+/* =========================
+   LABELS
+========================= */
+/* .label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 0.4rem;
+  margin-top: 1.2rem;
+  opacity: 0.85;
+} */
+
+/* =========================
+   INPUTS & SELECTS
+========================= */
+/* .input {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  backdrop-filter: blur(3px);
+  transition: all 0.2s ease;
+} */
+
+/* =========================
+   ON THIS PAGE
+========================= */
+#navTitle {
+  margin-top: 2rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+

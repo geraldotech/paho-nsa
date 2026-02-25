@@ -3,9 +3,10 @@ const nasas = await fetchJson('./assets/database/nsa.json')
 const activity = await fetchJson('./assets/database/activity.json') // Collaboration with PAHO
 const workplan = await fetchJson('./assets/database/workplan.json')
 
+
 /* === State === */
 let currentLang = 'en'
-let currentId = 62 // 6
+let currentId = 6 // 62, 6
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true
@@ -28,6 +29,9 @@ const el = {
   activities: document.getElementById('nsa-activities'),
   workplansCard: document.getElementById('workplans-card'),
   financialCard: document.getElementById('financial_card'),
+  financialnav: document.getElementById('financialnav'),
+  typeOfSubmissionTypeInput: document.getElementById('typeOfSubmission-type-input'),
+  organizationTypeInput: document.getElementById('organization-type-input')
 }
 
 init()
@@ -38,6 +42,7 @@ init()
 function init() {
   // buildNSASelect()
   buildPeriodSelect()
+  buildTypeOfSubmissionTypeInput(nasas)
 
   const langToggle = document.querySelectorAll('.lang-toggle')
 
@@ -56,7 +61,7 @@ function init() {
   el.searchResults.addEventListener('click', onSearchResultClick)
 
   el.periodSelect.addEventListener('change', () => {
-      buildNSASelect()
+  //    buildNSASelect()
     clearSearchResults()
   })
 
@@ -92,6 +97,37 @@ function buildNSASelect() {
   el.nsaSelect.value = String(currentId)
   render()
 }
+
+
+/**
+ * BUILD THE typeOfSubmissionTypeInput SELECT OPTIONS
+ */
+/**
+ * BUILD THE typeOfSubmissionTypeInput SELECT OPTIONS
+ */
+function buildTypeOfSubmissionTypeInput(nasas) {
+
+  const values = nasas.map(nsa => nsa.TypeOfSubmission).filter(Boolean)
+  
+  // Remover duplicados
+  const uniqueValues = [...new Set(values)]
+  
+  if(DEBUG) console.log(`buildTypeOfSubmissionTypeInput`, uniqueValues)     
+
+  // ordenar (opcional)
+  uniqueValues.sort()
+
+  // limpar select
+  el.typeOfSubmissionTypeInput.innerHTML = '<option value="">Select...</option>'
+
+  // riar options
+  uniqueValues.forEach(val => {
+    const option = document.createElement('option')
+    option.value = val
+    option.textContent = val
+     el.typeOfSubmissionTypeInput.appendChild(option)
+  }) 
+}
  
 
 function getFilteredNasas() {
@@ -105,6 +141,93 @@ function getFilteredNasas() {
   return filtered
 }
 
+
+/* === SELECT LISTEING PARA MONTAR OS FILTROS DO handleSearchInput === */
+const filters = {
+  term: '',
+  typeOfSubmission: '',
+  organizationType: ''
+}
+
+function applyFilters() {
+  const term = filters.term
+
+  const matches = nasas
+    .filter((n) => {
+
+      /* === FILTER • typeOfSubmission (igualdade) === */
+      if (
+        filters.typeOfSubmission &&
+        String(n.TypeOfSubmission || '') !== filters.typeOfSubmission
+      ) {
+        return false
+      }
+
+      /* === FILTER • organizationType (includes) === */
+      if (filters.organizationType) {
+        const orgType = String(n.NSAOrganizationType || '').toLowerCase()
+
+        if (!orgType.includes(filters.organizationType.toLowerCase())) {
+          return false
+        }
+      }
+
+      /* === FILTER • term === */
+      if (term.length >= MIN_SEARCH_CHARS) {
+        const titleEng = String(n.TitleENG || '').toLowerCase()
+        const titleSpa = String(n.TitleENGSPA || '').toLowerCase()
+
+        return (
+          titleEng.includes(term) ||
+          titleSpa.includes(term)
+        )
+      }
+
+      return true
+    })
+    .sort((a, b) =>
+      String(a.TitleENG || '').localeCompare(String(b.TitleENG || ''))
+    )
+    .slice(0, 30)
+
+  renderSearchResults(matches)
+}
+// base: aqui você pode retornar nasas ou alguma pré-filtragem tua
+function getFilteredNasasBase() {
+  return nasas
+}
+
+// search input
+el.searchInput.addEventListener('input', (e) => {
+  filters.term = String(e.target.value || '').trim().toLowerCase()
+  applyFilters()
+})
+
+// selects
+el.typeOfSubmissionTypeInput.addEventListener('change', (e) => {
+  filters.typeOfSubmission = e.target.value || ''
+  applyFilters()
+})
+
+el.organizationTypeInput.addEventListener('change', (e) => {
+  filters.organizationType = e.target.value || ''
+  applyFilters()
+})
+
+// typeOfSubmissionTypeInput
+/* el.typeOfSubmissionTypeInput.addEventListener("change", function(e){
+  console.log(e.target.value)
+})
+ */
+/* el.organizationTypeInput.addEventListener("change", function(e){
+  console.log(e.target.value)
+}) */
+
+/**
+ * HANDLER THE FILTER NASAS
+ */
+/* */
+
 function handleSearchInput(event) {
   const term = String(event.target.value || '')
     .trim()
@@ -114,7 +237,6 @@ function handleSearchInput(event) {
     clearSearchResults()
     return
   }
-
   const matches = getFilteredNasas()
     .filter((n) => {
       const titleEng = String(n.TitleENG || '').toLowerCase()
@@ -125,7 +247,7 @@ function handleSearchInput(event) {
     .slice(0, 30)
 
   renderSearchResults(matches)
-}
+} 
 
 function renderSearchResults(results) {
   if (!results.length) {
@@ -201,11 +323,15 @@ function render() {
    * só mostrar o ano mais recente
    */
   if (isProcessReportType) {
+    if(DEBUG)  console.log(`isProcessReportType`, isProcessReportType)
+      
     el.financialCard.classList.add('none')
     el.workplansCard.classList.add('none')
+    el.financialnav.classList.add('none')
   } else {
-    el.financialCard.classList.remove('none')
-    el.workplansCard.classList.add('none')
+    el.financialCard.classList.remove('none')    
+    el.financialnav.classList.remove('none')
+    el.workplansCard.classList.remove('none')
     renderFinancialCharts(nsa) // Financial information
   }
 
@@ -284,10 +410,12 @@ function renderActivities(list) {
  * BUILD PERIODS TO SELECT
  */
 function buildPeriodSelect() {
+  console.log(`buildPeriodSelect`, nasas)
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
   const unique = [...new Set(periods)].sort() // unique values
 
   el.periodSelect.innerHTML = `
+    <option></option>
     <option value="">All Periods</option>
     ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
   `
@@ -608,6 +736,5 @@ async function fetchJson(url) {
     return data
   } catch (error) {
     console.error('fetchJson erro:', error.message)
-    return null
   }
 }

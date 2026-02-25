@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0" />
-    <title>NSA Profile - Official Relations Portal</title>
+     <title>PAHO • Non-State Actors (NSA)</title>
     <link
       rel="icon"
       href="./assets/img/favicon.ico"
@@ -24,24 +24,17 @@
             src="./assets/img/logo-en.png"
             alt="OPAS"
             class="brand-logo" />
-        </div>
-        <div
-          class="brand-title"
-          id="brand-title">
-          NSA Portal
+          <div
+            class="brand-title"
+            id="brand-title">
+            NSA Portal
+          </div>
         </div>
       </div>
 
       <div class="controls">
-        <!--         <label
-                  class="label"
-                  id="nsa-select-input"
-                  for="nsa-select"
-                  >Select NSA</label
-                >
-                <select
-                  id="nsa-select"
-                  class="input"></select> -->
+        <!-- <label class="label" id="nsa-select-input" for="nsa-select">Select NSA</label>
+                <select id="nsa-select" class="input"></select> -->
         <label
           class="label"
           for="search-open"
@@ -68,7 +61,7 @@
           class="input">
           <option value="all">All</option>
         </select>
-
+      <!-- Organization type -->
         <label
           class="label"
           for="period-select"
@@ -78,7 +71,30 @@
         <select
           id="organization-type-input"
           class="input">
-          <option value="all" id="organization-all">All</option>
+          <option
+            value="all"
+            id="organization-all">
+            All
+          </option>
+          <option value="Non-governmental Organizations">Non-governmental Organizations</option>
+          <option value="Philanthropic Foundation">Philanthropic Foundation</option>
+        </select>
+
+      <!-- TypeOfSubmission -->
+        <label
+          class="label"
+          for="period-select"
+          id="TypeOfSubmission-type"
+          >TypeOfSubmission</label
+        >
+        <select
+          id="typeOfSubmission-type-input"
+          class="input">
+          <option
+            value="all"
+            id="TypeOfSubmission-all">
+            All
+          </option>
           <option value="Non-governmental Organizations">Non-governmental Organizations</option>
           <option value="Philanthropic Foundation">Philanthropic Foundation</option>
         </select>
@@ -90,19 +106,34 @@
         </button>
 
         <p id="navTitle">On this page</p>
-        <h2></h2>
-        <ul>
+        <ul class="on-this-page">
           <li>
-            <a href="#profileTitle" id="profileTitlenav">Profile</a>
+            <a
+              href="#profileTitle"
+              id="profileTitlenav"
+              >Profile</a
+            >
           </li>
           <li>
-            <a href="#uiFinTitle" id="financialnav">Financial information</a>
+            <a
+              href="#uiFinTitle"
+              id="financialnav"
+              >Financial information</a
+            >
           </li>
           <li>
-            <a href="#collaboraionPAHO" id="CollaborationNav">Collaboration with PAHO</a>
+            <a
+              href="#collaboraionPAHO"
+              id="CollaborationNav"
+              >Collaboration with PAHO</a
+            >
           </li>
           <li>
-            <a href="#wpTitle" id="WorkplansNav">Workplans</a>
+            <a
+              href="#wpTitle"
+              id="WorkplansNav"
+              >Workplans</a
+            >
           </li>
         </ul>
       </div>
@@ -112,12 +143,13 @@
     <main class="main">
       <!-- language -->
       <div class="language-link">
-        <a        
+        <a
           data-lan="en"
           class="lang-toggle">
           English
-        </a> |
-        <a         
+        </a>
+        |
+        <a
           data-lan="es"
           class="lang-toggle">
           Español
@@ -164,14 +196,18 @@
       </section>
 
       <!-- Collaboration with PAHO Activities -->
-      <section class="card" id="collaboraionPAHO">
+      <section
+        class="card"
+        id="collaboraionPAHO">
         <h2 id="collabTitle">Collaboration with PAHO</h2>
         <div id="collabSubtitle"></div>
         <div id="nsa-activities"></div>
       </section>
 
       <!-- work plans -->
-      <section class="card" id="workplans-card">
+      <section
+        class="card"
+        id="workplans-card">
         <h2 id="wpTitle">Work Plans</h2>
         <p
           class="muted"
@@ -222,6 +258,6 @@
     <script
       src="./assets/js/app.js"
       type="module"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./assets/js/vendors/chart.js"></script>
   </body>
 </html>
