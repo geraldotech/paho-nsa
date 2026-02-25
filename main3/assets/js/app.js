@@ -5,7 +5,7 @@ const workplan = await fetchJson('./assets/database/workplan.json')
 
 /* === State === */
 let currentLang = 'en'
-let currentId = 45 // 6
+let currentId = 62 // 6
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true
@@ -41,12 +41,11 @@ function init() {
 
   langToggle.forEach((val) => {
     val.addEventListener('click', (e) => {
-      
       const clickLang = e.target.dataset.lan
-     // console.log(clickLang)
-    //  currentLang = currentLang === 'en' ? 'es' : 'en'
+      // console.log(clickLang)
+      //  currentLang = currentLang === 'en' ? 'es' : 'en'
       currentLang = clickLang
-    //  el.langToggle.innerText = currentLang === 'en' ? 'ES' : 'EN'
+      //  el.langToggle.innerText = currentLang === 'en' ? 'ES' : 'EN'
       render()
     })
   })
@@ -195,11 +194,11 @@ function render() {
 
   // if has Progress Report - not show financial report
   if (nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')) {
-    // nao exi
+    // nao exibir
     document.getElementById('financial_card').classList.add('none')
   } else {
     document.getElementById('financial_card').classList.remove('none')
-    renderFinancialCharts(nsa) // financial
+    renderFinancialCharts(nsa) // Financial information
   }
 
   /* === NSA Activities === */
@@ -287,12 +286,17 @@ function buildPeriodSelect() {
 }
 
 /**
- * FINANCIAL ECHARTS
+ * FINANCIAL  information
+ECHARTS
  */
 function renderFinancialCharts(nsa) {
   const canvas = document.getElementById('financialBarChart')
+  const FinAnnualIncomeYear = document.getElementById('FinAnnualIncomeYear')
   if (!canvas) return
-
+  FinAnnualIncomeYear.innerHTML = `<div class="field_fiscal">
+    <h3>${UI[currentLang].fiscalYear}</h3>
+    <p>${nsa.FinAnnualIncomeYear}</p>
+    </div>`
   const wrapper = canvas.closest('.chart-wrapper') || canvas.parentElement
 
   // remove msg antiga sempre que renderizar
@@ -305,7 +309,6 @@ function renderFinancialCharts(nsa) {
 
   const values = [income, expenses, assets]
 
-  // 👇 IMPORTANTE: evite “fingir 0” quando o dado vem vazio
   // Se teu toNumber("") retorna 0, isso engana. Então detecta vazio aqui:
   const raw = [nsa.FinAnnualIncome, nsa.FinAnnualExpenses, nsa.FinAssets]
   const hasAnyRaw = raw.some((v) => String(v ?? '').trim() !== '')
