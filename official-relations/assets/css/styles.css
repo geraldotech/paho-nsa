@@ -103,6 +103,7 @@ background: linear-gradient(180deg, var(--paho-primary), var(--paho-primary-2));
   margin-top: 10px;
   flex: 1;
   min-height: 0;
+  position: relative;
 }
 
 .label {
@@ -131,12 +132,15 @@ background: linear-gradient(180deg, var(--paho-primary), var(--paho-primary-2));
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #fff;
-  max-height: 220px;
+  max-height: min(34vh, 320px);
   overflow-y: auto;
 }
 
 #search-results {
-  flex: 0 1 220px;
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  width: 100%;
   min-height: 0;
 }
 

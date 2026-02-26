@@ -58,7 +58,10 @@ function init() {
   })
 
   el.searchInput.addEventListener('input', handleSearchInput)
+  el.searchInput.addEventListener('focus', showSearchResults)
+  el.searchInput.addEventListener('click', onSearchInputClick)
   el.searchResults.addEventListener('click', onSearchResultClick)
+  document.addEventListener('pointerdown', handleOutsideSearchClick)
 
   el.periodSelect.addEventListener('change', () => {
   //    buildNSASelect()
@@ -99,17 +102,13 @@ function buildNSASelect() {
 }
 
 
-/**
- * BUILD THE typeOfSubmissionTypeInput SELECT OPTIONS
- */
+
 /**
  * BUILD THE typeOfSubmissionTypeInput SELECT OPTIONS
  */
 function buildTypeOfSubmissionTypeInput(nasas) {
 
   const values = nasas.map(nsa => nsa.TypeOfSubmission).filter(Boolean)
-  
-  // Remover duplicados
   const uniqueValues = [...new Set(values)]
   
   if(DEBUG) console.log(`buildTypeOfSubmissionTypeInput`, uniqueValues)     
@@ -117,10 +116,9 @@ function buildTypeOfSubmissionTypeInput(nasas) {
   // ordenar (opcional)
   uniqueValues.sort()
 
-  // limpar select
   el.typeOfSubmissionTypeInput.innerHTML = '<option value="">Select...</option>'
+  el.typeOfSubmissionTypeInput.innerHTML = '<option value="all">All</option>'
 
-  // riar options
   uniqueValues.forEach(val => {
     const option = document.createElement('option')
     option.value = val
@@ -205,23 +203,16 @@ el.searchInput.addEventListener('input', (e) => {
 
 // selects
 el.typeOfSubmissionTypeInput.addEventListener('change', (e) => {
-  filters.typeOfSubmission = e.target.value || ''
+  const value = String(e.target.value || '').trim()
+  filters.typeOfSubmission = value.toLowerCase() === 'all' ? '' : value
   applyFilters()
 })
 
 el.organizationTypeInput.addEventListener('change', (e) => {
-  filters.organizationType = e.target.value || ''
+  const value = String(e.target.value || '').trim()
+  filters.organizationType = value.toLowerCase() === 'all' ? '' : value
   applyFilters()
 })
-
-// typeOfSubmissionTypeInput
-/* el.typeOfSubmissionTypeInput.addEventListener("change", function(e){
-  console.log(e.target.value)
-})
- */
-/* el.organizationTypeInput.addEventListener("change", function(e){
-  console.log(e.target.value)
-}) */
 
 /**
  * HANDLER THE FILTER NASAS
@@ -234,7 +225,7 @@ function handleSearchInput(event) {
     .toLowerCase()
 
   if (term.length < MIN_SEARCH_CHARS) {
-    clearSearchResults()
+    showSearchResults()
     return
   }
   const matches = getFilteredNasas()
@@ -244,10 +235,32 @@ function handleSearchInput(event) {
       return titleEng.includes(term) || titleEngSpa.includes(term)
     })
     .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
-    .slice(0, 30)
 
   renderSearchResults(matches)
 } 
+
+function showSearchResults() {
+  const term = String(el.searchInput.value || '')
+    .trim()
+    .toLowerCase()
+
+  const matches = getFilteredNasas()
+    .filter((n) => {
+      if (!term) return true
+
+      const titleEng = String(n.TitleENG || '').toLowerCase()
+      const titleEngSpa = String(n.TitleENGSPA || '').toLowerCase()
+      return titleEng.includes(term) || titleEngSpa.includes(term)
+    })
+    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
+
+  renderSearchResults(matches)
+}
+
+function onSearchInputClick(event) {
+  event.stopPropagation()
+  showSearchResults()
+}
 
 function renderSearchResults(results) {
   if (!results.length) {
@@ -275,6 +288,20 @@ function onSearchResultClick(event) {
   clearSearchResults()
   el.searchInput.value = ''
   render()
+}
+
+function handleOutsideSearchClick(event) {
+  const target = event.target
+  if (!(target instanceof Element)) return
+
+  const clickedInsideInput = target.closest('#searchInput')
+  const clickedInsideResults = target.closest('#search-results')
+
+  if (clickedInsideInput || clickedInsideResults) return
+
+  el.searchInput.value = ''
+  filters.term = ''
+  clearSearchResults()
 }
 
 /**
