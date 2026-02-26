@@ -196,7 +196,7 @@ background: linear-gradient(180deg, var(--paho-primary), var(--paho-primary-2));
 
 .btn-ghost {
   background: transparent;
-  color: var(--brand);
+  color: #fff;
   border: 1px solid var(--border);
 }
 

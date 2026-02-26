@@ -39,7 +39,6 @@ init()
  * ELEMENTOS INICIAIS
  */
 function init() {
-  // buildNSASelect()
   buildPeriodSelect()
   buildTypeOfSubmissionTypeInput(nasas)
 
@@ -48,8 +47,6 @@ function init() {
   langToggle.forEach((val) => {
     val.addEventListener('click', (e) => {
       const clickLang = e.target.dataset.lan
-      // console.log(clickLang)
-      //  currentLang = currentLang === 'en' ? 'es' : 'en'
       currentLang = clickLang
       //  el.langToggle.innerText = currentLang === 'en' ? 'ES' : 'EN'
       render()
@@ -63,40 +60,10 @@ function init() {
   document.addEventListener('pointerdown', handleOutsideSearchClick)
 
   el.periodSelect.addEventListener('change', () => {
-    //    buildNSASelect()
     clearSearchResults()
   })
 
-  el.clear.addEventListener('click', () => {
-    el.filterActivities.checked = true
-    el.filterWorkplans.checked = true
-    render()
-  })
-
   // seta default no select
-  render()
-}
-
-/**
- * FILTER SELECTED NSA
- */
-
-function buildNSASelect() {
-  const sorted = getFilteredNasas().sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
-
-  el.nsaSelect.innerHTML = sorted
-    .map((n) => {
-      const label = `${n.TitleENG || n.TitleSPA || 'Untitled'}`
-      return `<option value="${n.id}">${escapeHtml(label)}</option>`
-    })
-    .join('')
-
-  // se o atual não existir mais no filtro, seleciona o primeiro
-  if (!sorted.find((n) => Number(n.id) === Number(currentId))) {
-    currentId = sorted.length ? sorted[0].id : ''
-  }
-
-  el.nsaSelect.value = String(currentId)
   render()
 }
 
@@ -141,6 +108,18 @@ const filters = {
   organizationType: '',
 }
 
+/* RESET DOS FILTERS AND SELECT */
+el.clear.addEventListener('click', () => {
+  filters.term = ''
+  filters.typeOfSubmission = ''
+  filters.organizationType = ''
+
+  el.typeOfSubmissionTypeInput.selectedIndex = 0
+  el.organizationTypeInput.selectedIndex = 0
+
+  render()
+}) 
+
 function applyFilters() {
   const term = filters.term
 
@@ -175,10 +154,6 @@ function applyFilters() {
 
   renderSearchResults(matches)
 }
-// base: aqui você pode retornar nasas ou alguma pré-filtragem tua
-function getFilteredNasasBase() {
-  return nasas
-}
 
 // search input
 el.searchInput.addEventListener('input', (e) => {
@@ -210,8 +185,6 @@ el.organizationTypeInput.addEventListener('change', (e) => {
 /**
  * HANDLER THE FILTER NASAS
  */
-/* */
-
 function handleSearchInput(event) {
   const term = String(event.target.value || '')
     .trim()
@@ -328,9 +301,6 @@ function render() {
     console.log('Workplans', allWorkplans)
     console.log(`========================`)
   }
-  /*   if (allWorkplans.length === 0) {
-    alert('sem allWorkplans')
-  } */
 
   /* === NSA PROFILE === */
   renderNSAProfile(nsa)
@@ -340,7 +310,6 @@ function render() {
    * @see when is Progress Report:
    * not show financial report card
    * Workplan for the next three years hide tudo
-   * só mostrar o ano mais recente
    */
   if (isProcessReportType) {
     if (DEBUG) console.log(`isProcessReportType`, isProcessReportType)
@@ -430,7 +399,7 @@ function renderActivities(list) {
  * BUILD PERIODS TO SELECT
  */
 function buildPeriodSelect() {
-  console.log(`buildPeriodSelect`, nasas)
+  if(DEBUG) console.log(`buildPeriodSelect`, nasas)  
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
   const unique = [...new Set(periods)].sort() // unique values
 
@@ -543,8 +512,6 @@ function renderNSAProfile(nsa) {
   const infoEl = document.getElementById('nsa-info')
   el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleENGSPA || '-'
 
-  /*   el.nsaSubtitle.innerText = `${currentLang === 'en' ? nsa.NSAOrganizationTypeENG : nsa.NSAOrganizationTypeSPA} ${nsa.CollaborationPeriod || '-'}` */
-  //el.nsaSubtitle.innerText = `${nsa.NSAOrganizationType}`
   el.nsaSubtitle.innerText = `${nsa.TypeOfSubmission}`
 
   if (!infoEl) return
@@ -720,7 +687,6 @@ window.toggleClamp = function (btn) {
  */
 async function fetchJson(url) {
   try {
-    // Validação básica de URL
     if (!url || typeof url !== 'string') {
       throw new Error('URL inválida ou não informada')
     }
