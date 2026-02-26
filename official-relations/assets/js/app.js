@@ -80,7 +80,7 @@ function buildTypeOfSubmissionTypeInput(nasas) {
   uniqueValues.sort()
 
   el.typeOfSubmissionTypeInput.innerHTML = '<option value="">Select...</option>'
-  el.typeOfSubmissionTypeInput.innerHTML = '<option value="all">All</option>'
+  el.typeOfSubmissionTypeInput.innerHTML = '<option value="all" id="typeOfSubmissionTypeInputAll">All</option>'
 
   uniqueValues.forEach((val) => {
     const option = document.createElement('option')
@@ -353,13 +353,12 @@ function renderWorkplans(list, enabled) {
       const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
       const dur = currentLang === 'en' ? w.DurationENG : w.DurationSPA
       const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
-
+     /*  <h3>${escapeHtml(w.Title || '-')}</h3> */
       return `
-        <div class="item">
-          <h3>${escapeHtml(w.Title || '-')}</h3>
+        <div class="item">         
+          <h4>${UI[currentLang].thResp}: ${w.ResponsibleEntity}</h4>
           <p>${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
           ${dur ? `<p class="meta"><strong>Duration:</strong> ${escapeHtml(dur)}</p>` : ''}
-          <p>${UI[currentLang].thResp}: ${w.ResponsibleEntity}</p>
           <p>HealthAgenda: ${HealthAgenda ?? ''}</p>
         </div>
       `
@@ -378,14 +377,14 @@ function renderActivities(list) {
   }
 
   el.activities.innerHTML = list
-    .map((w) => {
-      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
-      const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
-
-      return `
+  .map((w) => {
+    const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
+    const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
+    /*<h3>${escapeHtml(w.Title || '-')}</h3> */
+    
+    return `
         <div class="item">
-          <h3>${escapeHtml(w.Title || '-')}</h3>         
-          <h5>${UI[currentLang].thEntity}</h5> 
+          <h4>${UI[currentLang].thEntity}</h4> 
           <p>${w.Entity}</p>         
           <h5>${UI[currentLang].thResults}</h5>
           <p>${directResults}</p>          
@@ -631,7 +630,9 @@ function applyLanguage() {
   setText('navTitle', t.navTitle)
   setText('organization-type', t.orgType)
   setText('organization-all', t.all)
+  setText('typeOfSubmissionTypeInputAll', t.all)
   setText('TypeOfSubmission-type', t.typeOfSubmission)
+  setText('clear-filters', t.clear)
 
   el.searchInput.placeholder = t.searchPh
 

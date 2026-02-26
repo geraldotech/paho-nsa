@@ -70,7 +70,8 @@ export default {
     board: 'Governing body members',
     bodies: 'Organization bodies & affiliations',
     selectInput: 'Select NSA',
-    brandTitle: 'Non-State Actors in Official Relations Portal'
+    brandTitle: 'Non-State Actors in Official Relations Portal',
+    clear: 'Clear'
 
   },
   es: {
@@ -142,6 +143,7 @@ export default {
     board: 'Miembros del órgano de gobernanza',
     bodies: 'Órganos y afiliaciones',
     selectInput: 'Selecione NSA',
-    brandTitle: 'Portal de Agentes No Estatales en Relaciones Oficiales'
+    brandTitle: 'Portal de Agentes No Estatales en Relaciones Oficiales',
+    clear: 'Claro'
   },
 }
