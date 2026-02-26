@@ -528,13 +528,13 @@ function renderNSAProfile(nsa) {
       <dd>${nsa.NSAYearOfEstablishment || '-'}</dd>
   
       <dt>${UI[currentLang].orgType}</dt>
-      <dd>${currentLang === 'en' ? nsa.NSAOrganizationTypeENG || '-' : nsa.NSAOrganizationTypeSPA || '-'}</dd>
+      <dd>${currentLang === 'en' ? nsa.NSAOrganizationType || '-' : nsa.NSAOrganizationType || '-'}</dd>
   
       <dt>${UI[currentLang].period}</dt>
       <dd>${nsa.CollaborationPeriod || '-'}</dd>
   
       <dt>${UI[currentLang].typeOfSubmission}</dt>
-      <dd>${currentLang === 'en' ? nsa.TypeOfSubmissionENG || '-' : nsa.TypeOfSubmissionSPA || '-'}</dd>
+      <dd>${currentLang === 'en' ? nsa.TypeOfSubmission || '-' : nsa.TypeOfSubmission || '-'}</dd>
     </dl>
   </div>`
 
