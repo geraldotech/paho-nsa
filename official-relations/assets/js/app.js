@@ -3,7 +3,6 @@ const nasas = await fetchJson('./assets/database/nsa.json')
 const activity = await fetchJson('./assets/database/activity.json') // Collaboration with PAHO
 const workplan = await fetchJson('./assets/database/workplan.json')
 
-
 /* === State === */
 let currentLang = 'en'
 let currentId = 6 // 62, 6
@@ -29,9 +28,9 @@ const el = {
   activities: document.getElementById('nsa-activities'),
   workplansCard: document.getElementById('workplans-card'),
   financialCard: document.getElementById('financial_card'),
-  financialnav: document.getElementById('financialnav'),
+  financialnav: document.querySelector('.financialnav'),
   typeOfSubmissionTypeInput: document.getElementById('typeOfSubmission-type-input'),
-  organizationTypeInput: document.getElementById('organization-type-input')
+  organizationTypeInput: document.getElementById('organization-type-input'),
 }
 
 init()
@@ -64,7 +63,7 @@ function init() {
   document.addEventListener('pointerdown', handleOutsideSearchClick)
 
   el.periodSelect.addEventListener('change', () => {
-  //    buildNSASelect()
+    //    buildNSASelect()
     clearSearchResults()
   })
 
@@ -101,17 +100,14 @@ function buildNSASelect() {
   render()
 }
 
-
-
 /**
  * BUILD THE typeOfSubmissionTypeInput SELECT OPTIONS
  */
 function buildTypeOfSubmissionTypeInput(nasas) {
-
-  const values = nasas.map(nsa => nsa.TypeOfSubmission).filter(Boolean)
+  const values = nasas.map((nsa) => nsa.TypeOfSubmission).filter(Boolean)
   const uniqueValues = [...new Set(values)]
-  
-  if(DEBUG) console.log(`buildTypeOfSubmissionTypeInput`, uniqueValues)     
+
+  if (DEBUG) console.log(`buildTypeOfSubmissionTypeInput`, uniqueValues)
 
   // ordenar (opcional)
   uniqueValues.sort()
@@ -119,14 +115,13 @@ function buildTypeOfSubmissionTypeInput(nasas) {
   el.typeOfSubmissionTypeInput.innerHTML = '<option value="">Select...</option>'
   el.typeOfSubmissionTypeInput.innerHTML = '<option value="all">All</option>'
 
-  uniqueValues.forEach(val => {
+  uniqueValues.forEach((val) => {
     const option = document.createElement('option')
     option.value = val
     option.textContent = val
-     el.typeOfSubmissionTypeInput.appendChild(option)
-  }) 
+    el.typeOfSubmissionTypeInput.appendChild(option)
+  })
 }
- 
 
 function getFilteredNasas() {
   const selectedPeriod = el.periodSelect.value
@@ -139,12 +134,11 @@ function getFilteredNasas() {
   return filtered
 }
 
-
 /* === SELECT LISTEING PARA MONTAR OS FILTROS DO handleSearchInput === */
 const filters = {
   term: '',
   typeOfSubmission: '',
-  organizationType: ''
+  organizationType: '',
 }
 
 function applyFilters() {
@@ -152,12 +146,8 @@ function applyFilters() {
 
   const matches = nasas
     .filter((n) => {
-
       /* === FILTER • typeOfSubmission (igualdade) === */
-      if (
-        filters.typeOfSubmission &&
-        String(n.TypeOfSubmission || '') !== filters.typeOfSubmission
-      ) {
+      if (filters.typeOfSubmission && String(n.TypeOfSubmission || '') !== filters.typeOfSubmission) {
         return false
       }
 
@@ -175,17 +165,12 @@ function applyFilters() {
         const titleEng = String(n.TitleENG || '').toLowerCase()
         const titleSpa = String(n.TitleENGSPA || '').toLowerCase()
 
-        return (
-          titleEng.includes(term) ||
-          titleSpa.includes(term)
-        )
+        return titleEng.includes(term) || titleSpa.includes(term)
       }
 
       return true
     })
-    .sort((a, b) =>
-      String(a.TitleENG || '').localeCompare(String(b.TitleENG || ''))
-    )
+    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
     .slice(0, 30)
 
   renderSearchResults(matches)
@@ -197,14 +182,22 @@ function getFilteredNasasBase() {
 
 // search input
 el.searchInput.addEventListener('input', (e) => {
-  filters.term = String(e.target.value || '').trim().toLowerCase()
+  filters.term = String(e.target.value || '')
+    .trim()
+    .toLowerCase()
   applyFilters()
 })
 
 // selects
 el.typeOfSubmissionTypeInput.addEventListener('change', (e) => {
   const value = String(e.target.value || '').trim()
+  if (DEBUG) console.log(`typeOfSubmissionTypeInput`, value)
   filters.typeOfSubmission = value.toLowerCase() === 'all' ? '' : value
+  if (!value.toLowerCase().includes('Progress Report - Reporte de Progreso')) {
+    el.financialnav.classList.remove('none')
+  } else {
+    el.financialnav.classList.add('none')
+  }
   applyFilters()
 })
 
@@ -237,7 +230,7 @@ function handleSearchInput(event) {
     .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
 
   renderSearchResults(matches)
-} 
+}
 
 function showSearchResults() {
   const term = String(el.searchInput.value || '')
@@ -350,13 +343,13 @@ function render() {
    * só mostrar o ano mais recente
    */
   if (isProcessReportType) {
-    if(DEBUG)  console.log(`isProcessReportType`, isProcessReportType)
-      
+    if (DEBUG) console.log(`isProcessReportType`, isProcessReportType)
+
     el.financialCard.classList.add('none')
     el.workplansCard.classList.add('none')
     el.financialnav.classList.add('none')
   } else {
-    el.financialCard.classList.remove('none')    
+    el.financialCard.classList.remove('none')
     el.financialnav.classList.remove('none')
     el.workplansCard.classList.remove('none')
     renderFinancialCharts(nsa) // Financial information
@@ -671,7 +664,7 @@ function applyLanguage() {
   setText('navTitle', t.navTitle)
   setText('organization-type', t.orgType)
   setText('organization-all', t.all)
-  
+
   el.searchInput.placeholder = t.searchPh
 
   updateBrandLogo()
