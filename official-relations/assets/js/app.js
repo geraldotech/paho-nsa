@@ -664,6 +664,7 @@ function applyLanguage() {
   setText('navTitle', t.navTitle)
   setText('organization-type', t.orgType)
   setText('organization-all', t.all)
+  setText('TypeOfSubmission-type', t.typeOfSubmission)
 
   el.searchInput.placeholder = t.searchPh
 
