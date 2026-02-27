@@ -27,8 +27,8 @@
 
 # CAMPOS VINDO EM BRANCO: 
 
-- [ ] PAHO focal point ... este aqui nao ta vindo. Pendente c Eduardo
-- [ ] NSA focal point
+- [x] PAHO focal point ... este aqui nao ta vindo. Pendente c Eduardo
+- [x] NSA focal point
 - [x] Contact email ... nao esta vindo, porem deve ser removido
 - [x] Organization type
 - [ ] Collaboration period ... este aqui nao ta vindo. Pendente c Eduardo
