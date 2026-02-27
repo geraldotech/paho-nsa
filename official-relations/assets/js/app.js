@@ -516,6 +516,14 @@ function renderNSAProfile(nsa) {
 
   if (!infoEl) return
 
+  // Normaliza URL (fallback para https://)
+  const websiteLabel = String(nsa.NSAWebsite || '').trim()
+  const websiteHref = websiteLabel
+    ? /^https?:\/\//i.test(websiteLabel)
+      ? websiteLabel
+      : `https://${websiteLabel}`
+    : ''
+
   // infoIdentity
   const infoIdentity = `
   <div class="field">
@@ -523,7 +531,8 @@ function renderNSAProfile(nsa) {
   
     <dl class="kv">
       <dt>${UI[currentLang].website}</dt>
-      <dd><a href="${nsa.NSAWebsite}" target="_blank" >${nsa.NSAWebsite}</a></dd>
+      
+      <dd>${websiteHref ? `<a href="${websiteHref}" target="_blank" rel="noopener noreferrer">${websiteLabel}</a>` : '-'}</dd>
   
       <dt>${UI[currentLang].foundationYear}</dt>
       <dd>${nsa.NSAYearOfEstablishment || '-'}</dd>

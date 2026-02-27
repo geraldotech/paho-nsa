@@ -12,8 +12,8 @@
 - [x] Assegurar que TODOS os Entity foram mudados de acordo. (eg: - cambiar Entity / Entidad -> Responsible Entity / Entidad Responsable)
 - [x] Ao invés de "Identity" -> "Profile"
 - [x] remover por completo o campo de "contact email"
-- [ ] o site tem que abrir em /official-relations
-- [ ] ao clicar no site do NSA, nao abre, verificar. As vezes so, exemplo: Global Alliance for Tobacco Control (GATC)
+- [x] o site tem que abrir em /official-relations
+- [x] ao clicar no site do NSA, nao abre, verificar. As vezes so, exemplo: Global Alliance for Tobacco Control (GATC)
 - [ ] when input is empty get all 
 - [ ] quando e progress report ele não ta descendo/ancorando
 
