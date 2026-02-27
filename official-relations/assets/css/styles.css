@@ -58,20 +58,6 @@ background: linear-gradient(180deg, var(--paho-primary), var(--paho-primary-2));
   flex-direction: column;
 } 
 
-/* .sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: var(--sidebar-w);
-  height: 100vh;
-  background: linear-gradient(160deg, var(--paho-light-blue) 0%, var(--paho-dark-blue) 68%);
-  border-right: 4px solid var(--paho-orange);
-  padding: 18px 10px;
-  overflow: hidden;
-  padding-top: 0;
-  color: #fff;
-}
- */
 .brand {
   margin-bottom: 18px;
 }
@@ -124,7 +110,6 @@ background: linear-gradient(180deg, var(--paho-primary), var(--paho-primary-2));
 .input:focus {
   border-color: #b8c9dc;
 }
-
 .search-results {
   list-style: none;
   margin: 0;
@@ -140,6 +125,7 @@ background: linear-gradient(180deg, var(--paho-primary), var(--paho-primary-2));
   position: absolute;
   z-index: 40;
   left: 0;
+  top: var(--search-results-top, 0px);
   width: 100%;
   min-height: 0;
 }
@@ -428,11 +414,7 @@ img.brand-logo {
   font-size: 14px;
   line-height: 1.6;
   color: #111827;
-
-  /* respeita \n vindos do JSON */
   white-space: pre-line;
-
-  /* quebra links grandes */
   word-break: break-word;
 }
 
@@ -607,8 +589,6 @@ img.brand-logo {
   margin: 0;
 }
 
-
-
 /* Link base */
 .on-this-page a {
   display: block;
@@ -642,22 +622,3 @@ img.brand-logo {
     margin-top: auto;
     padding-top: 10px;
 }
-
-/* === OPTIONS DO SELECT === */
-/* Dropdown aberto */
-
-/* 
-select.input option {
-  background-color: #236192; 
-  color: #ffffff;
-}
-
-select.input option:hover {
-  background-color: #3498db;
-} */
-
-/* select.input option:checked {
-  background-color: #ff671f;
-  color: #ffffff;
-}
- */

@@ -65,12 +65,14 @@ function init() {
   el.searchInput.addEventListener('click', onSearchInputClick)
   el.searchResults.addEventListener('click', onSearchResultClick)
   document.addEventListener('pointerdown', handleOutsideSearchClick)
+  window.addEventListener('resize', setSearchResultsPosition)
 
   el.periodSelect.addEventListener('change', () => {
     clearSearchResults()
   })
 
   // seta default no select
+  setSearchResultsPosition()
   render()
 }
 
@@ -96,7 +98,6 @@ function buildTypeOfSubmissionTypeInput(nasas) {
     el.typeOfSubmissionTypeInput.appendChild(option)
   })
 }
-
 
 /* === SELECT LISTEING PARA MONTAR OS FILTROS DO handleSearchInput === */
 
@@ -210,6 +211,7 @@ function handleSearchInput(event) {
 }
 
 function showSearchResults() {
+  setSearchResultsPosition()
   const term = String(el.searchInput.value || '')
     .trim()
     .toLowerCase()
@@ -669,20 +671,13 @@ function updateBrandLogo() {
   logo.src = map[currentLang] || map.en
 }
 
-// botão “ver mais / ver menos”
-window.toggleClamp = function (btn) {
-  const content = btn.parentElement.querySelector('.content')
-  const isFull = content.getAttribute('data-full') === '1'
-  if (isFull) {
-    content.classList.add('clamp')
-    content.setAttribute('data-full', '0')
-    btn.textContent = 'Ver mais'
-  } else {
-    content.classList.remove('clamp')
-    content.setAttribute('data-full', '1')
-    btn.textContent = 'Ver menos'
-  }
+// Mantém o dropdown de busca sempre logo abaixo do #searchInput, mesmo com mudanças de layout/resize.
+function setSearchResultsPosition() {
+  if (!el.searchInput || !el.searchResults) return
+  const top = el.searchInput.offsetTop + el.searchInput.offsetHeight
+  el.searchResults.style.setProperty('--search-results-top', `${top}px`)
 }
+
 
 /**
  * Busca dados JSON de uma URL com tratamento completo de erros

@@ -1,8 +1,8 @@
 # UI / UX:
 
 - [x] filtro de TypeOfSubmission, que se comunica com o Search 
-- [ ] o que sai na lista tem que ser o resultado da combinação dos filtros
-- [ ] no Search, trazer todos os resultados, porem mantendo a opcao de busca. Abaixar um pouco a lista para que se possa ver
+- [x] o que sai na lista tem que ser o resultado da combinação dos filtros (REVISADO 3 SELECTS)
+- [x] no Search, trazer todos os resultados, porem mantendo a opcao de busca. Abaixar um pouco a lista para que se possa ver
 - [x] quando eh progress report, e o financial some, o menu da esquerda tem que se ajustar
 - [x] logo espanhol mudar pra espanhol (esta em portugues)
 - [ ] há um lag ao carregar a página em root - talvez colocar um loading...
