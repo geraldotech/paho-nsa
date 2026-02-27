@@ -9,9 +9,9 @@
 - [x] assegurar que try/catch esta ligado, caso algo falhe. Ver onde os fetch podem falhar e implementar try/catch
 - [x] corrigir texto ao lado da logo: Non-State Actors Official Relations Portal to Non-State Actors in Official Relations Portal e em espanhol : Agentes No Estatales Portal de Relaciones Oficiales -> Portal de Agentes No Estatales en Relaciones Oficiales
 - [x] tem que remover os titulos / ids do activity e workplan. isso eh pra uso interno somente
-- [ ] Assegurar que TODOS os Entity foram mudados de acordo. (eg: - cambiar Entity / Entidad -> Responsible Entity / Entidad Responsable)
-- [ ] Ao invés de "Identity" -> "Profile"
-- [ ] remover por completo o campo de "contact email"
+- [x] Assegurar que TODOS os Entity foram mudados de acordo. (eg: - cambiar Entity / Entidad -> Responsible Entity / Entidad Responsable)
+- [x] Ao invés de "Identity" -> "Profile"
+- [x] remover por completo o campo de "contact email"
 - [ ] o site tem que abrir em /official-relations
 - [ ] ao clicar no site do NSA, nao abre, verificar. As vezes so, exemplo: Global Alliance for Tobacco Control (GATC)
 - [ ] when input is empty get all 

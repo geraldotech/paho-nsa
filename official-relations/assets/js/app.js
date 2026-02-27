@@ -277,13 +277,11 @@ function handleOutsideSearchClick(event) {
 }
 
 /**
- * RENDER THE NSA
+ * RENDER THE SELECT NSA
  */
 function render() {
-  // console.log(nasas.find(v => v.id == 6))
   const nsa = nasas.find((n) => Number(n.id) === Number(currentId))
 
-  // se nao encontrar a NSA nao filtra os demais
   if (!nsa) {
     el.nsaTitle.innerText = 'NSA not found'
     el.nsaSubtitle.innerText = ''
@@ -340,6 +338,33 @@ function render() {
 }
 
 /**
+ * RENDER renderActivities
+ * @return html
+ */
+function renderActivities(list) {
+  if (!list.length) {
+    el.activities.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
+    return
+  }
+
+  el.activities.innerHTML = list
+    .map((w) => {
+      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
+      const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
+      /*<h3>${escapeHtml(w.Title || '-')}</h3> */
+
+      return `
+        <div class="item">
+          <h4>${UI[currentLang].thEntity}: ${w.Entity}</h4>           
+          <p>${UI[currentLang].thResults}</p>
+          <p>${directResults}</p>          
+        </div>
+      `
+    })
+    .join('')
+}
+
+/**
  * RENDER WORKPLANS
  * @return html
  */
@@ -362,38 +387,10 @@ function renderWorkplans(list, enabled) {
       /*  <h3>${escapeHtml(w.Title || '-')}</h3> */
       return `
         <div class="item">         
-          <h4>${UI[currentLang].thResp}: ${w.ResponsibleEntity}</h4>
+          <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>
           <p>${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
           ${dur ? `<p class="meta"><strong>Duration:</strong> ${escapeHtml(dur)}</p>` : ''}
           <p>HealthAgenda: ${HealthAgenda ?? ''}</p>
-        </div>
-      `
-    })
-    .join('')
-}
-
-/**
- * RENDER renderActivities
- * @return html
- */
-function renderActivities(list) {
-  if (!list.length) {
-    el.activities.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
-    return
-  }
-
-  el.activities.innerHTML = list
-    .map((w) => {
-      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
-      const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
-      /*<h3>${escapeHtml(w.Title || '-')}</h3> */
-
-      return `
-        <div class="item">
-          <h4>${UI[currentLang].thEntity}</h4> 
-          <p>${w.Entity}</p>         
-          <h5>${UI[currentLang].thResults}</h5>
-          <p>${directResults}</p>          
         </div>
       `
     })
@@ -556,10 +553,14 @@ function renderNSAProfile(nsa) {
   
       <dt>${UI[currentLang].nsaFocalRole}</dt>
       <dd>${currentLang === 'en' ? nsa.NSAFocalpointRoleENG || '-' : nsa.NSAFocalpointRoleSPA || '-'}</dd>  
-      <dt>${UI[currentLang].contactEmail}</dt>
-      <dd>${nsa.NSAContactEmail || '-'}</dd>
+     
     </dl>
   </div>`
+
+  /*  email removed
+   <dt>${UI[currentLang].contactEmail}</dt>
+      <dd>${nsa.NSAContactEmail || '-'}</dd>
+  */
 
   // Objectives and Main work activities
   const description = `
@@ -677,7 +678,6 @@ function setSearchResultsPosition() {
   const top = el.searchInput.offsetTop + el.searchInput.offsetHeight
   el.searchResults.style.setProperty('--search-results-top', `${top}px`)
 }
-
 
 /**
  * Busca dados JSON de uma URL com tratamento completo de erros
