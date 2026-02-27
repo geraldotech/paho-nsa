@@ -63,7 +63,6 @@ function init() {
     val.addEventListener('click', (e) => {
       const clickLang = e.target.dataset.lan
       currentLang = clickLang
-      //  el.langToggle.innerText = currentLang === 'en' ? 'ES' : 'EN'
       render()
     })
   })
@@ -79,7 +78,7 @@ function init() {
     clearSearchResults()
   })
 
-  // seta default no select
+  // default no select
   setSearchResultsPosition()
   render()
 }
@@ -122,7 +121,7 @@ el.clear.addEventListener('click', () => {
 
   render()
 })
-
+// todo include the filters.period object to 
 function applyFilters() {
   const term = filters.term
 
@@ -142,7 +141,7 @@ function applyFilters() {
         }
       }
 
-      /* === FILTER • term === */
+      /* === FILTER term === */
       if (filters.period && String(n.CollaborationPeriod || '') !== filters.period) {
         return false
       }
@@ -206,7 +205,6 @@ function handleSearchInput(event) {
     showSearchResults()
     return
   }
-  //const matches = filteredCollaborationPeriods()
   const matches = nasas
     .filter((n) => {
       const titleEng = String(n.TitleENG || '').toLowerCase()
@@ -223,9 +221,32 @@ function showSearchResults() {
   const term = String(el.searchInput.value || '')
     .trim()
     .toLowerCase()
+  const periodFilter =
+    typeof filters.period === 'object' && filters.period !== null
+      ? String(filters.period.CollaborationPeriod || filters.period.value || '')
+      : String(filters.period || '')
+  const normalizedPeriodFilter = periodFilter.trim().toLowerCase()
 
   const matches = nasas
     .filter((n) => {
+      if (filters.typeOfSubmission && String(n.TypeOfSubmission || '') !== filters.typeOfSubmission) {
+        return false
+      }
+
+      if (filters.organizationType) {
+        const orgType = String(n.NSAOrganizationType || '').toLowerCase()
+        if (!orgType.includes(filters.organizationType.toLowerCase())) {
+          return false
+        }
+      }
+
+      if (
+        normalizedPeriodFilter &&
+        String(n.CollaborationPeriod || '').trim().toLowerCase() !== normalizedPeriodFilter
+      ) {
+        return false
+      }
+
       if (!term) return true
 
       const titleEng = String(n.TitleENG || '').toLowerCase()
@@ -302,7 +323,6 @@ function render() {
   const showWps = true // el.filterWorkplans.checked
   const allActivities = activity.filter((a) => String(a.ParentID) === String(currentId))
   const allWorkplans = workplan.filter((w) => String(w.ParentID) === String(currentId))
-  // const filteredActivities = showActs ? allActivities : []
   const filteredWorkplans = showWps ? allWorkplans : []
 
   // add aqui tratativa se todos os 3 relacionamentos foram encontrados
@@ -524,7 +544,7 @@ function renderNSAProfile(nsa) {
 
   if (!infoEl) return
 
-  // Normaliza URL (fallback para https://)
+  /** Normaliza URL (fallback para https://) */
   const websiteLabel = String(nsa.NSAWebsite || '').trim()
   const websiteHref = websiteLabel
     ? /^https?:\/\//i.test(websiteLabel)
@@ -621,7 +641,7 @@ function renderNSAProfile(nsa) {
   `
 }
 
-/* == Functions - UI Functions  == */
+/* === Functions - UI Functions  === */
 function setText(id, text) {
   const el = document.getElementById(id)
   if (el) el.textContent = text
@@ -689,7 +709,7 @@ function updateBrandLogo() {
   logo.src = map[currentLang] || map.en
 }
 
-// Mantém o dropdown de busca sempre logo abaixo do #searchInput, mesmo com mudanças de layout/resize.
+// dropdown de busca sempre logo abaixo do #searchInput, mesmo com mudanças de layout/resize.
 function setSearchResultsPosition() {
   if (!el.searchInput || !el.searchResults) return
   const top = el.searchInput.offsetTop + el.searchInput.offsetHeight
