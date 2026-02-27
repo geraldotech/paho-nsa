@@ -202,6 +202,7 @@ function handleSearchInput(event) {
     .toLowerCase()
 
   if (term.length < MIN_SEARCH_CHARS) {
+    if(DEBUG) console.log(`input is clean`)
     showSearchResults()
     return
   }

@@ -5,7 +5,7 @@
 - [x] no Search, trazer todos os resultados, porem mantendo a opcao de busca. Abaixar um pouco a lista para que se possa ver
 - [x] quando eh progress report, e o financial some, o menu da esquerda tem que se ajustar
 - [x] logo espanhol mudar pra espanhol (esta em portugues)
-- [ ] há um lag ao carregar a página em root - talvez colocar um loading...
+- [ ] há um lag ao carregar a página em root - talvez colocar um loading... (foi adicionado PromiseAll, efetuar o teste)
 - [x] assegurar que try/catch esta ligado, caso algo falhe. Ver onde os fetch podem falhar e implementar try/catch
 - [x] corrigir texto ao lado da logo: Non-State Actors Official Relations Portal to Non-State Actors in Official Relations Portal e em espanhol : Agentes No Estatales Portal de Relaciones Oficiales -> Portal de Agentes No Estatales en Relaciones Oficiales
 - [x] tem que remover os titulos / ids do activity e workplan. isso eh pra uso interno somente
@@ -14,7 +14,7 @@
 - [x] remover por completo o campo de "contact email"
 - [x] o site tem que abrir em /official-relations
 - [x] ao clicar no site do NSA, nao abre, verificar. As vezes so, exemplo: Global Alliance for Tobacco Control (GATC)
-- [ ] when input is empty get all 
+- [x] when input is empty get all  
 - [x] quando e progress report ele não ta descendo/ancorando
 
 - [ ] hierarquia deve ser: 
