@@ -10,6 +10,13 @@ let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true
 
+const filters = {
+  term: '',
+  typeOfSubmission: '',
+  organizationType: '',
+  period: '',
+}
+
 /* == UI - Elements == */
 const el = {
   langToggle: document.getElementById('lang-toggle'),
@@ -90,35 +97,22 @@ function buildTypeOfSubmissionTypeInput(nasas) {
   })
 }
 
-function getFilteredNasas() {
-  const selectedPeriod = el.periodSelect.value
-  let filtered = [...nasas]
-
-  if (selectedPeriod) {
-    filtered = filtered.filter((n) => n.CollaborationPeriod === selectedPeriod)
-  }
-
-  return filtered
-}
 
 /* === SELECT LISTEING PARA MONTAR OS FILTROS DO handleSearchInput === */
-const filters = {
-  term: '',
-  typeOfSubmission: '',
-  organizationType: '',
-}
 
 /* RESET DOS FILTERS AND SELECT */
 el.clear.addEventListener('click', () => {
   filters.term = ''
   filters.typeOfSubmission = ''
   filters.organizationType = ''
+  filters.period = ''
 
   el.typeOfSubmissionTypeInput.selectedIndex = 0
   el.organizationTypeInput.selectedIndex = 0
+  el.periodSelect.selectedIndex = 0
 
   render()
-}) 
+})
 
 function applyFilters() {
   const term = filters.term
@@ -140,6 +134,9 @@ function applyFilters() {
       }
 
       /* === FILTER • term === */
+      if (filters.period && String(n.CollaborationPeriod || '') !== filters.period) {
+        return false
+      }
       if (term.length >= MIN_SEARCH_CHARS) {
         const titleEng = String(n.TitleENG || '').toLowerCase()
         const titleSpa = String(n.TitleENGSPA || '').toLowerCase()
@@ -182,6 +179,12 @@ el.organizationTypeInput.addEventListener('change', (e) => {
   applyFilters()
 })
 
+el.periodSelect.addEventListener('change', (e) => {
+  const selectedPeriod = String(e.target.value || '').trim()
+  filters.period = selectedPeriod.toLowerCase() === 'all' ? '' : selectedPeriod
+  applyFilters()
+})
+
 /**
  * HANDLER THE FILTER NASAS
  */
@@ -194,7 +197,8 @@ function handleSearchInput(event) {
     showSearchResults()
     return
   }
-  const matches = getFilteredNasas()
+  //const matches = filteredCollaborationPeriods()
+  const matches = nasas
     .filter((n) => {
       const titleEng = String(n.TitleENG || '').toLowerCase()
       const titleEngSpa = String(n.TitleENGSPA || '').toLowerCase()
@@ -210,7 +214,7 @@ function showSearchResults() {
     .trim()
     .toLowerCase()
 
-  const matches = getFilteredNasas()
+  const matches = nasas
     .filter((n) => {
       if (!term) return true
 
@@ -353,7 +357,7 @@ function renderWorkplans(list, enabled) {
       const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
       const dur = currentLang === 'en' ? w.DurationENG : w.DurationSPA
       const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
-     /*  <h3>${escapeHtml(w.Title || '-')}</h3> */
+      /*  <h3>${escapeHtml(w.Title || '-')}</h3> */
       return `
         <div class="item">         
           <h4>${UI[currentLang].thResp}: ${w.ResponsibleEntity}</h4>
@@ -377,12 +381,12 @@ function renderActivities(list) {
   }
 
   el.activities.innerHTML = list
-  .map((w) => {
-    const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
-    const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
-    /*<h3>${escapeHtml(w.Title || '-')}</h3> */
-    
-    return `
+    .map((w) => {
+      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
+      const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
+      /*<h3>${escapeHtml(w.Title || '-')}</h3> */
+
+      return `
         <div class="item">
           <h4>${UI[currentLang].thEntity}</h4> 
           <p>${w.Entity}</p>         
@@ -398,13 +402,12 @@ function renderActivities(list) {
  * BUILD PERIODS TO SELECT
  */
 function buildPeriodSelect() {
-  if(DEBUG) console.log(`buildPeriodSelect`, nasas)  
+  if (DEBUG) console.log(`buildPeriodSelect`, nasas)
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
   const unique = [...new Set(periods)].sort() // unique values
 
   el.periodSelect.innerHTML = `
-    <option></option>
-    <option value="">All Periods</option>
+    <option value="all" id="buildperiodall">All</option>
     ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
   `
 }
@@ -447,7 +450,6 @@ function renderFinancialCharts(nsa) {
     return
   }
 
-  // plugin e charts (seu plugin, só com guarda pra não escrever "undefined")
   const valueLabelsPlugin = {
     id: 'valueLabelsPlugin',
     afterDatasetsDraw(chart) {
@@ -632,6 +634,7 @@ function applyLanguage() {
   setText('organization-all', t.all)
   setText('typeOfSubmissionTypeInputAll', t.all)
   setText('TypeOfSubmission-type', t.typeOfSubmission)
+  setText('buildperiodall', t.all)
   setText('clear-filters', t.clear)
 
   el.searchInput.placeholder = t.searchPh
