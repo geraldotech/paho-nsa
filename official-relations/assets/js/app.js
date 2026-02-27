@@ -1,7 +1,15 @@
 import UI from './ui-language.js'
-const nasas = await fetchJson('./assets/database/nsa.json')
-const activity = await fetchJson('./assets/database/activity.json') // Collaboration with PAHO
+// todo
+/* this await can let page slow?? is a good aproach */
+/* const nasas = await fetchJson('./assets/database/nsa.json')
+const activity = await fetchJson('./assets/database/activity.json')
 const workplan = await fetchJson('./assets/database/workplan.json')
+ */
+ const [nasas, activity, workplan] = await Promise.all([
+  fetchJson('./assets/database/nsa.json'),
+  fetchJson('./assets/database/activity.json'), // Collaboration with PAHO
+  fetchJson('./assets/database/workplan.json'),
+]) 
 
 /* === State === */
 let currentLang = 'en'
