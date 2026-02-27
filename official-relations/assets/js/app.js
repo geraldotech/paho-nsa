@@ -584,10 +584,10 @@ function renderNSAProfile(nsa) {
   
     <dl class="kv">
       <dt>${UI[currentLang].pahoFocal}</dt>
-      <dd>${nsa.PAHOFocalPoint || '-'}</dd>
+      <dd>${nsa.PAHOFocalPoint[0]?.LookupValue || '-'}</dd>
   
       <dt>${UI[currentLang].nsaFocal}</dt>
-      <dd>${nsa.NSAFocalpoint || '-'}</dd>
+      <dd>${currentLang === 'eng' ? nsa.NSAFocalpointRoleENG : nsa.NSAFocalpointRoleSPA}</dd>
   
       <dt>${UI[currentLang].nsaFocalRole}</dt>
       <dd>${currentLang === 'en' ? nsa.NSAFocalpointRoleENG || '-' : nsa.NSAFocalpointRoleSPA || '-'}</dd>  

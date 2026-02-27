@@ -5,7 +5,7 @@
 - [x] no Search, trazer todos os resultados, porem mantendo a opcao de busca. Abaixar um pouco a lista para que se possa ver
 - [x] quando eh progress report, e o financial some, o menu da esquerda tem que se ajustar
 - [x] logo espanhol mudar pra espanhol (esta em portugues)
-- [ ] há um lag ao carregar a página em root - talvez colocar um loading... (foi adicionado PromiseAll, efetuar o teste)
+- [testar] há um lag ao carregar a página em root - talvez colocar um loading... (foi adicionado PromiseAll, efetuar o teste)
 - [x] assegurar que try/catch esta ligado, caso algo falhe. Ver onde os fetch podem falhar e implementar try/catch
 - [x] corrigir texto ao lado da logo: Non-State Actors Official Relations Portal to Non-State Actors in Official Relations Portal e em espanhol : Agentes No Estatales Portal de Relaciones Oficiales -> Portal de Agentes No Estatales en Relaciones Oficiales
 - [x] tem que remover os titulos / ids do activity e workplan. isso eh pra uso interno somente
@@ -17,7 +17,7 @@
 - [x] when input is empty get all  
 - [x] quando e progress report ele não ta descendo/ancorando
 
-- [ ] hierarquia deve ser: 
+- [x] hierarquia deve ser: 
 
 •⁠  ⁠Profile
 •⁠  ⁠Financial Information
@@ -29,7 +29,7 @@
 
 - [ ] PAHO focal point ... este aqui nao ta vindo. Pendente c Eduardo
 - [ ] NSA focal point
-- [ ] Contact email ... nao esta vindo, porem deve ser removido
+- [x] Contact email ... nao esta vindo, porem deve ser removido
 - [x] Organization type
 - [ ] Collaboration period ... este aqui nao ta vindo. Pendente c Eduardo
 - [x] Type of submission
