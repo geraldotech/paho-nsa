@@ -324,11 +324,12 @@ function render() {
 
   // if necessary add aqui tratativa se todos os 3 relacionamentos foram encontrados
   if (DEBUG) {
-    console.log(`========================`)
+    console.groupCollapsed('DEBUG ')    
     console.log('nsa', nsa)
+    console.log('nsa', nasas)
     console.log('Collaboration with PAHO activities', allActivities)
     console.log('Workplans', allWorkplans)
-    console.log(`========================`)
+    console.groupEnd()
   }
 
   /**
