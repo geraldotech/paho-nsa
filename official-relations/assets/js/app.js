@@ -324,7 +324,7 @@ function render() {
 
   // if necessary add aqui tratativa se todos os 3 relacionamentos foram encontrados
   if (DEBUG) {
-    console.groupCollapsed('DEBUG ')    
+    console.groupCollapsed('DEBUG ')
     console.log('nsa', nsa)
     console.log('nsa', nasas)
     console.log('Collaboration with PAHO activities', allActivities)
@@ -368,10 +368,6 @@ function render() {
    */
   const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
   const preferredAgendaFromWorkplan = currentLang === 'en' ? allWorkplans?.HealthAgendaENG : allWorkplans?.HealthAgendaSPA
-
-  if (DEBUG) console.log(`Goals preferredAgendaFromNsa`, preferredAgendaFromNsa)
-  if (DEBUG) console.log(`Goals preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
-
   const collabWPActHealthAgendaSource = preferredAgendaFromNsa || preferredAgendaFromWorkplan
 
   let collabWPActHealthAgendaObj = collabWPActHealthAgendaSource ? (Array.isArray(collabWPActHealthAgendaSource) ? collabWPActHealthAgendaSource : [collabWPActHealthAgendaSource]) : []
@@ -394,7 +390,14 @@ function render() {
 
     return [item]
   })
-  if (DEBUG) console.log(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
+
+  if (DEBUG) {
+    console.groupCollapsed('CollabWPActHealthAgenda ')
+    console.log(`Goals preferredAgendaFromNsa`, preferredAgendaFromNsa)
+    console.log(`Goals preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
+    console.warn(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
+    console.groupEnd()
+  }
   rendercollabWPActHealthAgendaObj(collabWPActHealthAgendaObj)
 
   /**
@@ -415,7 +418,7 @@ function render() {
   // console.log(`getCollabWPActStrategicPlan`, getCollabWPActStrategicPlan?.split(';'))
 
   /* === NSA workplans children === */
-  renderWorkplans(allWorkplans, true)
+  renderWorkplans(allWorkplans)
 
   applyLanguage()
 }
@@ -426,7 +429,7 @@ function render() {
  */
 function renderActivities(list) {
   if (!list.length) {
-    el.activities.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
+    el.activities.innerHTML = `<p class="meta">No activities found for this nas.</p>`
     return
   }
 
@@ -446,12 +449,12 @@ function renderActivities(list) {
 }
 
 /**
- * Render Activities from workplan 
+ * Render Activities from workplan
  * @return html
  */
 function renderActivitiesFromWorkplan(list) {
   if (!list.length) {
-    el.activities.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
+    el.activities.innerHTML = `<p class="meta">No workplans found for this nas.</p>`
     return
   }
 
@@ -474,11 +477,7 @@ function renderActivitiesFromWorkplan(list) {
  * Render workplans
  * @return html
  */
-function renderWorkplans(list, enabled) {
-  if (!enabled) {
-    el.workplans.innerHTML = `<p class="meta">Workplans filter is off.</p>`
-    return
-  }
+function renderWorkplans(list) {
 
   if (!list.length) {
     el.workplans.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
@@ -528,7 +527,7 @@ function rendercollabWPActHealthAgendaObj(list) {
 function buildPeriodSelect() {
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
   const unique = [...new Set(periods)].sort() // unique values
-  
+
   if (DEBUG) console.log(`buildPeriodSelect`, unique)
   el.periodSelect.innerHTML = `
     <option value="all" id="buildperiodall">All</option>
