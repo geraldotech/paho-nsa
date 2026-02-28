@@ -344,7 +344,6 @@ function render() {
    * Find CollabWPActHealthAgenda from nsa || Find HealthAgenda from allWorkplans
    */
   const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
-
   const preferredAgendaFromWorkplan = currentLang === 'en' ? allWorkplans?.HealthAgendaENG : allWorkplans?.HealthAgendaSPA
 
   if (DEBUG) console.log(`preferredAgendaFromNsa`, preferredAgendaFromNsa)
