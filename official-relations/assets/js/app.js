@@ -5,18 +5,18 @@ import UI from './ui-language.js'
 const activity = await fetchJson('./assets/database/activity.json')
 const workplan = await fetchJson('./assets/database/workplan.json')
  */
- const [nasas, activity, workplan] = await Promise.all([
+const [nasas, activity, workplan] = await Promise.all([
   fetchJson('./assets/database/nsa.json'),
   fetchJson('./assets/database/activity.json'), // Collaboration with PAHO
   fetchJson('./assets/database/workplan.json'),
-]) 
+])
 
 /* === State === */
 let currentLang = 'en'
 let currentId = 6 // 62, 6
 let barChart = null
 const MIN_SEARCH_CHARS = 1
-const DEBUG = true
+const DEBUG = true // modo dev
 
 const filters = {
   term: '',
@@ -46,6 +46,7 @@ const el = {
   financialnav: document.querySelector('.financialnav'),
   typeOfSubmissionTypeInput: document.getElementById('typeOfSubmission-type-input'),
   organizationTypeInput: document.getElementById('organization-type-input'),
+  collabWPActHealthAgendaObj: document.getElementById('collabWPActHealthAgendaObj'),
 }
 
 init()
@@ -121,18 +122,21 @@ el.clear.addEventListener('click', () => {
 
   render()
 })
-// todo include the filters.period object to 
+
+/**
+ * APPLY FILTERS
+ */
 function applyFilters() {
   const term = filters.term
 
   const matches = nasas
     .filter((n) => {
-      /* === FILTER • typeOfSubmission (igualdade) === */
+      /* === FILTER typeOfSubmission === */
       if (filters.typeOfSubmission && String(n.TypeOfSubmission || '') !== filters.typeOfSubmission) {
         return false
       }
 
-      /* === FILTER • organizationType (includes) === */
+      /* === FILTER organizationType (includes) === */
       if (filters.organizationType) {
         const orgType = String(n.NSAOrganizationType || '').toLowerCase()
 
@@ -202,7 +206,7 @@ function handleSearchInput(event) {
     .toLowerCase()
 
   if (term.length < MIN_SEARCH_CHARS) {
-    if(DEBUG) console.log(`input is clean`)
+    if (DEBUG) console.log(`input is clean`)
     showSearchResults()
     return
   }
@@ -222,10 +226,7 @@ function showSearchResults() {
   const term = String(el.searchInput.value || '')
     .trim()
     .toLowerCase()
-  const periodFilter =
-    typeof filters.period === 'object' && filters.period !== null
-      ? String(filters.period.CollaborationPeriod || filters.period.value || '')
-      : String(filters.period || '')
+  const periodFilter = typeof filters.period === 'object' && filters.period !== null ? String(filters.period.CollaborationPeriod || filters.period.value || '') : String(filters.period || '')
   const normalizedPeriodFilter = periodFilter.trim().toLowerCase()
 
   const matches = nasas
@@ -243,7 +244,9 @@ function showSearchResults() {
 
       if (
         normalizedPeriodFilter &&
-        String(n.CollaborationPeriod || '').trim().toLowerCase() !== normalizedPeriodFilter
+        String(n.CollaborationPeriod || '')
+          .trim()
+          .toLowerCase() !== normalizedPeriodFilter
       ) {
         return false
       }
@@ -335,8 +338,55 @@ function render() {
     console.log(`========================`)
   }
 
+  /** FIND NSAFocalpoint do NSA
+   * @since Fev, 27, 2025
+   */
+  const firstActivityWithNSAFocalpoint = allActivities.find((item) => item && item.NSAFocalpoint)
+  const segundActivityWithNSAFocalpoint = allWorkplans.find((item) => item && item.NSAFocalpoint)
+  let nsaFocalpoint = firstActivityWithNSAFocalpoint?.NSAFocalpoint || segundActivityWithNSAFocalpoint?.NSAFocalpoint
+
+  /**
+   * FIND CollabWPActHealthAgenda (nsa) || HealthAgenda(workplan)
+   * @since Fev, 27, 2025
+   */
+  const workplanWithHealthAgenda = allWorkplans.find((item) => item && (item.HealthAgendaENG || item.HealthAgendaSPA))
+  const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
+  const preferredAgendaFromWorkplan = currentLang === 'en' ? workplanWithHealthAgenda?.HealthAgendaENG : workplanWithHealthAgenda?.HealthAgendaSPA
+  const collabWPActHealthAgendaSource = preferredAgendaFromNsa || preferredAgendaFromWorkplan
+
+  let collabWPActHealthAgendaObj = collabWPActHealthAgendaSource ? (Array.isArray(collabWPActHealthAgendaSource) ? collabWPActHealthAgendaSource : [collabWPActHealthAgendaSource]) : []
+
+  collabWPActHealthAgendaObj = collabWPActHealthAgendaObj.flatMap((item) => {
+    if (typeof item !== 'string') return [item]
+    if (item.includes(';')) {
+      return item
+        .split(';')
+        .map((part) => part.trim())
+        .filter(Boolean)
+    }
+
+    if ((item.match(/Goal\s+\d+:/g) || []).length > 1) {
+      return item
+        .split(/(?=Goal\s+\d+:)/)
+        .map((part) => part.trim())
+        .filter(Boolean)
+    }
+
+    return [item]
+  })
+
+  /**
+   * FIND CollabWPActStrategicPlan frm nsa
+   * 
+   */
+  const getCollabWPActStrategicPlan = currentLang == 'eg' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA;
+  // too
+  console.log(`getCollabWPActStrategicPlan`, getCollabWPActStrategicPlan?.split(';'))
+
+  if (DEBUG) console.log(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
+
   /* === NSA PROFILE === */
-  renderNSAProfile(nsa)
+  renderNSAProfile(nsa, nsaFocalpoint)
   const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
 
   /**
@@ -358,16 +408,24 @@ function render() {
   }
 
   /* === NSA Collaboration with PAHO === */
-  renderActivities(allActivities)
+  // quando for progress report, as activities estao no workplan
+  if (isProcessReportType) {
+    renderActivitiesFromWorkplan(allWorkplans)
+  } else {
+    renderActivities(allActivities)
+  }
 
-  /* === NSA workplans === */
+  /* === NSA workplans children === */
   renderWorkplans(filteredWorkplans, true)
+
+  /* === NSA collabWPActHealthAgendaObj children === */
+  rendercollabWPActHealthAgendaObj(collabWPActHealthAgendaObj)
 
   applyLanguage()
 }
 
 /**
- * RENDER renderActivities
+ * RENDER renderActivities from @activities
  * @return html
  */
 function renderActivities(list) {
@@ -385,6 +443,33 @@ function renderActivities(list) {
       return `
         <div class="item">
           <h4>${UI[currentLang].thEntity}: ${w.Entity}</h4>           
+          <p>${UI[currentLang].thResults}</p>
+          <p>${directResults}</p>          
+        </div>
+      `
+    })
+    .join('')
+}
+
+/**
+ * RENDER renderActivities from @workplan - a fazer
+ * @return html
+ */
+function renderActivitiesFromWorkplan(list) {
+  if (!list.length) {
+    el.activities.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
+    return
+  }
+
+  el.activities.innerHTML = list
+    .map((w) => {
+      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
+      const directResults = currentLang === 'en' ? w.StrategicPlanENG : w.StrategicPlanSPA
+      
+
+      return `
+        <div class="item">
+          <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>           
           <p>${UI[currentLang].thResults}</p>
           <p>${directResults}</p>          
         </div>
@@ -419,9 +504,32 @@ function renderWorkplans(list, enabled) {
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>
           <p>${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
           ${dur ? `<p class="meta"><strong>Duration:</strong> ${escapeHtml(dur)}</p>` : ''}
-          <p>HealthAgenda: ${HealthAgenda ?? ''}</p>
+          <p>HealthAgenda: ${HealthAgenda ?? '-'}</p>
         </div>
       `
+    })
+    .join('')
+}
+
+/* 
+todo add a css stile for #collabWPActHealthAgendaObj ul
+*/
+/**
+ * RENDER rendercollabWPActHealthAgendaObj (Collaboration with PAHO card)
+ * @return html
+ */
+function rendercollabWPActHealthAgendaObj(list) {
+  console.log(`collabWPActHealthAgendaObj`, list)
+  /*   if (!enabled) {
+    el.workplans.innerHTML = `<p class="meta">Workplans filter is off.</p>`
+    return
+  } */
+
+  el.collabWPActHealthAgendaObj.innerHTML = list
+    ?.map((val) => {
+      return `<ul>
+    <li>${val}</li>
+    </ul>`
     })
     .join('')
 }
@@ -537,21 +645,16 @@ function renderFinancialCharts(nsa) {
   })
 }
 
-function renderNSAProfile(nsa) {
+function renderNSAProfile(nsa, nsafocalPoint) {
   const infoEl = document.getElementById('nsa-info')
   el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleENGSPA || '-'
-
   el.nsaSubtitle.innerText = `${nsa.TypeOfSubmission}`
 
   if (!infoEl) return
 
   /** Normaliza URL (fallback para https://) */
   const websiteLabel = String(nsa.NSAWebsite || '').trim()
-  const websiteHref = websiteLabel
-    ? /^https?:\/\//i.test(websiteLabel)
-      ? websiteLabel
-      : `https://${websiteLabel}`
-    : ''
+  const websiteHref = websiteLabel ? (/^https?:\/\//i.test(websiteLabel) ? websiteLabel : `https://${websiteLabel}`) : ''
 
   // infoIdentity
   const infoIdentity = `
@@ -577,7 +680,7 @@ function renderNSAProfile(nsa) {
     </dl>
   </div>`
 
-  // infoPoints
+  // Focal points
   const infoPoints = `
   <div class="field">
     <h3>${UI[currentLang].focalTitle}</h3>
@@ -587,10 +690,10 @@ function renderNSAProfile(nsa) {
       <dd>${nsa.PAHOFocalPoint[0]?.LookupValue || '-'}</dd>
   
       <dt>${UI[currentLang].nsaFocal}</dt>
-      <dd>${currentLang === 'eng' ? nsa.NSAFocalpointRoleENG : nsa.NSAFocalpointRoleSPA}</dd>
-  
-      <dt>${UI[currentLang].nsaFocalRole}</dt>
-      <dd>${currentLang === 'en' ? nsa.NSAFocalpointRoleENG || '-' : nsa.NSAFocalpointRoleSPA || '-'}</dd>  
+      <dd>${currentLang === 'en' ? nsafocalPoint || '-' : nsafocalPoint || '-'}</dd>  
+      
+      <dt>${UI[currentLang].nsaFocalRole}</dt>       
+      <dd>${currentLang === 'en' ? nsa.NSAFocalpointRoleENG : nsa.NSAFocalpointRoleSPA}</dd>
      
     </dl>
   </div>`
@@ -631,7 +734,6 @@ function renderNSAProfile(nsa) {
     </p>
   </div>
   `
-  // injecta os cars n DOM
   infoEl.innerHTML = `
     <div class="nsa-grid">
     ${infoIdentity}
@@ -669,7 +771,7 @@ function applyLanguage() {
   setText('profileTitlenav', t.navProfile)
   setText('financialnav', t.navFinancials)
   setText('CollaborationNav', t.navCollaboration)
-/*   setText('WorkplansNav', t.navWorkplan) */
+  /*   setText('WorkplansNav', t.navWorkplan) */
   setText('navTitle', t.navTitle)
   setText('organization-type', t.orgType)
   setText('organization-all', t.all)
@@ -735,7 +837,7 @@ async function fetchJson(url) {
       },
     })
 
-    // Trata HTTP errors (404, 500…)
+    // HTTP errors (404, 500…)
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error(`Recurso não encontrado (404): ${url}`)
@@ -747,8 +849,7 @@ async function fetchJson(url) {
 
       throw new Error(`Erro HTTP: ${response.status}`)
     }
-
-    // Verifica se é JSON válido
+    // JSON válido
     const contentType = response.headers.get('content-type')
 
     if (!contentType || !contentType.includes('application/json')) {

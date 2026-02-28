@@ -31,27 +31,45 @@
 - [x] NSA focal point
 - [x] Contact email ... nao esta vindo, porem deve ser removido
 - [x] Organization type
-- [ ] Collaboration period ... este aqui nao ta vindo. Pendente c Eduardo
+- [x] Collaboration period ... este aqui nao ta vindo. Pendente c Eduardo
 - [x] Type of submission
 
-# matar tudo ate aqui
-# amanha comecamos do REGRAS DE NEGOCIO
+# 27/2
 
-# REGRAS DE NEGOCIO 
-
-- [ ] CollaborationPeriod: tem 2 subtitulos
-    - Past Activities / Actividades Pasadas (dentro: Activities carried out in the past three years / Actividades realizadas en los últimos tres años)
+- [x] NSA Focal Point: encontra-se em "NSAFocalPoint". Pode estar em workplan.json ou activity.json
+- [x] CollaborationPeriod: tem 2 subtitulos
+    - [x] SUBTITULO 1: Activities carried out in the past three years / Actividades realizadas en los últimos tres años
         - jalar Description
-        - cambiar Entity / Entidad -> Responsible Entity / Entidad Responsable
         - a ordem e: Description.. hay un order, chequear documento
         - RENEWAL:
-        - Plan de Trabajo hay un orden. ver documento.
         - umbrella em StrategicPlan y HealthAgenda
+    - [ ] SUBTITULO 2: o texto ta ok.
 
     - Workplan is good. just need to become sub of CollaborationPeriod
     - Collaboration with PAHO: this is the only thing that shows. Don't show Workplan. Only the most recent year
 
-- [ ] Status: Completed only
+- [ ] Status: Completed only nsas filter
+
+- [x] Sempre que houver `<a`, adicionar `rel="noreferrer"` ao lado, exemplo: 
+    ```html
+    <dd><a href="${nsa.NSAWebsite}" target="_blank" rel="noreferrer">${nsa.NSAWebsite}</a></dd>
+    ```
+- [x] Revisar se funcoes podem ser eliminadas (por falta de uso). Limpeza geral
+- [-] trocar todos os `./` por `/` quando eu fiz isso quebrou!!
+
+- [x] nsa.json
+	- [] CollabWPActStrategicPlan (mais um card)
+	- [x] CollabWPActHealthAgenda (a implementar new card)
+
+- [] workplan.json 
+	- [] StrategicPlanENG (mais um card)
+	- [x] HealthAgenda (a implementar new card)
+
+- [x] e quando for progress report, as activities estao no workplan
+- [ ] adicionar ProgressReport (workplan.json)
+
+
+# ============
 
 # DATA/INTEGRATION problems (ERIC):
 
