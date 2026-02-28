@@ -79,7 +79,7 @@ function init() {
 }
 
 /**
- * BUILD THE typeOfSubmissionTypeInput SELECT OPTIONS
+ * Build the typeOfSubmissionTypeInput select options
  */
 function buildTypeOfSubmissionTypeInput(nasas) {
   const values = nasas.map((nsa) => nsa.TypeOfSubmission).filter(Boolean)
@@ -118,7 +118,7 @@ el.clear.addEventListener('click', () => {
 })
 
 /**
- * APPLY FILTERS
+ * Apply Filters
  */
 function applyFilters() {
   const term = filters.term
@@ -192,7 +192,7 @@ el.periodSelect.addEventListener('change', (e) => {
 })
 
 /**
- * HANDLER THE FILTER NASAS
+ * Handler the filter nasas
  */
 function handleSearchInput(event) {
   const term = String(event.target.value || '')
@@ -304,7 +304,7 @@ function handleOutsideSearchClick(event) {
 }
 
 /**
- * RENDER THE SELECTED NSA
+ * Render the selecte NSA
  */
 function render() {
   if (!currentId) currentId = nasas[0].id
@@ -325,7 +325,7 @@ function render() {
   const allWorkplans = workplan.filter((w) => String(w.ParentID) === String(currentId))
   const filteredWorkplans = showWps ? allWorkplans : []
 
-  // add aqui tratativa se todos os 3 relacionamentos foram encontrados
+  // if necessary add aqui tratativa se todos os 3 relacionamentos foram encontrados
   if (DEBUG) {
     console.log(`========================`)
     console.log('nsa', nsa)
@@ -346,10 +346,10 @@ function render() {
    */
   const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
 
-  const preferredAgendaFromWorkplan = currentLang === 'en' ? allWorkplans?.HealthAgendaENG : allWorkplans?.HealthAgendaSPA  
+  const preferredAgendaFromWorkplan = currentLang === 'en' ? allWorkplans?.HealthAgendaENG : allWorkplans?.HealthAgendaSPA
 
-  if(DEBUG) console.log(`preferredAgendaFromNsa`, preferredAgendaFromNsa)
-  if(DEBUG) console.log(`preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
+  if (DEBUG) console.log(`preferredAgendaFromNsa`, preferredAgendaFromNsa)
+  if (DEBUG) console.log(`preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
 
   const collabWPActHealthAgendaSource = preferredAgendaFromNsa || preferredAgendaFromWorkplan
 
@@ -376,7 +376,7 @@ function render() {
   if (DEBUG) console.log(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
 
   /**
-   * FIND CollabWPActStrategicPlan from  @file nsa.json || @file workplan.json
+   * Find CollabWPActStrategicPlan from  @file nsa.json || @file workplan.json
    *
    */
   const getCollabWPActStrategicPlan = currentLang == 'eg' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA
@@ -422,7 +422,7 @@ function render() {
 }
 
 /**
- * RENDER renderActivities from @activities
+ * Render renderActivities from @activities
  * @return html
  */
 function renderActivities(list) {
@@ -447,7 +447,7 @@ function renderActivities(list) {
 }
 
 /**
- * RENDER renderActivities from @workplan - a fazer
+ * Render renderActivities from @workplan - a fazer
  * @return html
  */
 function renderActivitiesFromWorkplan(list) {
@@ -472,7 +472,7 @@ function renderActivitiesFromWorkplan(list) {
 }
 
 /**
- * RENDER WORKPLANS
+ * Render workplans
  * @return html
  */
 function renderWorkplans(list, enabled) {
@@ -505,7 +505,7 @@ function renderWorkplans(list, enabled) {
 }
 
 /**
- * RENDER rendercollabWPActHealthAgendaObj (Collaboration with PAHO card)
+ * Render rendercollabWPActHealthAgendaObj (Collaboration with PAHO card)
  * @return html
  */
 function rendercollabWPActHealthAgendaObj(list) {
