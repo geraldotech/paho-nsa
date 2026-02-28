@@ -319,10 +319,8 @@ function render() {
     //  el.disclaimer.innerText = DISCLAIMER[currentLang]
     return
   }
-  const showWps = true // el.filterWorkplans.checked
   const allActivities = activity.filter((a) => String(a.ParentID) === String(currentId))
   const allWorkplans = workplan.filter((w) => String(w.ParentID) === String(currentId))
-  const filteredWorkplans = showWps ? allWorkplans : []
 
   // if necessary add aqui tratativa se todos os 3 relacionamentos foram encontrados
   if (DEBUG) {
@@ -416,7 +414,7 @@ function render() {
   }
 
   /* === NSA workplans children === */
-  renderWorkplans(filteredWorkplans, true)
+  renderWorkplans(allWorkplans, true)
 
   /* === NSA collabWPActHealthAgendaObj children === */
   rendercollabWPActHealthAgendaObj(collabWPActHealthAgendaObj)
