@@ -307,8 +307,7 @@ function handleOutsideSearchClick(event) {
  * Render the selecte NSA
  */
 function render() {
-  if (!currentId) currentId = nasas[0].id
-
+  if (!currentId) currentId = nasas[0].id // se nao foi definido current id pega o first do array
   const nsa = nasas.find((n) => Number(n.id) === Number(currentId))
 
   if (!nsa) {
