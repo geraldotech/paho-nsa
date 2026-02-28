@@ -1,10 +1,5 @@
 import UI from './ui-language.js'
-// todo
-/* this await can let page slow?? is a good aproach */
-/* const nasas = await fetchJson('./assets/database/nsa.json')
-const activity = await fetchJson('./assets/database/activity.json')
-const workplan = await fetchJson('./assets/database/workplan.json')
- */
+
 const [nasas, activity, workplan] = await Promise.all([
   fetchJson('./assets/database/nsa.json'),
   fetchJson('./assets/database/activity.json'), // Collaboration with PAHO
@@ -13,7 +8,7 @@ const [nasas, activity, workplan] = await Promise.all([
 
 /* === State === */
 let currentLang = 'en'
-let currentId = null // 51 default value or fallback is first 
+let currentId = 51 // 51 default value or fallback is first
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true // modo dev
@@ -55,7 +50,6 @@ init()
  * ELEMENTOS INICIAIS
  */
 function init() {
-
   buildPeriodSelect()
   buildTypeOfSubmissionTypeInput(nasas)
 
@@ -311,11 +305,10 @@ function handleOutsideSearchClick(event) {
 }
 
 /**
- * RENDER THE SELECT NSA
+ * RENDER THE SELECTED NSA
  */
 function render() {
-  
-  if(!currentId) currentId = nasas[0].id
+  if (!currentId) currentId = nasas[0].id
 
   const nsa = nasas.find((n) => Number(n.id) === Number(currentId))
 
@@ -342,7 +335,7 @@ function render() {
     console.log(`========================`)
   }
 
-  /** FIND NSAFocalpoint do NSA
+  /** Find NSAFocalpoint from allActivities || Find allWorkplans
    * @since Fev, 27, 2025
    */
   const firstActivityWithNSAFocalpoint = allActivities.find((item) => item && item.NSAFocalpoint)
@@ -350,12 +343,15 @@ function render() {
   let nsaFocalpoint = firstActivityWithNSAFocalpoint?.NSAFocalpoint || segundActivityWithNSAFocalpoint?.NSAFocalpoint
 
   /**
-   * FIND CollabWPActHealthAgenda (nsa) || HealthAgenda(workplan)
-   * @since Fev, 27, 2025
+   * Find CollabWPActHealthAgenda from nsa || Find HealthAgenda from allWorkplans
    */
-  const workplanWithHealthAgenda = allWorkplans.find((item) => item && (item.HealthAgendaENG || item.HealthAgendaSPA))
   const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
-  const preferredAgendaFromWorkplan = currentLang === 'en' ? workplanWithHealthAgenda?.HealthAgendaENG : workplanWithHealthAgenda?.HealthAgendaSPA
+
+  const preferredAgendaFromWorkplan = currentLang === 'en' ? allWorkplans?.HealthAgendaENG : allWorkplans?.HealthAgendaSPA  
+
+  if(DEBUG) console.log(`preferredAgendaFromNsa`, preferredAgendaFromNsa)
+  if(DEBUG) console.log(`preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
+
   const collabWPActHealthAgendaSource = preferredAgendaFromNsa || preferredAgendaFromWorkplan
 
   let collabWPActHealthAgendaObj = collabWPActHealthAgendaSource ? (Array.isArray(collabWPActHealthAgendaSource) ? collabWPActHealthAgendaSource : [collabWPActHealthAgendaSource]) : []
@@ -378,16 +374,14 @@ function render() {
 
     return [item]
   })
+  if (DEBUG) console.log(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
 
   /**
-   * FIND CollabWPActStrategicPlan frm nsa
-   * 
+   * FIND CollabWPActStrategicPlan from  @file nsa.json || @file workplan.json
+   *
    */
-  const getCollabWPActStrategicPlan = currentLang == 'eg' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA;
-  // too
-  console.log(`getCollabWPActStrategicPlan`, getCollabWPActStrategicPlan?.split(';'))
-
-  if (DEBUG) console.log(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
+  const getCollabWPActStrategicPlan = currentLang == 'eg' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA
+  // console.log(`getCollabWPActStrategicPlan`, getCollabWPActStrategicPlan?.split(';'))
 
   /* === NSA PROFILE === */
   renderNSAProfile(nsa, nsaFocalpoint)
@@ -469,7 +463,6 @@ function renderActivitiesFromWorkplan(list) {
     .map((w) => {
       const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
       const directResults = currentLang === 'en' ? w.StrategicPlanENG : w.StrategicPlanSPA
-      
 
       return `
         <div class="item">
@@ -515,15 +508,11 @@ function renderWorkplans(list, enabled) {
     .join('')
 }
 
-/* 
-todo add a css stile for #collabWPActHealthAgendaObj ul
-*/
 /**
  * RENDER rendercollabWPActHealthAgendaObj (Collaboration with PAHO card)
  * @return html
  */
 function rendercollabWPActHealthAgendaObj(list) {
-  console.log(`collabWPActHealthAgendaObj`, list)
   /*   if (!enabled) {
     el.workplans.innerHTML = `<p class="meta">Workplans filter is off.</p>`
     return
