@@ -359,7 +359,7 @@ function render() {
     el.financialCard.classList.remove('none')
     el.financialnav.classList.remove('none')
     el.workplansCard.classList.remove('none')
-    renderFinancialCharts(nsa) // Financial information
+    renderFinancialCharts(nsa)
   }
 
   /**
@@ -478,7 +478,6 @@ function renderActivitiesFromWorkplan(list) {
  * @return html
  */
 function renderWorkplans(list) {
-
   if (!list.length) {
     el.workplans.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
     return
@@ -507,10 +506,10 @@ function renderWorkplans(list) {
  * @return html
  */
 function rendercollabWPActHealthAgendaObj(list) {
-  /*   if (!list) {
-    el.workplans.innerHTML = `<p class="meta">Workplans filter is off.</p>`
+  if (!list) {
+    el.workplans.innerHTML = `<p class="meta">No Health Agenda found for this nas.</p>`
     return
-  } */
+  }
 
   el.collabWPActHealthAgendaObj.innerHTML = list
     ?.map((val) => {
