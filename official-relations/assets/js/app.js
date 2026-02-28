@@ -368,8 +368,8 @@ function render() {
   const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
   const preferredAgendaFromWorkplan = currentLang === 'en' ? allWorkplans?.HealthAgendaENG : allWorkplans?.HealthAgendaSPA
 
-  if (DEBUG) console.log(`preferredAgendaFromNsa`, preferredAgendaFromNsa)
-  if (DEBUG) console.log(`preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
+  if (DEBUG) console.log(`Goals preferredAgendaFromNsa`, preferredAgendaFromNsa)
+  if (DEBUG) console.log(`Goals preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
 
   const collabWPActHealthAgendaSource = preferredAgendaFromNsa || preferredAgendaFromWorkplan
 
@@ -445,7 +445,7 @@ function renderActivities(list) {
 }
 
 /**
- * Render renderActivities from @workplan - a fazer
+ * Render Activities from workplan 
  * @return html
  */
 function renderActivitiesFromWorkplan(list) {
@@ -525,10 +525,10 @@ function rendercollabWPActHealthAgendaObj(list) {
  * Build periods to select
  */
 function buildPeriodSelect() {
-  if (DEBUG) console.log(`buildPeriodSelect`, nasas)
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
   const unique = [...new Set(periods)].sort() // unique values
-
+  
+  if (DEBUG) console.log(`buildPeriodSelect`, unique)
   el.periodSelect.innerHTML = `
     <option value="all" id="buildperiodall">All</option>
     ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
