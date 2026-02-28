@@ -414,8 +414,10 @@ function render() {
    * @section Collaboration with PAHO
    * Find CollabWPActStrategicPlan from  nsa || allWorkplans
    */
-  const getCollabWPActStrategicPlan = currentLang == 'eg' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA
-  // console.log(`getCollabWPActStrategicPlan`, getCollabWPActStrategicPlan?.split(';'))
+  const collabWPActStrategicPlanFromNSA = currentLang == 'en' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA
+  const collabWPActStrategicPlanFromWork = currentLang == 'en' ? nsa.StrategicPlanENG : nsa.StrategicPlanSPA
+  console.log(`collabWPActStrategicPlanFromNSA`, collabWPActStrategicPlanFromNSA?.split(';'))
+  console.log(`collabWPActStrategicPlanFromWork`, collabWPActStrategicPlanFromWork)
 
   /* === NSA workplans children === */
   renderWorkplans(allWorkplans)
@@ -509,13 +511,14 @@ function renderWorkplans(list) {
  */
 function rendercollabWPActHealthAgendaObj(list) {
   if (!list) {
-    el.workplans.innerHTML = `<p class="meta">No Health Agenda found for this nas.</p>`
+    el.collabWPActHealthAgendaObj.innerHTML = `<p class="meta">No Health Agenda found for this nas.</p>`
     return
   }
 
   el.collabWPActHealthAgendaObj.innerHTML = list
     ?.map((val) => {
-      return `<ul>
+      return `
+      <ul>
     <li>${val}</li>
     </ul>`
     })
