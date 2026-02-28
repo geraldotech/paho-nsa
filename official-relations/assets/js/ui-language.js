@@ -71,8 +71,9 @@ export default {
     bodies: 'Organization bodies & affiliations',
     selectInput: 'Select NSA',
     brandTitle: 'Non-State Actors in Official Relations Portal',
-    clear: 'Clear'
-
+    clear: 'Clear',
+    HealthAgenda: 'Health Agenda',
+    Duration: 'Duration'
   },
   es: {
     disclaimer:
@@ -144,6 +145,8 @@ export default {
     bodies: 'Órganos y afiliaciones',
     selectInput: 'Selecione NSA',
     brandTitle: 'Portal de Agentes No Estatales en Relaciones Oficiales',
-    clear: 'Claro'
+    clear: 'Claro',
+    HealthAgenda: 'Agenda de Salud',
+    Duration: 'Duración'
   },
 }

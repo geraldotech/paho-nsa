@@ -65,8 +65,8 @@
 	- [] StrategicPlanENG (mais um card)
 	- [x] HealthAgenda (a implementar new card)
 
-- [x] e quando for progress report, as activities estao no workplan
-- [ ] adicionar ProgressReport (workplan.json)
+- [x] e quando for progress report, as activities estao no (workplan.json)
+    - [ ] adicionar ProgressReport (workplan.json)
 
 
 # ============

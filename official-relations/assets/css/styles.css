@@ -246,7 +246,7 @@ body {
 
 .meta {
   color: var(--muted);
-  font-size: 12px;
+ /*  font-size: 12px; */
   margin-top: 6px;
 }
 
@@ -523,6 +523,9 @@ img.brand-logo {
 .muted {
   color: var(--muted);
   margin: 6px 0 0;
+}
+.lead{
+  color: var(--muted);
 }
 
 .chart-wrapper {

@@ -453,6 +453,7 @@ function renderActivities(list) {
  * @return html
  */
 function renderActivitiesFromWorkplan(list) {
+  console.log(`Render Activities from workplan`, list)
   if (!list.length) {
     el.activities.innerHTML = `<p class="meta">No activities found for this nas.</p>`
     return
@@ -461,12 +462,13 @@ function renderActivitiesFromWorkplan(list) {
   el.activities.innerHTML = list
     .map((w) => {
       const directResults = currentLang === 'en' ? w.StrategicPlanENG : w.StrategicPlanSPA
+      const ProgressReport = currentLang === 'en' ? w.ProgressReport : w.ProgressReport
 
       return `
         <div class="item">
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>           
-          <p>${UI[currentLang].thResults}</p>
-          <p>${directResults}</p>          
+          <p><span class="lead">${UI[currentLang].thResults}:</span> ${directResults}</p>          
+          <p><span class="lead">ProgressReport:</span> ${ProgressReport}</p>
         </div>
       `
     })
@@ -492,9 +494,9 @@ function renderWorkplans(list) {
       return `
         <div class="item">         
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>
+          ${dur ? `<p class="meta"><strong>${UI[currentLang].Duration}:</strong> ${escapeHtml(dur)}</p>` : ''}
           <p>${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
-          ${dur ? `<p class="meta"><strong>Duration:</strong> ${escapeHtml(dur)}</p>` : ''}
-          <p>HealthAgenda: ${HealthAgenda ?? '-'}</p>
+          <p>${UI[currentLang].HealthAgenda}: ${HealthAgenda ? HealthAgenda : '-'}</p>
         </div>
       `
     })
@@ -527,7 +529,7 @@ function buildPeriodSelect() {
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
   const unique = [...new Set(periods)].sort() // unique values
   if (DEBUG) console.log(`buildPeriodSelect`, unique)
-    
+
   el.periodSelect.innerHTML = `
     <option value="all" id="buildperiodall">All</option>
     ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
