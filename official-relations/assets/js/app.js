@@ -1,5 +1,4 @@
 import UI from './ui-language.js'
-
 const [nasas, activity, workplan] = await Promise.all([
   fetchJson('./assets/database/nsa.json'),
   fetchJson('./assets/database/activity.json'), // Collaboration with PAHO
@@ -434,9 +433,7 @@ function renderActivities(list) {
 
   el.activities.innerHTML = list
     .map((w) => {
-      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
       const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
-      /*<h3>${escapeHtml(w.Title || '-')}</h3> */
 
       return `
         <div class="item">
@@ -461,7 +458,6 @@ function renderActivitiesFromWorkplan(list) {
 
   el.activities.innerHTML = list
     .map((w) => {
-      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
       const directResults = currentLang === 'en' ? w.StrategicPlanENG : w.StrategicPlanSPA
 
       return `
@@ -495,7 +491,7 @@ function renderWorkplans(list, enabled) {
       const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
       const dur = currentLang === 'en' ? w.DurationENG : w.DurationSPA
       const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
-      /*  <h3>${escapeHtml(w.Title || '-')}</h3> */
+
       return `
         <div class="item">         
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>
@@ -513,7 +509,7 @@ function renderWorkplans(list, enabled) {
  * @return html
  */
 function rendercollabWPActHealthAgendaObj(list) {
-  /*   if (!enabled) {
+  /*   if (!list) {
     el.workplans.innerHTML = `<p class="meta">Workplans filter is off.</p>`
     return
   } */
@@ -528,7 +524,7 @@ function rendercollabWPActHealthAgendaObj(list) {
 }
 
 /**
- * BUILD PERIODS TO SELECT
+ * Build periods to select
  */
 function buildPeriodSelect() {
   if (DEBUG) console.log(`buildPeriodSelect`, nasas)
@@ -542,7 +538,7 @@ function buildPeriodSelect() {
 }
 
 /**
- * FINANCIAL  information - ECHARTS
+ * Financial information - echarts
  */
 function renderFinancialCharts(nsa) {
   const canvas = document.getElementById('financialBarChart')
@@ -696,7 +692,7 @@ function renderNSAProfile(nsa, nsafocalPoint) {
       <dd>${nsa.NSAContactEmail || '-'}</dd>
   */
 
-  // Objectives and Main work activities
+  // objectives and main work activities
   const description = `
   <div class="field">
     <h3>${UI[currentLang].descTitle}</h3>
