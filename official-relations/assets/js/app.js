@@ -13,7 +13,7 @@ const [nasas, activity, workplan] = await Promise.all([
 
 /* === State === */
 let currentLang = 'en'
-let currentId = 6 // 62, 6
+let currentId = null // 51 default value or fallback is first 
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true // modo dev
@@ -55,6 +55,7 @@ init()
  * ELEMENTOS INICIAIS
  */
 function init() {
+
   buildPeriodSelect()
   buildTypeOfSubmissionTypeInput(nasas)
 
@@ -313,6 +314,9 @@ function handleOutsideSearchClick(event) {
  * RENDER THE SELECT NSA
  */
 function render() {
+  
+  if(!currentId) currentId = nasas[0].id
+
   const nsa = nasas.find((n) => Number(n.id) === Number(currentId))
 
   if (!nsa) {
