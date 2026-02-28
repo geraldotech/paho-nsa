@@ -332,16 +332,37 @@ function render() {
   }
 
   /**
-   * @section Collaboration with PAHO
+   * =================  NSA Profile =============================================
    * Find NSAFocalpoint from allActivities || Find allWorkplans
-   * @since Fev, 27, 2025
    */
   const firstActivityWithNSAFocalpoint = allActivities.find((item) => item && item.NSAFocalpoint)
   const segundActivityWithNSAFocalpoint = allWorkplans.find((item) => item && item.NSAFocalpoint)
-  let nsaFocalpoint = firstActivityWithNSAFocalpoint?.NSAFocalpoint || segundActivityWithNSAFocalpoint?.NSAFocalpoint
+  let nsaFocalpoint = firstActivityWithNSAFocalpoint?.NSAFocalpoint || segundActivityWithNSAFocalpoint?.NSAFocalpoint || null
+  renderNSAProfile(nsa, nsaFocalpoint)
+
+  /* === NSA is Process ReportType  */
+  const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
 
   /**
-   * @section Collaboration with PAHO
+   * =================  Financial information ===================================
+   * @see when is Progress Report:
+   * not show financial report card - Workplan for the next three years hide tudo
+   */
+  if (isProcessReportType) {
+    if (DEBUG) console.log(`isProcessReportType`, isProcessReportType)
+
+    el.financialCard.classList.add('none')
+    el.workplansCard.classList.add('none')
+    el.financialnav.classList.add('none')
+  } else {
+    el.financialCard.classList.remove('none')
+    el.financialnav.classList.remove('none')
+    el.workplansCard.classList.remove('none')
+    renderFinancialCharts(nsa) // Financial information
+  }
+
+  /**
+   * =================  Collaboration with PAHO - activities ======================
    * Find CollabWPActHealthAgenda from nsa || Find HealthAgenda from allWorkplans
    */
   const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
@@ -373,37 +394,9 @@ function render() {
     return [item]
   })
   if (DEBUG) console.log(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
+  rendercollabWPActHealthAgendaObj(collabWPActHealthAgendaObj)
 
   /**
-   * @section Collaboration with PAHO
-   * Find CollabWPActStrategicPlan from  nsa || allWorkplans
-   */
-  const getCollabWPActStrategicPlan = currentLang == 'eg' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA
-  // console.log(`getCollabWPActStrategicPlan`, getCollabWPActStrategicPlan?.split(';'))
-
-  /* === NSA PROFILE === */
-  renderNSAProfile(nsa, nsaFocalpoint)
-  const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
-
-  /**
-   * @section Collaboration with PAHO
-   * @see when is Progress Report:
-   * not show financial report card - Workplan for the next three years hide tudo
-   */
-  if (isProcessReportType) {
-    if (DEBUG) console.log(`isProcessReportType`, isProcessReportType)
-
-    el.financialCard.classList.add('none')
-    el.workplansCard.classList.add('none')
-    el.financialnav.classList.add('none')
-  } else {
-    el.financialCard.classList.remove('none')
-    el.financialnav.classList.remove('none')
-    el.workplansCard.classList.remove('none')
-    renderFinancialCharts(nsa) // Financial information
-  }
-
-  /** 
    * @section Collaboration with PAHO - activities
    * when is progress report get activities from workplan
    */
@@ -413,11 +406,15 @@ function render() {
     renderActivities(allActivities)
   }
 
+  /**
+   * @section Collaboration with PAHO
+   * Find CollabWPActStrategicPlan from  nsa || allWorkplans
+   */
+  const getCollabWPActStrategicPlan = currentLang == 'eg' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA
+  // console.log(`getCollabWPActStrategicPlan`, getCollabWPActStrategicPlan?.split(';'))
+
   /* === NSA workplans children === */
   renderWorkplans(allWorkplans, true)
-
-  /* === NSA collabWPActHealthAgendaObj children === */
-  rendercollabWPActHealthAgendaObj(collabWPActHealthAgendaObj)
 
   applyLanguage()
 }
