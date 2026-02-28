@@ -454,7 +454,7 @@ function renderActivities(list) {
  */
 function renderActivitiesFromWorkplan(list) {
   if (!list.length) {
-    el.activities.innerHTML = `<p class="meta">No workplans found for this nas.</p>`
+    el.activities.innerHTML = `<p class="meta">No activities found for this nas.</p>`
     return
   }
 
@@ -479,7 +479,7 @@ function renderActivitiesFromWorkplan(list) {
  */
 function renderWorkplans(list) {
   if (!list.length) {
-    el.workplans.innerHTML = `<p class="meta">No workplans found for this filter.</p>`
+    el.workplans.innerHTML = `<p class="meta">No workplans found for this nas.</p>`
     return
   }
 
@@ -526,8 +526,8 @@ function rendercollabWPActHealthAgendaObj(list) {
 function buildPeriodSelect() {
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
   const unique = [...new Set(periods)].sort() // unique values
-
   if (DEBUG) console.log(`buildPeriodSelect`, unique)
+    
   el.periodSelect.innerHTML = `
     <option value="all" id="buildperiodall">All</option>
     ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
