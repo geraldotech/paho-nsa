@@ -333,7 +333,9 @@ function render() {
     console.log(`========================`)
   }
 
-  /** Find NSAFocalpoint from allActivities || Find allWorkplans
+  /**
+   * @section Collaboration with PAHO
+   * Find NSAFocalpoint from allActivities || Find allWorkplans
    * @since Fev, 27, 2025
    */
   const firstActivityWithNSAFocalpoint = allActivities.find((item) => item && item.NSAFocalpoint)
@@ -341,6 +343,7 @@ function render() {
   let nsaFocalpoint = firstActivityWithNSAFocalpoint?.NSAFocalpoint || segundActivityWithNSAFocalpoint?.NSAFocalpoint
 
   /**
+   * @section Collaboration with PAHO
    * Find CollabWPActHealthAgenda from nsa || Find HealthAgenda from allWorkplans
    */
   const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
@@ -374,8 +377,8 @@ function render() {
   if (DEBUG) console.log(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
 
   /**
-   * Find CollabWPActStrategicPlan from  @file nsa.json || @file workplan.json
-   *
+   * @section Collaboration with PAHO
+   * Find CollabWPActStrategicPlan from  nsa || allWorkplans
    */
   const getCollabWPActStrategicPlan = currentLang == 'eg' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA
   // console.log(`getCollabWPActStrategicPlan`, getCollabWPActStrategicPlan?.split(';'))
@@ -385,9 +388,9 @@ function render() {
   const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
 
   /**
+   * @section Collaboration with PAHO
    * @see when is Progress Report:
-   * not show financial report card
-   * Workplan for the next three years hide tudo
+   * not show financial report card - Workplan for the next three years hide tudo
    */
   if (isProcessReportType) {
     if (DEBUG) console.log(`isProcessReportType`, isProcessReportType)
@@ -402,8 +405,10 @@ function render() {
     renderFinancialCharts(nsa) // Financial information
   }
 
-  /* === NSA Collaboration with PAHO === */
-  // quando for progress report, as activities estao no workplan
+  /** 
+   * @section Collaboration with PAHO - activities
+   * when is progress report get activities from workplan
+   */
   if (isProcessReportType) {
     renderActivitiesFromWorkplan(allWorkplans)
   } else {
