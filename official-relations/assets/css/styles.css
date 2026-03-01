@@ -551,12 +551,13 @@ img.brand-logo {
   justify-content: flex-end;
   gap: 4px;
   margin-bottom: 5px;
-  cursor: pointer;
   position: sticky;
   top: 0;
-  color: #00205C;
+  color: #00205c;
   z-index: 1;
- 
+}
+.lang-toggle {
+  cursor: pointer;
 }
 .lang-toggle:hover {
   text-decoration: underline;
