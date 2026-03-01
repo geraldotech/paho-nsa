@@ -73,7 +73,9 @@ export default {
     brandTitle: 'Non-State Actors in Official Relations Portal',
     clear: 'Clear',
     HealthAgenda: 'Health Agenda',
-    Duration: 'Duration'
+    Duration: 'Duration',
+    Goal: 'Goals',
+    StrategicPlan: 'Strategic Plan'
   },
   es: {
     disclaimer:
@@ -147,6 +149,8 @@ export default {
     brandTitle: 'Portal de Agentes No Estatales en Relaciones Oficiales',
     clear: 'Claro',
     HealthAgenda: 'Agenda de Salud',
-    Duration: 'Duración'
+    Duration: 'Duración',
+    Goal: 'Metas',
+    StrategicPlan: 'Plan estratégico'
   },
 }

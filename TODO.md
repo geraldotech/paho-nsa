@@ -59,11 +59,11 @@
 
 - [x] nsa.json
 	- [] CollabWPActStrategicPlan (mais um card)
-	- [x] CollabWPActHealthAgenda (a implementar new card)
+	- [x] CollabWPActHealthAgenda (a implementar new card) 1
 
 - [] workplan.json 
 	- [] StrategicPlanENG (mais um card)
-	- [x] HealthAgenda (a implementar new card)
+	- [x] HealthAgenda (a implementar new card) 1
 
 - [x] e quando for progress report, as activities estao no (workplan.json)
     - [ ] adicionar ProgressReport (workplan.json)

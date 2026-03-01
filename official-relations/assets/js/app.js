@@ -41,6 +41,7 @@ const el = {
   typeOfSubmissionTypeInput: document.getElementById('typeOfSubmission-type-input'),
   organizationTypeInput: document.getElementById('organization-type-input'),
   collabWPActHealthAgendaObj: document.getElementById('collabWPActHealthAgendaObj'),
+  strategicPlan: document.getElementById('strategicPlan'),
 }
 
 init()
@@ -364,7 +365,7 @@ function render() {
 
   /**
    * =================  Collaboration with PAHO - activities ======================
-   * Find CollabWPActHealthAgenda from nsa || Find HealthAgenda from allWorkplans
+   * Find CollabWPActHealthAgenda from nsa || Find HealthAgenda from allWorkplans (Goals - Metas)
    */
   const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
   const preferredAgendaFromWorkplan = currentLang === 'en' ? allWorkplans?.HealthAgendaENG : allWorkplans?.HealthAgendaSPA
@@ -390,7 +391,7 @@ function render() {
 
     return [item]
   })
-
+  rendercollabWPActHealthAgendaObj(collabWPActHealthAgendaObj)
   if (DEBUG) {
     console.groupCollapsed('CollabWPActHealthAgenda ')
     console.log(`Goals preferredAgendaFromNsa`, preferredAgendaFromNsa)
@@ -398,7 +399,6 @@ function render() {
     console.warn(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
     console.groupEnd()
   }
-  rendercollabWPActHealthAgendaObj(collabWPActHealthAgendaObj)
 
   /**
    * @section Collaboration with PAHO - activities
@@ -411,13 +411,38 @@ function render() {
   }
 
   /**
-   * @section Collaboration with PAHO
-   * Find CollabWPActStrategicPlan from  nsa || allWorkplans
+   * @section Collaboration with PAHO - strategic Plans
+   * Find CollabWPActStrategicPlan from nsa || StrategicPlanENG from allWorkplans
    */
-  const collabWPActStrategicPlanFromNSA = currentLang == 'en' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA
-  const collabWPActStrategicPlanFromWork = currentLang == 'en' ? nsa.StrategicPlanENG : nsa.StrategicPlanSPA
-  console.log(`collabWPActStrategicPlanFromNSA`, collabWPActStrategicPlanFromNSA?.split(';'))
-  console.log(`collabWPActStrategicPlanFromWork`, collabWPActStrategicPlanFromWork)
+  const strategicPlanFromNSA = currentLang == 'en' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA // vem como string
+  const strategicPlanFromWork = currentLang == 'en' ? allWorkplans[0].StrategicPlanENG : allWorkplans[0].StrategicPlanSPA // pode vim como um array mas so é preciso do first index
+  
+  console.log(`strategicPlanFromNSA =>`, strategicPlanFromNSA)
+  console.log(`strategicPlanFromWork =>`, strategicPlanFromWork)
+
+  let renderStrategicPlanOBJ = [strategicPlanFromNSA] || strategicPlanFromWork || null
+
+  renderStrategicPlanOBJ = renderStrategicPlanOBJ.flatMap((item) => {
+    if (typeof item !== 'string') return [item]
+    if (item.includes(';')) {
+      return item
+        .split(';')
+        .map((part) => part.trim())
+        .filter(Boolean)
+    }
+
+    if ((item.match(/Goal\s+\d+:/g) || []).length > 1) {
+      return item
+        .split(/(?=Goal\s+\d+:)/)
+        .map((part) => part.trim())
+        .filter(Boolean)
+    }
+
+    return [item]
+  })
+
+  console.log(`renderStrategicPlanOBJ final`, renderStrategicPlanOBJ)
+  renderStrategicPlan(renderStrategicPlanOBJ)
 
   /* === NSA workplans children === */
   renderWorkplans(allWorkplans)
@@ -515,14 +540,41 @@ function rendercollabWPActHealthAgendaObj(list) {
     return
   }
 
-  el.collabWPActHealthAgendaObj.innerHTML = list
-    ?.map((val) => {
-      return `
+  el.collabWPActHealthAgendaObj.innerHTML = `
+    <h3>${UI[currentLang].Goal}</h3>
+    ${list
+      ?.map((val) => {
+        return `
       <ul>
     <li>${val}</li>
     </ul>`
-    })
-    .join('')
+      })
+      .join('')}
+  `
+}
+
+
+/**
+ * Render strategicPlan (Collaboration with PAHO card)
+ * @return html
+ */
+function renderStrategicPlan(list) {
+  if (!list) {
+    el.strategicPlan.innerHTML = `<p class="meta">No strategicPlan  found for this nas.</p>`
+    return
+  }
+
+  el.strategicPlan.innerHTML = `
+    <h3>${UI[currentLang].StrategicPlan}</h3>
+    ${list
+      ?.map((val) => {
+        return `
+      <ul>
+    <li>${val}</li>
+    </ul>`
+      })
+      .join('')}
+  `
 }
 
 /**
