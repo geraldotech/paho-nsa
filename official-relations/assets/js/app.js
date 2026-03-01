@@ -416,7 +416,7 @@ function render() {
    */
   const strategicPlanFromNSA = currentLang == 'en' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA // vem como string
   const strategicPlanFromWork = currentLang == 'en' ? allWorkplans[0].StrategicPlanENG : allWorkplans[0].StrategicPlanSPA // pode vim como um array mas so é preciso do first index
-  
+
   console.log(`strategicPlanFromNSA =>`, strategicPlanFromNSA)
   console.log(`strategicPlanFromWork =>`, strategicPlanFromWork)
 
@@ -545,14 +545,13 @@ function rendercollabWPActHealthAgendaObj(list) {
     ${list
       ?.map((val) => {
         return `
-      <ul>
-    <li>${val}</li>
-    </ul>`
+      <ul class="list-tag">
+          <li  class="tag">${val}</li>
+      </ul>`
       })
       .join('')}
   `
 }
-
 
 /**
  * Render strategicPlan (Collaboration with PAHO card)
@@ -569,9 +568,9 @@ function renderStrategicPlan(list) {
     ${list
       ?.map((val) => {
         return `
-      <ul>
-    <li>${val}</li>
-    </ul>`
+      <ul class="list-tag">
+        <li class="tag">${val}</li>
+      </ul>`
       })
       .join('')}
   `

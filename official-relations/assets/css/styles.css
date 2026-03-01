@@ -22,21 +22,12 @@
   --paho-dark-blue: #236192;
   --paho-orange: #f6711f;
 
-  --paho-primary: #0b5c7a; 
+  --paho-primary: #0b5c7a;
   --paho-primary-2: #0a4b63;
 }
 
 body {
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Helvetica,
-    Arial,
-    'Apple Color Emoji',
-    'Segoe UI Emoji';
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
   color: var(--text);
   background: var(--bg);
 }
@@ -55,7 +46,7 @@ body {
   padding-top: 0;
   display: flex;
   flex-direction: column;
-} 
+}
 
 .brand {
   margin-bottom: 18px;
@@ -185,7 +176,7 @@ body {
 /* MAIN (empurra por causa da sidebar fixa) */
 .main {
   margin-left: var(--sidebar-w);
-  padding: 12px;
+  padding: 18px;
   /*  max-width: 1200px; */
 }
 
@@ -210,10 +201,10 @@ body {
 .card {
   /* background: var(--card); */
   background: var(--bg);
-  padding: 18px;
-  margin-bottom: 16px;
+  /*   margin-bottom: 16px; */
   border-radius: 12px;
-  /*   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); */
+  margin-block: 20px;
+  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);  */
 }
 
 .card h3 {
@@ -246,7 +237,7 @@ body {
 
 .meta {
   color: var(--muted);
- /*  font-size: 12px; */
+  /*  font-size: 12px; */
   margin-top: 6px;
 }
 
@@ -524,7 +515,7 @@ img.brand-logo {
   color: var(--muted);
   margin: 6px 0 0;
 }
-.lead{
+.lead {
   color: var(--muted);
 }
 
@@ -615,17 +606,52 @@ img.brand-logo {
   font-weight: 600;
 }
 
-#navTitle{
-    font-weight: 800;
-    color: var(--sidebarbackground);
-    margin-top: auto;
-    padding-top: 10px;
+#navTitle {
+  font-weight: 800;
+  color: var(--sidebarbackground);
+  margin-top: auto;
+  padding-top: 10px;
 }
-.list ul li {
-  margin-bottom: 0.5rem;
+.list-tag {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-tag li {
+  margin: 0.5rem 0;
   line-height: 1.4;
 }
 
-.list ul li{
- list-style: none;
+.tag {
+  display: inline-block;
+  background: #e6f0f7;
+  color: #0b5aa6;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+:root:has(#profileTitle:target) #profileTitlenav,
+:root:has(#uiFinTitle:target) #financialnav,
+:root:has(#collaboraionWihPAHO:target) #CollaborationNav {
+  color: #ff671f;
+  font-weight: 700;
+  /* text-decoration: underline; */
+  text-underline-offset: 0.15em;
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1f2d3d;
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e3e8ef;
+  letter-spacing: 0.3px;
+}
+#wpTitle {
+  margin: 0;
 }
