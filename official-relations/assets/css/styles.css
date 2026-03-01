@@ -547,13 +547,20 @@ img.brand-logo {
 
 .language-link {
   display: flex;
+  font-size: 1rem;
   justify-content: flex-end;
-  gap: 2px;
+  gap: 4px;
   margin-bottom: 5px;
   cursor: pointer;
   position: sticky;
   top: 0;
+  color: #00205C;
   z-index: 1;
+ 
+}
+.lang-toggle:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 /* Container do "On this page" */
