@@ -48,7 +48,7 @@
     - Workplan is good. just need to become sub of CollaborationPeriod
     - Collaboration with PAHO: this is the only thing that shows. Don't show Workplan. Only the most recent year
 
-- [ ] Status: Completed only nsas filter
+- [x] Status: Completed only nsas filter
 
 - [x] Sempre que houver `<a`, adicionar `rel="noreferrer"` ao lado, exemplo: 
     ```html
@@ -66,7 +66,7 @@
 	- [x] HealthAgenda (card: Goals)
 
 - [x] e quando for progress report, as activities estao no (workplan.json)
-    - [ ] adicionar ProgressReport (workplan.json)
+    - [x] adicionar ProgressReport (workplan.json)
 
 
 # ============

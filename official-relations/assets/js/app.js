@@ -1,9 +1,15 @@
 import UI from './ui-language.js'
-const [nasas, activity, workplan] = await Promise.all([
+const [nasasData, activity, workplan] = await Promise.all([
   fetchJson('./assets/database/nsa.json'),
   fetchJson('./assets/database/activity.json'), // Collaboration with PAHO
   fetchJson('./assets/database/workplan.json'),
 ])
+/* === ONLY COMPLETED NAS === */
+const nasas = []
+for (let i = 0, len = nasasData.length; i < len; i += 1) {
+  const item = nasasData[i]
+  if (item && item.Status === 'Completed') nasas.push(item)
+}
 
 /* === State === */
 let currentLang = 'en'
@@ -199,7 +205,7 @@ function render() {
   }
 
   /**
-   * =================  NSA Profile =============================================
+   * =============================================  NSA Profile =============================================
    * Find NSAFocalpoint from allActivities || Find allWorkplans
    */
   const firstActivityWithNSAFocalpoint = allActivities.find((item) => item && item.NSAFocalpoint)
@@ -211,7 +217,7 @@ function render() {
   const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
 
   /**
-   * =================  Financial information ===================================
+   * ===================================  Financial information ===================================
    * @see when is Progress Report:
    * not show financial report card - Workplan for the next three years hide tudo
    */
@@ -639,9 +645,8 @@ function renderNSAProfile(nsa, nsafocalPoint) {
 }
 
 /* ================= Select Builds ================= */
-/**
- * Build Collaboration period select options
- */
+
+// Build Collaboration period select options
 function buildPeriodSelect() {
   const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
   const unique = [...new Set(periods)].sort() // unique values
@@ -653,9 +658,7 @@ function buildPeriodSelect() {
   `
 }
 
-/**
- * Build the typeOfSubmissionTypeInput select options
- */
+// Build typeOfSubmissionTypeInput select options
 function buildTypeOfSubmissionTypeInput(nasas) {
   const values = nasas.map((nsa) => nsa.TypeOfSubmission).filter(Boolean)
   const uniqueValues = [...new Set(values)]
@@ -677,7 +680,6 @@ function buildTypeOfSubmissionTypeInput(nasas) {
 }
 
 /* ================= Functions - UI Functions  ================= */
-
 function setText(id, text) {
   const el = document.getElementById(id)
   if (el) el.textContent = text
