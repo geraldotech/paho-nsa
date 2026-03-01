@@ -58,12 +58,12 @@
 - [-] trocar todos os `./` por `/` quando eu fiz isso quebrou!!
 
 - [x] nsa.json
-	- [] CollabWPActStrategicPlan (mais um card)
-	- [x] CollabWPActHealthAgenda (a implementar new card) 1
+	- [x] CollabWPActStrategicPlan (card: Strategic Plan)
+	- [x] CollabWPActHealthAgenda (card: Goals)
 
 - [] workplan.json 
-	- [] StrategicPlanENG (mais um card)
-	- [x] HealthAgenda (a implementar new card) 1
+	- [x] StrategicPlanENG (card: Strategic Plan)
+	- [x] HealthAgenda (card: Goals)
 
 - [x] e quando for progress report, as activities estao no (workplan.json)
     - [ ] adicionar ProgressReport (workplan.json)

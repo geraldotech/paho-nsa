@@ -53,8 +53,8 @@ function init() {
   buildPeriodSelect()
   buildTypeOfSubmissionTypeInput(nasas)
 
+  // toggle language
   const langToggle = document.querySelectorAll('.lang-toggle')
-
   langToggle.forEach((val) => {
     val.addEventListener('click', (e) => {
       const clickLang = e.target.dataset.lan
@@ -78,45 +78,6 @@ function init() {
   setSearchResultsPosition()
   render()
 }
-
-/**
- * Build the typeOfSubmissionTypeInput select options
- */
-function buildTypeOfSubmissionTypeInput(nasas) {
-  const values = nasas.map((nsa) => nsa.TypeOfSubmission).filter(Boolean)
-  const uniqueValues = [...new Set(values)]
-
-  if (DEBUG) console.log(`buildTypeOfSubmissionTypeInput`, uniqueValues)
-
-  // ordenar (opcional)
-  uniqueValues.sort()
-
-  el.typeOfSubmissionTypeInput.innerHTML = '<option value="">Select...</option>'
-  el.typeOfSubmissionTypeInput.innerHTML = '<option value="all" id="typeOfSubmissionTypeInputAll">All</option>'
-
-  uniqueValues.forEach((val) => {
-    const option = document.createElement('option')
-    option.value = val
-    option.textContent = val
-    el.typeOfSubmissionTypeInput.appendChild(option)
-  })
-}
-
-/* === SELECT LISTEING PARA MONTAR OS FILTROS DO handleSearchInput === */
-
-/* RESET DOS FILTERS AND SELECT */
-el.clear.addEventListener('click', () => {
-  filters.term = ''
-  filters.typeOfSubmission = ''
-  filters.organizationType = ''
-  filters.period = ''
-
-  el.typeOfSubmissionTypeInput.selectedIndex = 0
-  el.organizationTypeInput.selectedIndex = 0
-  el.periodSelect.selectedIndex = 0
-
-  render()
-})
 
 /**
  * Apply Filters
@@ -159,6 +120,8 @@ function applyFilters() {
   renderSearchResults(matches)
 }
 
+/*  =================  SELECT FILTER EVENTS ====================== */
+
 // search input
 el.searchInput.addEventListener('input', (e) => {
   filters.term = String(e.target.value || '')
@@ -167,7 +130,6 @@ el.searchInput.addEventListener('input', (e) => {
   applyFilters()
 })
 
-// selects
 el.typeOfSubmissionTypeInput.addEventListener('change', (e) => {
   const value = String(e.target.value || '').trim()
   if (DEBUG) console.log(`typeOfSubmissionTypeInput`, value)
@@ -192,118 +154,21 @@ el.periodSelect.addEventListener('change', (e) => {
   applyFilters()
 })
 
-/**
- * Handler the filter nasas
- */
-function handleSearchInput(event) {
-  const term = String(event.target.value || '')
-    .trim()
-    .toLowerCase()
-
-  if (term.length < MIN_SEARCH_CHARS) {
-    if (DEBUG) console.log(`input is clean`)
-    showSearchResults()
-    return
-  }
-  const matches = nasas
-    .filter((n) => {
-      const titleEng = String(n.TitleENG || '').toLowerCase()
-      const titleEngSpa = String(n.TitleENGSPA || '').toLowerCase()
-      return titleEng.includes(term) || titleEngSpa.includes(term)
-    })
-    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
-
-  renderSearchResults(matches)
-}
-
-function showSearchResults() {
-  setSearchResultsPosition()
-  const term = String(el.searchInput.value || '')
-    .trim()
-    .toLowerCase()
-  const periodFilter = typeof filters.period === 'object' && filters.period !== null ? String(filters.period.CollaborationPeriod || filters.period.value || '') : String(filters.period || '')
-  const normalizedPeriodFilter = periodFilter.trim().toLowerCase()
-
-  const matches = nasas
-    .filter((n) => {
-      if (filters.typeOfSubmission && String(n.TypeOfSubmission || '') !== filters.typeOfSubmission) {
-        return false
-      }
-
-      if (filters.organizationType) {
-        const orgType = String(n.NSAOrganizationType || '').toLowerCase()
-        if (!orgType.includes(filters.organizationType.toLowerCase())) {
-          return false
-        }
-      }
-
-      if (
-        normalizedPeriodFilter &&
-        String(n.CollaborationPeriod || '')
-          .trim()
-          .toLowerCase() !== normalizedPeriodFilter
-      ) {
-        return false
-      }
-
-      if (!term) return true
-
-      const titleEng = String(n.TitleENG || '').toLowerCase()
-      const titleEngSpa = String(n.TitleENGSPA || '').toLowerCase()
-      return titleEng.includes(term) || titleEngSpa.includes(term)
-    })
-    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
-
-  renderSearchResults(matches)
-}
-
-function onSearchInputClick(event) {
-  event.stopPropagation()
-  showSearchResults()
-}
-
-function renderSearchResults(results) {
-  if (!results.length) {
-    el.searchResults.innerHTML = `<li>No results found</li>`
-    return
-  }
-
-  el.searchResults.innerHTML = results
-    .map((n) => {
-      const label = n.TitleENG || n.TitleENGSPA || n.Title || 'Untitled'
-      return `<li data-id="${n.id}">${escapeHtml(label)}</li>`
-    })
-    .join('')
-}
-
-function clearSearchResults() {
-  el.searchResults.innerHTML = ''
-}
-
-function onSearchResultClick(event) {
-  const item = event.target.closest('li[data-id]')
-  if (!item) return
-
-  currentId = Number(item.dataset.id)
-  clearSearchResults()
-  el.searchInput.value = ''
-  render()
-}
-
-function handleOutsideSearchClick(event) {
-  const target = event.target
-  if (!(target instanceof Element)) return
-
-  const clickedInsideInput = target.closest('#searchInput')
-  const clickedInsideResults = target.closest('#search-results')
-
-  if (clickedInsideInput || clickedInsideResults) return
-
-  el.searchInput.value = ''
+/* RESET DOS FILTERS AND SELECT */
+el.clear.addEventListener('click', () => {
   filters.term = ''
-  clearSearchResults()
-}
+  filters.typeOfSubmission = ''
+  filters.organizationType = ''
+  filters.period = ''
 
+  el.typeOfSubmissionTypeInput.selectedIndex = 0
+  el.organizationTypeInput.selectedIndex = 0
+  el.periodSelect.selectedIndex = 0
+
+  render()
+})
+
+/* ================= Renders  ================= */
 /**
  * Render the selecte NSA
  */
@@ -417,9 +282,6 @@ function render() {
   const strategicPlanFromNSA = currentLang == 'en' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA // vem como string
   const strategicPlanFromWork = currentLang == 'en' ? allWorkplans[0].StrategicPlanENG : allWorkplans[0].StrategicPlanSPA // pode vim como um array mas so é preciso do first index
 
-  console.log(`strategicPlanFromNSA =>`, strategicPlanFromNSA)
-  console.log(`strategicPlanFromWork =>`, strategicPlanFromWork)
-
   let renderStrategicPlanOBJ = [strategicPlanFromNSA] || strategicPlanFromWork || null
 
   renderStrategicPlanOBJ = renderStrategicPlanOBJ.flatMap((item) => {
@@ -441,7 +303,12 @@ function render() {
     return [item]
   })
 
-  console.log(`renderStrategicPlanOBJ final`, renderStrategicPlanOBJ)
+  if (DEBUG) {
+    console.log(`strategicPlanFromNSA =>`, strategicPlanFromNSA)
+    console.log(`strategicPlanFromWork =>`, strategicPlanFromWork)
+    console.log(`renderStrategicPlanOBJ final`, renderStrategicPlanOBJ)
+  }
+
   renderStrategicPlan(renderStrategicPlanOBJ)
 
   /* === NSA workplans children === */
@@ -480,7 +347,6 @@ function renderActivities(list) {
  * @return html
  */
 function renderActivitiesFromWorkplan(list) {
-  console.log(`Render Activities from workplan`, list)
   if (!list.length) {
     el.activities.innerHTML = `<p class="meta">No activities found for this nas.</p>`
     return
@@ -573,20 +439,6 @@ function renderStrategicPlan(list) {
       </ul>`
       })
       .join('')}
-  `
-}
-
-/**
- * Build periods to select
- */
-function buildPeriodSelect() {
-  const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
-  const unique = [...new Set(periods)].sort() // unique values
-  if (DEBUG) console.log(`buildPeriodSelect`, unique)
-
-  el.periodSelect.innerHTML = `
-    <option value="all" id="buildperiodall">All</option>
-    ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
   `
 }
 
@@ -786,7 +638,46 @@ function renderNSAProfile(nsa, nsafocalPoint) {
   `
 }
 
-/* === Functions - UI Functions  === */
+/* ================= Select Builds ================= */
+/**
+ * Build Collaboration period select options
+ */
+function buildPeriodSelect() {
+  const periods = nasas.map((n) => n.CollaborationPeriod).filter(Boolean) // removes null
+  const unique = [...new Set(periods)].sort() // unique values
+  if (DEBUG) console.log(`buildPeriodSelect`, unique)
+
+  el.periodSelect.innerHTML = `
+    <option value="all" id="buildperiodall">All</option>
+    ${unique.map((p) => `<option value="${p}">${p}</option>`).join('')}
+  `
+}
+
+/**
+ * Build the typeOfSubmissionTypeInput select options
+ */
+function buildTypeOfSubmissionTypeInput(nasas) {
+  const values = nasas.map((nsa) => nsa.TypeOfSubmission).filter(Boolean)
+  const uniqueValues = [...new Set(values)]
+
+  if (DEBUG) console.log(`buildTypeOfSubmissionTypeInput`, uniqueValues)
+
+  // ordenar (opcional)
+  uniqueValues.sort()
+
+  el.typeOfSubmissionTypeInput.innerHTML = '<option value="">Select...</option>'
+  el.typeOfSubmissionTypeInput.innerHTML = '<option value="all" id="typeOfSubmissionTypeInputAll">All</option>'
+
+  uniqueValues.forEach((val) => {
+    const option = document.createElement('option')
+    option.value = val
+    option.textContent = val
+    el.typeOfSubmissionTypeInput.appendChild(option)
+  })
+}
+
+/* ================= Functions - UI Functions  ================= */
+
 function setText(id, text) {
   const el = document.getElementById(id)
   if (el) el.textContent = text
@@ -859,6 +750,118 @@ function setSearchResultsPosition() {
   if (!el.searchInput || !el.searchResults) return
   const top = el.searchInput.offsetTop + el.searchInput.offsetHeight
   el.searchResults.style.setProperty('--search-results-top', `${top}px`)
+}
+
+function clearSearchResults() {
+  el.searchResults.innerHTML = ''
+}
+
+/**
+ * Handler the filter nasas
+ */
+function handleSearchInput(event) {
+  const term = String(event.target.value || '')
+    .trim()
+    .toLowerCase()
+
+  if (term.length < MIN_SEARCH_CHARS) {
+    if (DEBUG) console.log(`input is clean`)
+    showSearchResults()
+    return
+  }
+  const matches = nasas
+    .filter((n) => {
+      const titleEng = String(n.TitleENG || '').toLowerCase()
+      const titleEngSpa = String(n.TitleENGSPA || '').toLowerCase()
+      return titleEng.includes(term) || titleEngSpa.includes(term)
+    })
+    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
+
+  renderSearchResults(matches)
+}
+
+function renderSearchResults(results) {
+  if (!results.length) {
+    el.searchResults.innerHTML = `<li>No results found</li>`
+    return
+  }
+
+  el.searchResults.innerHTML = results
+    .map((n) => {
+      const label = n.TitleENG || n.TitleENGSPA || n.Title || 'Untitled'
+      return `<li data-id="${n.id}">${escapeHtml(label)}</li>`
+    })
+    .join('')
+}
+
+function showSearchResults() {
+  setSearchResultsPosition()
+  const term = String(el.searchInput.value || '')
+    .trim()
+    .toLowerCase()
+  const periodFilter = typeof filters.period === 'object' && filters.period !== null ? String(filters.period.CollaborationPeriod || filters.period.value || '') : String(filters.period || '')
+  const normalizedPeriodFilter = periodFilter.trim().toLowerCase()
+
+  const matches = nasas
+    .filter((n) => {
+      if (filters.typeOfSubmission && String(n.TypeOfSubmission || '') !== filters.typeOfSubmission) {
+        return false
+      }
+
+      if (filters.organizationType) {
+        const orgType = String(n.NSAOrganizationType || '').toLowerCase()
+        if (!orgType.includes(filters.organizationType.toLowerCase())) {
+          return false
+        }
+      }
+
+      if (
+        normalizedPeriodFilter &&
+        String(n.CollaborationPeriod || '')
+          .trim()
+          .toLowerCase() !== normalizedPeriodFilter
+      ) {
+        return false
+      }
+
+      if (!term) return true
+
+      const titleEng = String(n.TitleENG || '').toLowerCase()
+      const titleEngSpa = String(n.TitleENGSPA || '').toLowerCase()
+      return titleEng.includes(term) || titleEngSpa.includes(term)
+    })
+    .sort((a, b) => String(a.TitleENG || '').localeCompare(String(b.TitleENG || '')))
+
+  renderSearchResults(matches)
+}
+
+function onSearchInputClick(event) {
+  event.stopPropagation()
+  showSearchResults()
+}
+
+function onSearchResultClick(event) {
+  const item = event.target.closest('li[data-id]')
+  if (!item) return
+
+  currentId = Number(item.dataset.id)
+  clearSearchResults()
+  el.searchInput.value = ''
+  render()
+}
+
+function handleOutsideSearchClick(event) {
+  const target = event.target
+  if (!(target instanceof Element)) return
+
+  const clickedInsideInput = target.closest('#searchInput')
+  const clickedInsideResults = target.closest('#search-results')
+
+  if (clickedInsideInput || clickedInsideResults) return
+
+  el.searchInput.value = ''
+  filters.term = ''
+  clearSearchResults()
 }
 
 /**
