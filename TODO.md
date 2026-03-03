@@ -38,43 +38,79 @@
 
 - [x] NSA Focal Point: encontra-se em "NSAFocalPoint". Pode estar em workplan.json ou activity.json
 - [x] CollaborationPeriod: tem 2 subtitulos
-    - [x] SUBTITULO 1: Activities carried out in the past three years / Actividades realizadas en los últimos tres años
+    - [ ] SUBTITULO 1: Activities carried out in the past three years / Actividades realizadas en los últimos tres años
         - jalar Description
         - a ordem e: Description.. hay un order, chequear documento
         - RENEWAL:
         - umbrella em StrategicPlan y HealthAgenda
-    - [ ] SUBTITULO 2: o texto ta ok.
+    - [x] SUBTITULO 2: o texto ta ok.
 
     - Workplan is good. just need to become sub of CollaborationPeriod
     - Collaboration with PAHO: this is the only thing that shows. Don't show Workplan. Only the most recent year
 
-- [x] Status: Completed only nsas filter
-
+- [x] Status: Completed only
 - [x] Sempre que houver `<a`, adicionar `rel="noreferrer"` ao lado, exemplo: 
     ```html
     <dd><a href="${nsa.NSAWebsite}" target="_blank" rel="noreferrer">${nsa.NSAWebsite}</a></dd>
     ```
 - [x] Revisar se funcoes podem ser eliminadas (por falta de uso). Limpeza geral
-- [-] trocar todos os `./` por `/` quando eu fiz isso quebrou!!
-
-- [x] nsa.json
-	- [x] CollabWPActStrategicPlan (card: Strategic Plan)
-	- [x] CollabWPActHealthAgenda (card: Goals)
-
-- [] workplan.json 
-	- [x] StrategicPlanENG (card: Strategic Plan)
-	- [x] HealthAgenda (card: Goals)
-
-- [x] e quando for progress report, as activities estao no (workplan.json)
-    - [x] adicionar ProgressReport (workplan.json)
-
+- [x] trocar todos os `./` por `/`
 
 # ============
 
 # DATA/INTEGRATION problems (ERIC):
 
-- [ ] revisar progress report, pq vem zoado? 
-- [ ] Em certos momentos (ou sempre?) o progress report nao vem com o workplan
-- [ ] olhar CollabWPActStrategicPlan e CollabWPActHealthAgenda pode ser util ...  A questao do umbrella
-- [ ] security patches
+- [x] revisar progress report, pq vem zoado? 
+- [x] Em certos momentos (ou sempre?) o progress report nao vem com o workplan
+- [x] olhar CollabWPActStrategicPlan e CollabWPActHealthAgenda pode ser util ...  A questao do umbrella
+- [x] security patches
+
+# ============
+
+# LAST REVISION
+
 - [ ] abrir no /official-relations
+- [ ] Trocar string: Main work activities -> Main areas of work (espanhol ta ok)
+- [ ] Na parte "Governance & formal relations", os subtitulos devem ser: 
+    1: Governing body members and affiliations / Miembros y afiliaciones del órgano rector
+    2: UN & NGOs in Formal Relations with the NSA / Naciones Unidas y ONG en relaciones formales con la NSA
+- [x] labels: trazer os bullet points um pouco pra direita
+- [ ] em "NSA Profile" remover "Planned activities and expected results for the selected cycle."
+- [ ] "Activities carried out in the past three years." tem que ir acima do Goals/Strategic Plan. 
+- [ ] Quando for "Progress Report", também tem que estar acima do "Goals/Strategic Plan", porém o titulo muda para: "Activities carried out over the past year". 
+- [ ] E quando for "New Application", mantê-lo também acima de "Goals/Strategic Plan", porém o subtitulo é: "Activities carried out over the past two years"
+- [ ] Replace "Goals" por "Sustainable Health Agenda for the Americas 2018–2030" / "Agenda de Salud Sostenible para las Américas 2018–2030" 
+- [ ] Replace "Strategic Plan" por "PAHO Strategic Plan 2020 - 2025" / "Plan Estratégico de la OPS 2020–2025"
+- [ ] Para ambos Activity e Workplan, a ordem deve ser Description of activity, Direct results, Responsible entity
+    - [ ] em activity.json:
+        1: "Description" (Description:)
+        2: "DirectResults" (Direct Results:)
+        3: "Entity" (Responsible Entity:)
+        nota: assegurar que o texto esta em negrito
+    - [ ] em workplan.json:
+        1: "Description" (Description)
+        2: "ExpectedResults" (Expected Results)
+        3: "ResponsibleEntity" (ResponsibleEntity)
+- [ ] Logo acima do "NSA Profile", colocar a mesma "Note: The information has been provided direclty...". Manter a original tambem, so agregar mais uma la em cima.
+- [ ] Verificar que o numero de todas as barras saiam corretamente. Por exemplo: APHA - barra laranja
+- [ ] Quando é "New Application", a parte do Workplan está vindo vazia. Exemplo: Clean Air Institute (CAI) 
+- [ ] Na parte de Workplan, não deve sair este "Health Agenda: -". Deve remover "Health Agenda: -". 
+    nota: em geral, essa ordem aplica-se pra tudo
+- [ ] Claro -> Limpiar
+- [ ] Quando for "Progress Report", não mostrar as seções "Description" & "Governance & formal relations". Por exemplo, o APHA, que é um Progress Report, não deve mostrar estas seções: 
+<img width="2718" height="1330" alt="image" src="https://github.com/user-attachments/assets/58d6fe40-a5eb-4a9f-88d7-6336925119c6" />
+
+
+
+### ATE AQUI
+### ATE AQUI
+### ATE AQUI
+
+
+
+- [ ] O guarda-chuva em cima de "Activities" está ok. Devemos ter outro para "Workplan". O combo de Goals e Strategic Plan são diferentes para cada um.
+
+- [ ] Quando for "Progress Report", remover esta parte "user has provided the following results". Lembrar que a mesma ordem tem que aparecer aqui tambem eg: 
+    1: "Description" (Description)
+    2: "ExpectedResults" (Expected Results)
+    3: "ResponsibleEntity" (ResponsibleEntity)
