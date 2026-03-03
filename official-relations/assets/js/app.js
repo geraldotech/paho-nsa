@@ -697,7 +697,7 @@ function applyLanguage() {
   setText('profileTitle', t.profileTitle)
   setText('uiFinTitle', t.navFinancials)
   setText('wpTitle', t.wpTitle)
-  setText('profileSubtitle', t.wpSubtitle)
+  //setText('profileSubtitle', t.wpSubtitle)
   setText('uiFinSubtitle', t.finSubtitle)
   setText('collabTitle', t.collabTitle)
   setText('collabSubtitle', t.collabSubtitle)

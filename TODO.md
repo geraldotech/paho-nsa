@@ -70,11 +70,11 @@
 # LAST REVISION
 
 - [ ] abrir no /official-relations
-- [ ] Trocar string: Main work activities -> Main areas of work (espanhol ta ok)
-- [ ] Na parte "Governance & formal relations", os subtitulos devem ser: 
+- [x] Trocar string: Main work activities -> Main areas of work (espanhol ta ok)
+- [x] Na parte "Governance & formal relations", os subtitulos devem ser: 
     1: Governing body members and affiliations / Miembros y afiliaciones del órgano rector
     2: UN & NGOs in Formal Relations with the NSA / Naciones Unidas y ONG en relaciones formales con la NSA
-- [x] labels: trazer os bullet points um pouco pra direita
+- [x] labels: trazer os bullet points um pouco pra direita(?)
 - [ ] em "NSA Profile" remover "Planned activities and expected results for the selected cycle."
 - [ ] "Activities carried out in the past three years." tem que ir acima do Goals/Strategic Plan. 
 - [ ] Quando for "Progress Report", também tem que estar acima do "Goals/Strategic Plan", porém o titulo muda para: "Activities carried out over the past year". 
