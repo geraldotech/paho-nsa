@@ -76,8 +76,8 @@ export default {
     clear: 'Clear',
     HealthAgenda: 'Health Agenda',
     Duration: 'Duration',
-    Goal: 'Goals',
-    StrategicPlan: 'Strategic Plan'
+    Goal: 'Sustainable Health Agenda for the Americas 2018–2030',
+    StrategicPlan: 'PAHO Strategic Plan 2020 - 2025'
   },
   es: {
     disclaimer:
@@ -154,7 +154,7 @@ export default {
     clear: 'Claro',
     HealthAgenda: 'Agenda de Salud',
     Duration: 'Duración',
-    Goal: 'Metas',
-    StrategicPlan: 'Plan estratégico'
+    Goal: 'Agenda de Salud Sostenible para las Américas 2018–2030',
+    StrategicPlan: 'Plan Estratégico de la OPS 2020–2025'
   },
 }
