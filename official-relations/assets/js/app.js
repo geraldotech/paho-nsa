@@ -348,12 +348,13 @@ function renderActivities(list) {
   el.activities.innerHTML = list
     .map((w) => {
       const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
-
+      const DescriptionENG = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
+      
       return `
         <div class="item">
-          <h4>${UI[currentLang].thEntity}: ${w.Entity}</h4>           
-          <p>${UI[currentLang].thResults}</p>
-          <p>${directResults}</p>          
+          <p><strong>${UI[currentLang].descTitle}:</strong> ${DescriptionENG} </p>           
+          <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
+          <p><strong>${UI[currentLang].thResp}:</strong> : ${w.Entity}</p>          
         </div>
       `
     })

@@ -81,8 +81,8 @@
 - [x] E quando for "New Application", mantê-lo também acima de "Goals/Strategic Plan", porém o subtitulo é: "Activities carried out over the past two years"  Na versão Espanhol ficou 'Atividades realizadas nos últimos dois anos'
 - [x] Replace "Goals" por "Sustainable Health Agenda for the Americas 2018–2030" / "Agenda de Salud Sostenible para las Américas 2018–2030" 
 - [x] Replace "Strategic Plan" por "PAHO Strategic Plan 2020 - 2025" / "Plan Estratégico de la OPS 2020–2025"
-- [ ] Para ambos Activity e Workplan, a ordem deve ser Description of activity, Direct results, Responsible entity
-    - [ ] em activity.json:
+- [-] Para ambos Activity e Workplan, a ordem deve ser Description of activity, Direct results, Responsible entity
+    - [x] em activity.json:
         1: "Description" (Description:)
         2: "DirectResults" (Direct Results:)
         3: "Entity" (Responsible Entity:)

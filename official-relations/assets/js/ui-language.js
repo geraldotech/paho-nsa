@@ -41,7 +41,7 @@ export default {
     collabSubtitleNewApp: 'Activities carried out over the past two years',
     thEntity: 'Entity',
     thDesc: 'Activity description',
-    thResults: 'Direct results',
+    thResults: 'Direct Results',
     wpTitle: 'Workplan for the next three years',
     wpSubtitle: 'Planned activities and expected results for the selected cycle.',
     thAgenda: 'Health Agenda objectives',
