@@ -47,7 +47,7 @@ const el = {
   typeOfSubmissionTypeInput: document.getElementById('typeOfSubmission-type-input'),
   organizationTypeInput: document.getElementById('organization-type-input'),
   collabWPActHealthAgendaObj: document.getElementById('collabWPActHealthAgendaObj'),
-  strategicPlan: document.getElementById('strategicPlan'),
+  strategicPlan: document.getElementById('strategicPlan')
 }
 
 init()
@@ -211,18 +211,17 @@ function render() {
   const firstActivityWithNSAFocalpoint = allActivities.find((item) => item && item.NSAFocalpoint)
   const segundActivityWithNSAFocalpoint = allWorkplans.find((item) => item && item.NSAFocalpoint)
   let nsaFocalpoint = firstActivityWithNSAFocalpoint?.NSAFocalpoint || segundActivityWithNSAFocalpoint?.NSAFocalpoint || null
-  renderNSAProfile(nsa, nsaFocalpoint)
 
-  /* === NSA is Process ReportType  */
+  /* === NSA is Process ReportType || NewAppType ?  */
   const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
   const isNewAppType = nsa.TypeOfSubmission.includes('New Application - Nueva Aplicación')
-  if (isNewAppType) {
-  }
+
+  renderNSAProfile(nsa, nsaFocalpoint, isProcessReportType)
 
   if (isProcessReportType) {
     // when is progress report the title is different
     setText('collabSubtitle', UI[currentLang].collabSubtitleProgresReport)
-  } else if (isNewAppType) {
+  } else if (isNewAppType) { // title is different
     setText('collabSubtitle', UI[currentLang].collabSubtitleNewApp)
   } else {
     setText('collabSubtitle', UI[currentLang].collabSubtitle)
@@ -394,8 +393,8 @@ function renderActivitiesFromWorkplan(list) {
       return `
       <div class="item">
         <p><strong>${UI[currentLang].descTitle}:</strong>  ${ProgressReport}</p>
-        <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
-        <p><strong>${UI[currentLang].thResp}:</strong> ${w.ResponsibleEntity}</p>
+        <p><strong>${UI[currentLang].thResults}:</strong> ${directResults || '-'}</p>
+        <p><strong>${UI[currentLang].thResp}:</strong> ${w.ResponsibleEntity || '-'}</p>
       </div>
       `
     })
@@ -419,8 +418,8 @@ function renderWorkplans(list) {
       const desc2 = currentLang === 'en' ? w.Description : w.Description
       const duration = currentLang === 'en' ? w.DurationENG : w.DurationSPA
       const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
-      const ExpectedResults = currentLang === 'en' ? w.ExpectedResultsENG : w.ExpectedResultsSPA      
-/* 
+      const ExpectedResults = currentLang === 'en' ? w.ExpectedResultsENG : w.ExpectedResultsSPA
+      /* 
       return `
         <div class="item">         
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>
@@ -590,7 +589,7 @@ function renderFinancialCharts(nsa) {
   })
 }
 
-function renderNSAProfile(nsa, nsafocalPoint) {
+function renderNSAProfile(nsa, nsafocalPoint, isProcessReportType) {
   const infoEl = document.getElementById('nsa-info')
   el.nsaTitle.innerText = currentLang === 'en' ? nsa.TitleENG || '-' : nsa.TitleENGSPA || '-'
   el.nsaSubtitle.innerText = `${nsa.TypeOfSubmission}`
@@ -679,12 +678,16 @@ function renderNSAProfile(nsa, nsafocalPoint) {
     </p>
   </div>
   `
+
+  infoEl.innerHTML = ''
+
+  /* when is progress report not show the description and formalRelations */
   infoEl.innerHTML = `
     <div class="nsa-grid">
     ${infoIdentity}
     ${infoPoints}
-    ${description}
-    ${formalRelations}
+    ${!isProcessReportType ? description : ''}
+    ${!isProcessReportType ? formalRelations : ''}
     </div>
   `
 }

@@ -97,7 +97,7 @@
 - [x] Na parte de Workplan, não deve sair este "Health Agenda: -". Deve remover "Health Agenda: -". 
     nota: em geral, essa ordem aplica-se pra tudo
 - [x] Claro -> Limpiar
-- [ ] Quando for "Progress Report", não mostrar as seções "Description" & "Governance & formal relations". Por exemplo, o APHA, que é um Progress Report, não deve mostrar estas seções: 
+- [x] Quando for "Progress Report", não mostrar as seções "Description" & "Governance & formal relations". Por exemplo, o APHA, que é um Progress Report, não deve mostrar estas seções: 
 <img width="2718" height="1330" alt="image" src="https://github.com/user-attachments/assets/58d6fe40-a5eb-4a9f-88d7-6336925119c6" />
 
 
