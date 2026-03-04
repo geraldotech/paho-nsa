@@ -349,20 +349,27 @@ function renderActivities(list) {
     .map((w) => {
       const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
       const DescriptionENG = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
-      
-      return `
+
+     /*  return `
         <div class="item">
           <p><strong>${UI[currentLang].descTitle}:</strong> ${DescriptionENG} </p>           
           <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
           <p><strong>${UI[currentLang].thResp}:</strong> : ${w.Entity}</p>          
         </div>
+      ` */
+      return  `
+      <div class="item">
+        <p><strong>${UI[currentLang].descTitle}:</strong>  ${DescriptionENG}</p>
+        <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
+        <p><strong>${UI[currentLang].thResp}:</strong> ${w.Entity}</p>
+      </div>
       `
     })
     .join('')
 }
 
 /**
- * Render Activities from workplan
+ * Render Activities from workplan when is Progress Report - Reporte de Progreso
  * @return html
  */
 function renderActivitiesFromWorkplan(list) {
@@ -375,13 +382,21 @@ function renderActivitiesFromWorkplan(list) {
     .map((w) => {
       const directResults = currentLang === 'en' ? w.StrategicPlanENG : w.StrategicPlanSPA
       const ProgressReport = currentLang === 'en' ? w.ProgressReport : w.ProgressReport
+      //console.log(`ProgressReport to cut`, ProgressReport)
 
-      return `
+   /*    return `
         <div class="item">
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>           
           <p><span class="lead">${UI[currentLang].thResults}:</span> ${directResults}</p>          
           <p><span class="lead">ProgressReport:</span> ${ProgressReport}</p>
         </div>
+      ` */
+      return  `
+      <div class="item">
+        <p><strong>${UI[currentLang].descTitle}:</strong>  ${ProgressReport}</p>
+        <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
+        <p><strong>${UI[currentLang].thResp}:</strong> ${w.ResponsibleEntity}</p>
+      </div>
       `
     })
     .join('')
