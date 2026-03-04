@@ -521,7 +521,13 @@ img.brand-logo {
 
 .chart-wrapper {
   position: relative;
-  min-height: 280px; /* pode ser 320px se preferir */
+  height: clamp(320px, 42vh, 460px);
+}
+
+@media (max-width: 768px) {
+  .chart-wrapper {
+    height: 320px;
+  }
 }
 .no-financial-data {
   padding: 16px;

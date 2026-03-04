@@ -87,12 +87,12 @@
         2: "DirectResults" (Direct Results:)
         3: "Entity" (Responsible Entity:)
         nota: assegurar que o texto esta em negrito
-    - [ ] em workplan.json:
+    - [x] em workplan.json:
         1: "Description" (Description)
         2: "ExpectedResults" (Expected Results)
         3: "ResponsibleEntity" (ResponsibleEntity)
-- [ ] Logo acima do "NSA Profile", colocar a mesma "Note: The information has been provided direclty...". Manter a original tambem, so agregar mais uma la em cima.
-- [ ] Verificar que o numero de todas as barras saiam corretamente. Por exemplo: APHA - barra laranja
+- [x] Logo acima do "NSA Profile", colocar a mesma "Note: The information has been provided direclty...". Manter a original tambem, so agregar mais uma la em cima.
+- [x] Verificar que o numero de todas as barras saiam corretamente. Por exemplo: APHA - barra laranja
 - [ ] Quando é "New Application", a parte do Workplan está vindo vazia. Exemplo: Clean Air Institute (CAI) 
 - [ ] Na parte de Workplan, não deve sair este "Health Agenda: -". Deve remover "Health Agenda: -". 
     nota: em geral, essa ordem aplica-se pra tudo

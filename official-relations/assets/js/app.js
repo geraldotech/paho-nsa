@@ -417,8 +417,8 @@ function renderWorkplans(list) {
       const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
       const duration = currentLang === 'en' ? w.DurationENG : w.DurationSPA
       const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
-      const ExpectedResults = currentLang === 'en' ? w.ExpectedResultsENG : w.ExpectedResultsSPA
-      /* 
+      const ExpectedResults = currentLang === 'en' ? w.ExpectedResultsENG : w.ExpectedResultsSPA      
+/* 
       return `
         <div class="item">         
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>
@@ -563,6 +563,11 @@ function renderFinancialCharts(nsa) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 20,
+        },
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -574,6 +579,7 @@ function renderFinancialCharts(nsa) {
       scales: {
         y: {
           beginAtZero: true,
+          grace: '8%',
           ticks: { callback: (v) => formatNumber(v) },
         },
       },
@@ -727,14 +733,16 @@ function applyLanguage() {
   setText('uiLanguageLabel', t.language)
   setText('uiPeriodLabel', t.period)
   setText('uiDisclaimerText', t.disclaimer)
+  setText('uiDisclaimerText2', t.disclaimer)
   setText('uiDisclaimerTitle', t.disclaimerTitle)
+  setText('uiDisclaimerTitle2', t.disclaimerTitle)
   setText('searchNSA', t.search)
   setText('nsa-select-input', t.selectInput)
   setText('brand-title', t.brandTitle)
   setText('profileTitle', t.profileTitle)
   setText('uiFinTitle', t.navFinancials)
   setText('wpTitle', t.wpTitle)
-  //setText('profileSubtitle', t.wpSubtitle)
+  // setText('profileSubtitle', t.wpSubtitle) remove Planned activities and expected results for the selected cycle.
   setText('uiFinSubtitle', t.finSubtitle)
   setText('collabTitle', t.collabTitle)
 
@@ -742,7 +750,6 @@ function applyLanguage() {
   setText('profileTitlenav', t.navProfile)
   setText('financialnav', t.navFinancials)
   setText('CollaborationNav', t.navCollaboration)
-  /*   setText('WorkplansNav', t.navWorkplan) */
   setText('navTitle', t.navTitle)
   setText('organization-type', t.orgType)
   setText('organization-all', t.all)
@@ -752,7 +759,6 @@ function applyLanguage() {
   setText('clear-filters', t.clear)
 
   el.searchInput.placeholder = t.searchPh
-
   updateBrandLogo()
 }
 
