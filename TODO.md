@@ -75,10 +75,10 @@
     1: Governing body members and affiliations / Miembros y afiliaciones del órgano rector
     2: UN & NGOs in Formal Relations with the NSA / Naciones Unidas y ONG en relaciones formales con la NSA
 - [x] labels: trazer os bullet points um pouco pra direita(?)
-- [ ] em "NSA Profile" remover "Planned activities and expected results for the selected cycle."
-- [ ] "Activities carried out in the past three years." tem que ir acima do Goals/Strategic Plan. 
-- [ ] Quando for "Progress Report", também tem que estar acima do "Goals/Strategic Plan", porém o titulo muda para: "Activities carried out over the past year". 
-- [ ] E quando for "New Application", mantê-lo também acima de "Goals/Strategic Plan", porém o subtitulo é: "Activities carried out over the past two years"
+- [x] em "NSA Profile" remover "Planned activities and expected results for the selected cycle."
+- [x] "Activities carried out in the past three years." tem que ir acima do Goals/Strategic Plan. 
+- [x] Quando for "Progress Report", também tem que estar acima do "Goals/Strategic Plan", porém o titulo muda para: "Activities carried out over the past year". Na versão Espanhol ficou 'Actividades realizadas durante el último año'
+- [x] E quando for "New Application", mantê-lo também acima de "Goals/Strategic Plan", porém o subtitulo é: "Activities carried out over the past two years"  Na versão Espanhol ficou 'Atividades realizadas nos últimos dois anos'
 - [ ] Replace "Goals" por "Sustainable Health Agenda for the Americas 2018–2030" / "Agenda de Salud Sostenible para las Américas 2018–2030" 
 - [ ] Replace "Strategic Plan" por "PAHO Strategic Plan 2020 - 2025" / "Plan Estratégico de la OPS 2020–2025"
 - [ ] Para ambos Activity e Workplan, a ordem deve ser Description of activity, Direct results, Responsible entity

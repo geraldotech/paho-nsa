@@ -215,6 +215,18 @@ function render() {
 
   /* === NSA is Process ReportType  */
   const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
+  const isNewAppType = nsa.TypeOfSubmission.includes('New Application - Nueva Aplicación')
+  if (isNewAppType) {
+  }
+
+  if (isProcessReportType) {
+    // when is progress report the title is different
+    setText('collabSubtitle', UI[currentLang].collabSubtitleProgresReport)
+  } else if (isNewAppType) {
+    setText('collabSubtitle', UI[currentLang].collabSubtitleNewApp)
+  } else {
+    setText('collabSubtitle', UI[currentLang].collabSubtitle)
+  }
 
   /**
    * ===================================  Financial information ===================================
@@ -700,7 +712,6 @@ function applyLanguage() {
   //setText('profileSubtitle', t.wpSubtitle)
   setText('uiFinSubtitle', t.finSubtitle)
   setText('collabTitle', t.collabTitle)
-  setText('collabSubtitle', t.collabSubtitle)
 
   // navigation
   setText('profileTitlenav', t.navProfile)
