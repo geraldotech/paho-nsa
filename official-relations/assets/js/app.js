@@ -350,14 +350,14 @@ function renderActivities(list) {
       const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
       const DescriptionENG = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
 
-     /*  return `
+      /*  return `
         <div class="item">
           <p><strong>${UI[currentLang].descTitle}:</strong> ${DescriptionENG} </p>           
           <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
           <p><strong>${UI[currentLang].thResp}:</strong> : ${w.Entity}</p>          
         </div>
       ` */
-      return  `
+      return `
       <div class="item">
         <p><strong>${UI[currentLang].descTitle}:</strong>  ${DescriptionENG}</p>
         <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
@@ -384,14 +384,14 @@ function renderActivitiesFromWorkplan(list) {
       const ProgressReport = currentLang === 'en' ? w.ProgressReport : w.ProgressReport
       //console.log(`ProgressReport to cut`, ProgressReport)
 
-   /*    return `
+      /*    return `
         <div class="item">
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>           
           <p><span class="lead">${UI[currentLang].thResults}:</span> ${directResults}</p>          
           <p><span class="lead">ProgressReport:</span> ${ProgressReport}</p>
         </div>
       ` */
-      return  `
+      return `
       <div class="item">
         <p><strong>${UI[currentLang].descTitle}:</strong>  ${ProgressReport}</p>
         <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
@@ -415,9 +415,10 @@ function renderWorkplans(list) {
   el.workplans.innerHTML = list
     .map((w) => {
       const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
-      const dur = currentLang === 'en' ? w.DurationENG : w.DurationSPA
+      const duration = currentLang === 'en' ? w.DurationENG : w.DurationSPA
       const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
-
+      const ExpectedResults = currentLang === 'en' ? w.ExpectedResultsENG : w.ExpectedResultsSPA
+      /* 
       return `
         <div class="item">         
           <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>
@@ -425,6 +426,14 @@ function renderWorkplans(list) {
           <p>${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
           <p>${UI[currentLang].HealthAgenda}: ${HealthAgenda ? HealthAgenda : '-'}</p>
         </div>
+      ` */
+
+      return `
+      <div class="item">
+        <p><strong>${UI[currentLang].descTitle}:</strong>  ${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
+        <p><strong>${UI[currentLang].thResults}:</strong> ${ExpectedResults}</p>
+        <p><strong>${UI[currentLang].thResp}:</strong> ${w.ResponsibleEntity}</p>
+      </div>
       `
     })
     .join('')
