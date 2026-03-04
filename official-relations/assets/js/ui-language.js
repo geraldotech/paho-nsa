@@ -151,7 +151,7 @@ export default {
     bodies: 'Naciones Unidas y ONG en relaciones formales con la NSA',
     selectInput: 'Selecione NSA',
     brandTitle: 'Portal de Agentes No Estatales en Relaciones Oficiales',
-    clear: 'Claro',
+    clear: 'Limpiar',
     HealthAgenda: 'Agenda de Salud',
     Duration: 'Duración',
     Goal: 'Agenda de Salud Sostenible para las Américas 2018–2030',

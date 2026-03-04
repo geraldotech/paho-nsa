@@ -81,7 +81,7 @@
 - [x] E quando for "New Application", mantê-lo também acima de "Goals/Strategic Plan", porém o subtitulo é: "Activities carried out over the past two years"  Na versão Espanhol ficou 'Atividades realizadas nos últimos dois anos'
 - [x] Replace "Goals" por "Sustainable Health Agenda for the Americas 2018–2030" / "Agenda de Salud Sostenible para las Américas 2018–2030" 
 - [x] Replace "Strategic Plan" por "PAHO Strategic Plan 2020 - 2025" / "Plan Estratégico de la OPS 2020–2025"
-- [-] Para ambos Activity e Workplan, a ordem deve ser Description of activity, Direct results, Responsible entity
+- [x] Para ambos Activity e Workplan, a ordem deve ser Description of activity, Direct results, Responsible entity
     - [x] em activity.json:
         1: "Description" (Description:)
         2: "DirectResults" (Direct Results:)
@@ -93,10 +93,10 @@
         3: "ResponsibleEntity" (ResponsibleEntity)
 - [x] Logo acima do "NSA Profile", colocar a mesma "Note: The information has been provided direclty...". Manter a original tambem, so agregar mais uma la em cima.
 - [x] Verificar que o numero de todas as barras saiam corretamente. Por exemplo: APHA - barra laranja
-- [ ] Quando é "New Application", a parte do Workplan está vindo vazia. Exemplo: Clean Air Institute (CAI) 
-- [ ] Na parte de Workplan, não deve sair este "Health Agenda: -". Deve remover "Health Agenda: -". 
+- [?] Quando é "New Application", a parte do Workplan está vindo vazia. Exemplo: Clean Air Institute (CAI) (o object key DescriptionENG está vindo vazio, mas Description não, contudo o UNITE Parliamentarians isso não acontece)
+- [x] Na parte de Workplan, não deve sair este "Health Agenda: -". Deve remover "Health Agenda: -". 
     nota: em geral, essa ordem aplica-se pra tudo
-- [ ] Claro -> Limpiar
+- [x] Claro -> Limpiar
 - [ ] Quando for "Progress Report", não mostrar as seções "Description" & "Governance & formal relations". Por exemplo, o APHA, que é um Progress Report, não deve mostrar estas seções: 
 <img width="2718" height="1330" alt="image" src="https://github.com/user-attachments/assets/58d6fe40-a5eb-4a9f-88d7-6336925119c6" />
 

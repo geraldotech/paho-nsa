@@ -407,6 +407,7 @@ function renderActivitiesFromWorkplan(list) {
  * @return html
  */
 function renderWorkplans(list) {
+  console.log(`renderWorkplans`, list)
   if (!list.length) {
     el.workplans.innerHTML = `<p class="meta">No workplans found for this nas.</p>`
     return
@@ -415,6 +416,7 @@ function renderWorkplans(list) {
   el.workplans.innerHTML = list
     .map((w) => {
       const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
+      const desc2 = currentLang === 'en' ? w.Description : w.Description
       const duration = currentLang === 'en' ? w.DurationENG : w.DurationSPA
       const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
       const ExpectedResults = currentLang === 'en' ? w.ExpectedResultsENG : w.ExpectedResultsSPA      
@@ -430,8 +432,8 @@ function renderWorkplans(list) {
 
       return `
       <div class="item">
-        <p><strong>${UI[currentLang].descTitle}:</strong>  ${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
-        <p><strong>${UI[currentLang].thResults}:</strong> ${ExpectedResults}</p>
+        <p><strong>${UI[currentLang].descTitle}:</strong>  ${escapeHtml(desc || '-').replace(/\n/g, '<br/>')}</p>
+        <p><strong>${UI[currentLang].thResults}:</strong> ${ExpectedResults || '-'}</p>
         <p><strong>${UI[currentLang].thResp}:</strong> ${w.ResponsibleEntity}</p>
       </div>
       `
