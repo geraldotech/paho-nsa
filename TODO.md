@@ -69,16 +69,15 @@
 
 # LAST REVISION
 
-- [ ] abrir no /official-relations
 - [x] Trocar string: Main work activities -> Main areas of work (espanhol ta ok)
 - [x] Na parte "Governance & formal relations", os subtitulos devem ser: 
     1: Governing body members and affiliations / Miembros y afiliaciones del órgano rector
     2: UN & NGOs in Formal Relations with the NSA / Naciones Unidas y ONG en relaciones formales con la NSA
-- [x] labels: trazer os bullet points um pouco pra direita(?)
+- [x] labels: trazer os bullet points um pouco pra direita
 - [x] em "NSA Profile" remover "Planned activities and expected results for the selected cycle."
 - [x] "Activities carried out in the past three years." tem que ir acima do Goals/Strategic Plan. 
-- [x] Quando for "Progress Report", também tem que estar acima do "Goals/Strategic Plan", porém o titulo muda para: "Activities carried out over the past year". Na versão Espanhol ficou 'Actividades realizadas durante el último año'
-- [x] E quando for "New Application", mantê-lo também acima de "Goals/Strategic Plan", porém o subtitulo é: "Activities carried out over the past two years"  Na versão Espanhol ficou 'Atividades realizadas nos últimos dois anos'
+- [x] Quando for "Progress Report", também tem que estar acima do "Goals/Strategic Plan", porém o titulo muda para: "Activities carried out over the past year". 
+- [x] E quando for "New Application", mantê-lo também acima de "Goals/Strategic Plan", porém o subtitulo é: "Activities carried out over the past two years"
 - [x] Replace "Goals" por "Sustainable Health Agenda for the Americas 2018–2030" / "Agenda de Salud Sostenible para las Américas 2018–2030" 
 - [x] Replace "Strategic Plan" por "PAHO Strategic Plan 2020 - 2025" / "Plan Estratégico de la OPS 2020–2025"
 - [x] Para ambos Activity e Workplan, a ordem deve ser Description of activity, Direct results, Responsible entity
@@ -93,24 +92,39 @@
         3: "ResponsibleEntity" (ResponsibleEntity)
 - [x] Logo acima do "NSA Profile", colocar a mesma "Note: The information has been provided direclty...". Manter a original tambem, so agregar mais uma la em cima.
 - [x] Verificar que o numero de todas as barras saiam corretamente. Por exemplo: APHA - barra laranja
-- [?] Quando é "New Application", a parte do Workplan está vindo vazia. Exemplo: Clean Air Institute (CAI) (o object key DescriptionENG está vindo vazio, mas Description não, contudo o UNITE Parliamentarians isso não acontece)
 - [x] Na parte de Workplan, não deve sair este "Health Agenda: -". Deve remover "Health Agenda: -". 
     nota: em geral, essa ordem aplica-se pra tudo
 - [x] Claro -> Limpiar
-- [x] Quando for "Progress Report", não mostrar as seções "Description" & "Governance & formal relations". Por exemplo, o APHA, que é um Progress Report, não deve mostrar estas seções: 
-<img width="2718" height="1330" alt="image" src="https://github.com/user-attachments/assets/58d6fe40-a5eb-4a9f-88d7-6336925119c6" />
+- [x] remover o nome da pessoa que entrou
 
-
-
-### ATE AQUI
-### ATE AQUI
-### ATE AQUI
-
-
+# LAST ROUND:
 
 - [ ] O guarda-chuva em cima de "Activities" está ok. Devemos ter outro para "Workplan". O combo de Goals e Strategic Plan são diferentes para cada um.
+    - [ ] Para o "Activities carried out in the past three years", vem de
+        - card 1: Sustainable Health Agenda for the Americas 2018–2030. Fonte: CollabActHealthAgenda (nsa.json) (ou Eng / Spa)
+        - card 2: PAHO Strategic Plan 2020 - 2025. Fonte: CollabActStrategicPlan (nsa.json) (ou Eng/Spa)
+    - [ ] Para o "Workplan for the next three years"
+        - card 1: Sustainable Health Agenda for the Americas 2018–2030. Fonte: CollabWPActHealthAgenda (nsa.json) OU "HealthAgenda" (workplan.json) (ou Eng/Spa)
+        - card 2: PAHO Strategic Plan 2020 - 2025. Fonte: CollabWPActStrategicPlan (nsa.json) OU "StrategicPlan" (workplan.json) (ou Eng/Spa)
 
-- [ ] Quando for "Progress Report", remover esta parte "user has provided the following results". Lembrar que a mesma ordem tem que aparecer aqui tambem eg: 
+- [x] Quando for "Progress Report", remover esta parte "user has provided the following results". Lembrar que a mesma ordem tem que aparecer aqui tambem eg: 
     1: "Description" (Description)
     2: "ExpectedResults" (Expected Results)
     3: "ResponsibleEntity" (ResponsibleEntity)
+
+- [ ] activity ainda falta trocar "Entity" por "Responsible Entity". Dar uma conferida extra pra ver se todos os "Entity" foram trocados por "Responsible Entity" (tambem checar o espanhol: Entidad responsable)
+- [ ] Algumas vezes, os campos do Workplan estao vindo vazios (testar com os tres tipos de submissao). Exemplo: Clean Air Institute (CAI) (ingles: ou Description ou DescriptionENG / espanhol: DescriptionESP somente) - se tiver vazio, so lamento
+- [ ] Quando é "New Application", bajo "Colaboración con la OPS", "Atividades realizadas nos últimos dois anos" sale en Portugues. reemplazar por Espanol: "Actividades realizadas en los últimos dos años"
+- [ ] Quando for Progress report, o disclaimer de baixo pode ser escondido. 
+- [ ] Quando é Progress report, o Direct Results esta puxando de um campo equivocado. (ENG: DirectResults / DirectResultsENG .... SPA: DirectResultsSPA) fonte: activity.json
+- [ ] Na parte de "Focal points": trocar "Focal point role" por "Focal point title", e em espanhol deve ser: "Cargo del punto focal"
+- [ ] trocar string: Miembros y afiliaciones del órgano rector -> Miembros del órgano de governanza y afiliaciones
+- [ ] trocar string: Naciones Unidas y ONG en relaciones formales con la NSA -> Naciones Unidas y ONG en relaciones formales con el ANE
+- [ ] Quando põe-se a página em Espanhol, os nomes da NSA na parte de búsca também tem que estar em espanhol. No momento, está em inglês (ps: o titulo em espanhol vem de TitleENGSPA)
+- [ ] Há casos em que há mais de um PAHO Focal Point. Nestes casos, temos que trazer todos, eg: Instituto del Aire Limpio. O mesmos nao acontece com a NSA, somente PAHO. 
+- [ ] No filtro, Type of Submission tem que ser a primeira opção. Logo depois, Collaboration period, Organization type
+
+### ATE AQUI
+
+- [ ] abrir no /official-relations
+- [ ] escapeHtml XSS
