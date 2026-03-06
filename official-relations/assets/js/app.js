@@ -248,6 +248,10 @@ function render() {
 
   /**
    * =================  Collaboration with PAHO - Activities carried out in the past three years  ======================
+   */
+
+  /**
+   * @section strategic Plans
    * @card 01: Sustainable Health Agenda for the Americas 2018–2030
    * @find from CollabActHealthAgenda, CollabWPActHealthAgenda_txtENG e CollabWPActHealthAgenda_txtSPA
    */
@@ -257,46 +261,9 @@ function render() {
   const healthAgendaNormalized = normalizeObjects(collabActHealthAgendaFinal)
   rendercollabWPActHealthAgendaObj(healthAgendaNormalized)
 
-  function normalizeObjects(value) {
-    if (value == null) return []
-
-    const items = Array.isArray(value) ? value : [value]
-
-    return items
-      .flatMap((item) => {
-        if (item == null) return []
-
-        // se já vier objeto com Label
-        if (typeof item === 'object' && item.Label) {
-          return [item]
-        }
-
-        // se não for string, converte
-        if (typeof item !== 'string') {
-          return [{ Label: String(item).trim() }].filter((x) => x.Label)
-        }
-
-        const text = item.trim()
-        if (!text) return []
-
-        // se tiver ; separa em vários
-        if (text.includes(';')) {
-          return text
-            .split(';')
-            .map((part) => part.trim())
-            .filter(Boolean)
-            .map((part) => ({ Label: part }))
-        }
-
-        // se não tiver ; retorna 1 item só
-        return [{ Label: text }]
-      })
-      .filter((item) => item.Label)
-  }
-
   /**
-   * @section Collaboration with PAHO - strategic Plans
-   * @card 02: PAHO Strategic Plan 2020 - 2025
+   * @section
+   * @card 02: PAHO Strategic Plan 2020 - 2025 | strategic Plans
    * @find from CollabActStrategicPlan, CollabWPActStrategicPlan_txtENG e CollabWPActStrategicPlan_txtSPA
    */
 
@@ -304,18 +271,9 @@ function render() {
   const strategicSPA = nsa.CollabWPActStrategicPlan_txtSPA ?? null
   const strategicFinal = currentLang === 'en' ? strategicENG : strategicSPA
   const strategicPlansNormalized = normalizeObjects(strategicFinal)
-
-  console.log(`strategicPlansNormalized`, strategicPlansNormalized)
-
+  /*   console.log(`strategicFinal`, strategicFinal)
+  console.log(`strategicPlansNormalized`, strategicPlansNormalized) */
   renderStrategicPlan(strategicPlansNormalized)
-
-  /* if (DEBUG) {
-    console.groupCollapsed('CollabWPActHealthAgenda ')
-    console.log(`Goals preferredAgendaFromNsa`, preferredAgendaFromNsa)
-    console.log(`Goals preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
-    console.warn(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
-    console.groupEnd()
-  } */
 
   /**
    * @section Collaboration with PAHO - activities
@@ -893,6 +851,43 @@ function handleOutsideSearchClick(event) {
   el.searchInput.value = ''
   filters.term = ''
   clearSearchResults()
+}
+
+// normaliza strings para array
+function normalizeObjects(value) {
+  if (value == null) return []
+
+  const items = Array.isArray(value) ? value : [value]
+
+  return items
+    .flatMap((item) => {
+      if (item == null) return []
+
+      if (typeof item === 'object' && item.Label) {
+        return [item]
+      }
+
+      // se não for string, converte
+      if (typeof item !== 'string') {
+        return [{ Label: String(item).trim() }].filter((x) => x.Label)
+      }
+
+      const text = item.trim()
+      if (!text) return []
+
+      // se tiver ; separa em vários
+      if (text.includes(';')) {
+        return text
+          .split(';')
+          .map((part) => part.trim())
+          .filter(Boolean)
+          .map((part) => ({ Label: part }))
+      }
+
+      // se não tiver ; retorna 1 item só
+      return [{ Label: text }]
+    })
+    .filter((item) => item.Label)
 }
 
 /**
