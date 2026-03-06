@@ -288,6 +288,7 @@ function render() {
   const preferredAgendaFromNsa1 = nsa.CollabWPActHealthAgenda ?? nsa.CollabWPActHealthAgenda_txtENG ?? allWorkplans?.HealthAgendaENG
   const preferredAgendaFromWorkplan = nsa.CollabWPActHealthAgenda_txtSPA ?? allWorkplans?.HealthAgendaSPA ?? allWorkplans.CollabWPActHealthAgenda_txtSPA
   const card03fim = currentLang === 'en' ? preferredAgendaFromNsa1 : preferredAgendaFromWorkplan
+  console.log(`normalizeObjects(card03fim)`, normalizeObjects(card03fim))
   renderCard03(normalizeObjects(card03fim))
 
   /**
@@ -295,9 +296,10 @@ function render() {
    * @card 04: PAHO Strategic Plan 2020 - 2025 | strategic Plans
    * @find Fonte: CollabWPActStrategicPlan (nsa.json) OU "StrategicPlan" (workplan.json) (ou Eng/Spa)
    */
-  const preferredStrategicNsa1ENG = nsa.CollabWPActHealthAgenda ?? nsa.CollabWPActHealthAgenda_txtENG ?? allWorkplans?.HealthAgendaENG
-  const preferredStrategicWorkplanSPA = nsa.CollabWPActHealthAgenda_txtSPA ?? allWorkplans?.HealthAgendaSPA ?? allWorkplans.CollabWPActHealthAgenda_txtSPA
-  const card04fim = currentLang === 'en' ? preferredStrategicNsa1ENG : preferredStrategicWorkplanSPA
+  const preferredStrategicNsa1ENG = nsa.CollabWPActStrategicPlan ?? nsa.CollabWPActStrategicPlan_txtENG ?? workplan.StrategicPlan
+  const preferredStrategicSPA = nsa.CollabWPActStrategicPlan_txtSPA ?? allWorkplans?.HealthAgendaSPA ?? allWorkplans.CollabWPActHealthAgenda_txtSPA
+  const card04fim = currentLang === 'en' ? preferredStrategicNsa1ENG : preferredStrategicSPA
+  console.log(`normalizeObjects(card04fim)`, normalizeObjects(card04fim))
   renderCard04(normalizeObjects(card04fim))
 
   applyLanguage()
