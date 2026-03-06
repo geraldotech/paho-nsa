@@ -248,15 +248,16 @@ function render() {
 
   /**
    * =================  Collaboration with PAHO - Activities carried out in the past three years  ======================
-   * card 01: Sustainable Health Agenda for the Americas 2018–2030
+   * @card 01: Sustainable Health Agenda for the Americas 2018–2030
+   * @find from CollabActHealthAgenda, CollabWPActHealthAgenda_txtENG e CollabWPActHealthAgenda_txtSPA
    */
   const collabActHealthAgendaENG = nsa.CollabActHealthAgenda ?? nsa.CollabWPActHealthAgenda_txtENG ?? null
   const collabActHealthAgendaSPA = nsa.CollabWPActHealthAgenda_txtSPA ?? null
   const collabActHealthAgendaFinal = currentLang === 'en' ? collabActHealthAgendaENG : collabActHealthAgendaSPA
-  const healthAgendaNormalized = normalizeHealthAgenda(collabActHealthAgendaFinal)
+  const healthAgendaNormalized = normalizeObjects(collabActHealthAgendaFinal)
   rendercollabWPActHealthAgendaObj(healthAgendaNormalized)
 
-  function normalizeHealthAgenda(value) {
+  function normalizeObjects(value) {
     if (value == null) return []
 
     const items = Array.isArray(value) ? value : [value]
@@ -293,9 +294,21 @@ function render() {
       .filter((item) => item.Label)
   }
 
-  // card02: PAHO Strategic Plan 2020 - 2025
+  /**
+   * @section Collaboration with PAHO - strategic Plans
+   * @card 02: PAHO Strategic Plan 2020 - 2025
+   * @find from CollabActStrategicPlan, CollabWPActStrategicPlan_txtENG e CollabWPActStrategicPlan_txtSPA
+   */
 
-  //  rendercollabWPActHealthAgendaObj(collabActHealthAgendaFinal)
+  const strategicENG = nsa.CollabActStrategicPlan ?? nsa.CollabWPActStrategicPlan_txtENG ?? null
+  const strategicSPA = nsa.CollabWPActStrategicPlan_txtSPA ?? null
+  const strategicFinal = currentLang === 'en' ? strategicENG : strategicSPA
+  const strategicPlansNormalized = normalizeObjects(strategicFinal)
+
+  console.log(`strategicPlansNormalized`, strategicPlansNormalized)
+
+  renderStrategicPlan(strategicPlansNormalized)
+
   /* if (DEBUG) {
     console.groupCollapsed('CollabWPActHealthAgenda ')
     console.log(`Goals preferredAgendaFromNsa`, preferredAgendaFromNsa)
@@ -314,41 +327,11 @@ function render() {
     renderActivities(allActivities)
   }
 
-  /**
-   * @section Collaboration with PAHO - strategic Plans
-   * card: PAHO Strategic Plan 2020 - 2025
-   */
-  const strategicPlanFromNSA = currentLang == 'en' ? nsa.CollabActStrategicPlan : nsa.CollabActStrategicPlan // vem como string
-  // const strategicPlanFromWork = currentLang == 'en' ? allWorkplans[0].StrategicPlanENG : allWorkplans[0].StrategicPlanSPA // pode vim como um array mas so é preciso do first index
-
-  /* let renderStrategicPlanOBJ = [strategicPlanFromNSA] || strategicPlanFromWork || null
-
-  renderStrategicPlanOBJ = renderStrategicPlanOBJ.flatMap((item) => {
-    if (typeof item !== 'string') return [item]
-    if (item.includes(';')) {
-      return item
-        .split(';')
-        .map((part) => part.trim())
-        .filter(Boolean)
-    }
-
-    if ((item.match(/Goal\s+\d+:/g) || []).length > 1) {
-      return item
-        .split(/(?=Goal\s+\d+:)/)
-        .map((part) => part.trim())
-        .filter(Boolean)
-    }
-
-    return [item]
-  })
-
-  if (DEBUG) {
+  /*   if (DEBUG) {
     console.log(`strategicPlanFromNSA =>`, strategicPlanFromNSA)
     console.log(`strategicPlanFromWork =>`, strategicPlanFromWork)
     console.log(`renderStrategicPlanOBJ final`, renderStrategicPlanOBJ)
-  } */
-  console.log(`strategicPlanFromNSA`, strategicPlanFromNSA)
-  renderStrategicPlan(strategicPlanFromNSA)
+  }  */
 
   /* === NSA workplans children === */
   renderWorkplans(allWorkplans)
