@@ -13,7 +13,7 @@ for (let i = 0, len = nasasData.length; i < len; i += 1) {
 
 /* === State === */
 let currentLang = 'en'
-let currentId = 51 // 51 default value or fallback is first
+let currentId = 35 // 51 default value or fallback is first
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true // modo dev
@@ -47,7 +47,7 @@ const el = {
   typeOfSubmissionTypeInput: document.getElementById('typeOfSubmission-type-input'),
   organizationTypeInput: document.getElementById('organization-type-input'),
   collabWPActHealthAgendaObj: document.getElementById('collabWPActHealthAgendaObj'),
-  strategicPlan: document.getElementById('strategicPlan')
+  strategicPlan: document.getElementById('strategicPlan'),
 }
 
 init()
@@ -221,7 +221,8 @@ function render() {
   if (isProcessReportType) {
     // when is progress report the title is different
     setText('collabSubtitle', UI[currentLang].collabSubtitleProgresReport)
-  } else if (isNewAppType) { // title is different
+  } else if (isNewAppType) {
+    // title is different
     setText('collabSubtitle', UI[currentLang].collabSubtitleNewApp)
   } else {
     setText('collabSubtitle', UI[currentLang].collabSubtitle)
@@ -246,41 +247,62 @@ function render() {
   }
 
   /**
-   * =================  Collaboration with PAHO - activities ======================
-   * Find CollabWPActHealthAgenda from nsa || Find HealthAgenda from allWorkplans (Goals - Metas)
+   * =================  Collaboration with PAHO - Activities carried out in the past three years  ======================
+   * card 01: Sustainable Health Agenda for the Americas 2018–2030
    */
-  const preferredAgendaFromNsa = currentLang === 'en' ? nsa.CollabWPActHealthAgenda_txtENG : nsa.CollabWPActHealthAgenda_txtSPA
-  const preferredAgendaFromWorkplan = currentLang === 'en' ? allWorkplans?.HealthAgendaENG : allWorkplans?.HealthAgendaSPA
-  const collabWPActHealthAgendaSource = preferredAgendaFromNsa || preferredAgendaFromWorkplan
+  const collabActHealthAgendaENG = nsa.CollabActHealthAgenda ?? nsa.CollabWPActHealthAgenda_txtENG ?? null
+  const collabActHealthAgendaSPA = nsa.CollabWPActHealthAgenda_txtSPA ?? null
+  const collabActHealthAgendaFinal = currentLang === 'en' ? collabActHealthAgendaENG : collabActHealthAgendaSPA
+  const healthAgendaNormalized = normalizeHealthAgenda(collabActHealthAgendaFinal)
+  rendercollabWPActHealthAgendaObj(healthAgendaNormalized)
 
-  let collabWPActHealthAgendaObj = collabWPActHealthAgendaSource ? (Array.isArray(collabWPActHealthAgendaSource) ? collabWPActHealthAgendaSource : [collabWPActHealthAgendaSource]) : []
+  function normalizeHealthAgenda(value) {
+    if (value == null) return []
 
-  collabWPActHealthAgendaObj = collabWPActHealthAgendaObj.flatMap((item) => {
-    if (typeof item !== 'string') return [item]
-    if (item.includes(';')) {
-      return item
-        .split(';')
-        .map((part) => part.trim())
-        .filter(Boolean)
-    }
+    const items = Array.isArray(value) ? value : [value]
 
-    if ((item.match(/Goal\s+\d+:/g) || []).length > 1) {
-      return item
-        .split(/(?=Goal\s+\d+:)/)
-        .map((part) => part.trim())
-        .filter(Boolean)
-    }
+    return items
+      .flatMap((item) => {
+        if (item == null) return []
 
-    return [item]
-  })
-  rendercollabWPActHealthAgendaObj(collabWPActHealthAgendaObj)
-  if (DEBUG) {
+        // se já vier objeto com Label
+        if (typeof item === 'object' && item.Label) {
+          return [item]
+        }
+
+        // se não for string, converte
+        if (typeof item !== 'string') {
+          return [{ Label: String(item).trim() }].filter((x) => x.Label)
+        }
+
+        const text = item.trim()
+        if (!text) return []
+
+        // se tiver ; separa em vários
+        if (text.includes(';')) {
+          return text
+            .split(';')
+            .map((part) => part.trim())
+            .filter(Boolean)
+            .map((part) => ({ Label: part }))
+        }
+
+        // se não tiver ; retorna 1 item só
+        return [{ Label: text }]
+      })
+      .filter((item) => item.Label)
+  }
+
+  // card02: PAHO Strategic Plan 2020 - 2025
+
+  //  rendercollabWPActHealthAgendaObj(collabActHealthAgendaFinal)
+  /* if (DEBUG) {
     console.groupCollapsed('CollabWPActHealthAgenda ')
     console.log(`Goals preferredAgendaFromNsa`, preferredAgendaFromNsa)
     console.log(`Goals preferredAgendaFromWorkplan`, preferredAgendaFromWorkplan)
     console.warn(`collabWPActHealthAgendaObj`, collabWPActHealthAgendaObj)
     console.groupEnd()
-  }
+  } */
 
   /**
    * @section Collaboration with PAHO - activities
@@ -294,12 +316,12 @@ function render() {
 
   /**
    * @section Collaboration with PAHO - strategic Plans
-   * Find CollabWPActStrategicPlan from nsa || StrategicPlanENG from allWorkplans
+   * card: PAHO Strategic Plan 2020 - 2025
    */
-  const strategicPlanFromNSA = currentLang == 'en' ? nsa.CollabWPActStrategicPlan_txtENG : nsa.CollabWPActStrategicPlan_txtSPA // vem como string
-  const strategicPlanFromWork = currentLang == 'en' ? allWorkplans[0].StrategicPlanENG : allWorkplans[0].StrategicPlanSPA // pode vim como um array mas so é preciso do first index
+  const strategicPlanFromNSA = currentLang == 'en' ? nsa.CollabActStrategicPlan : nsa.CollabActStrategicPlan // vem como string
+  // const strategicPlanFromWork = currentLang == 'en' ? allWorkplans[0].StrategicPlanENG : allWorkplans[0].StrategicPlanSPA // pode vim como um array mas so é preciso do first index
 
-  let renderStrategicPlanOBJ = [strategicPlanFromNSA] || strategicPlanFromWork || null
+  /* let renderStrategicPlanOBJ = [strategicPlanFromNSA] || strategicPlanFromWork || null
 
   renderStrategicPlanOBJ = renderStrategicPlanOBJ.flatMap((item) => {
     if (typeof item !== 'string') return [item]
@@ -324,9 +346,9 @@ function render() {
     console.log(`strategicPlanFromNSA =>`, strategicPlanFromNSA)
     console.log(`strategicPlanFromWork =>`, strategicPlanFromWork)
     console.log(`renderStrategicPlanOBJ final`, renderStrategicPlanOBJ)
-  }
-
-  renderStrategicPlan(renderStrategicPlanOBJ)
+  } */
+  console.log(`strategicPlanFromNSA`, strategicPlanFromNSA)
+  renderStrategicPlan(strategicPlanFromNSA)
 
   /* === NSA workplans children === */
   renderWorkplans(allWorkplans)
@@ -349,13 +371,6 @@ function renderActivities(list) {
       const directResults = currentLang === 'en' ? w.DirectResultsENG : w.DirectResultsSPA
       const DescriptionENG = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
 
-      /*  return `
-        <div class="item">
-          <p><strong>${UI[currentLang].descTitle}:</strong> ${DescriptionENG} </p>           
-          <p><strong>${UI[currentLang].thResults}:</strong> ${directResults}</p>
-          <p><strong>${UI[currentLang].thResp}:</strong> : ${w.Entity}</p>          
-        </div>
-      ` */
       return `
       <div class="item">
         <p><strong>${UI[currentLang].descTitle}:</strong>  ${DescriptionENG}</p>
@@ -383,13 +398,6 @@ function renderActivitiesFromWorkplan(list) {
       const ProgressReport = currentLang === 'en' ? w.ProgressReport : w.ProgressReport
       //console.log(`ProgressReport to cut`, ProgressReport)
 
-      /*    return `
-        <div class="item">
-          <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>           
-          <p><span class="lead">${UI[currentLang].thResults}:</span> ${directResults}</p>          
-          <p><span class="lead">ProgressReport:</span> ${ProgressReport}</p>
-        </div>
-      ` */
       return `
       <div class="item">
         <p><strong>${UI[currentLang].descTitle}:</strong>  ${ProgressReport}</p>
@@ -419,15 +427,6 @@ function renderWorkplans(list) {
       const duration = currentLang === 'en' ? w.DurationENG : w.DurationSPA
       const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
       const ExpectedResults = currentLang === 'en' ? w.ExpectedResultsENG : w.ExpectedResultsSPA
-      /* 
-      return `
-        <div class="item">         
-          <h4>${UI[currentLang].thEntity}: ${w.ResponsibleEntity}</h4>
-          ${dur ? `<p class="meta"><strong>${UI[currentLang].Duration}:</strong> ${escapeHtml(dur)}</p>` : ''}
-          <p>${escapeHtml(desc || '').replace(/\n/g, '<br/>')}</p>
-          <p>${UI[currentLang].HealthAgenda}: ${HealthAgenda ? HealthAgenda : '-'}</p>
-        </div>
-      ` */
 
       return `
       <div class="item">
@@ -456,7 +455,7 @@ function rendercollabWPActHealthAgendaObj(list) {
       ?.map((val) => {
         return `
       <ul class="list-tag">
-          <li  class="tag">${val}</li>
+          <li  class="tag">${val.Label}</li>
       </ul>`
       })
       .join('')}
@@ -479,7 +478,7 @@ function renderStrategicPlan(list) {
       ?.map((val) => {
         return `
       <ul class="list-tag">
-        <li class="tag">${val}</li>
+        <li class="tag">${val.Label}</li>
       </ul>`
       })
       .join('')}

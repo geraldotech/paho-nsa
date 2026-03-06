@@ -100,9 +100,14 @@
 # LAST ROUND:
 
 - [ ] O guarda-chuva em cima de "Activities" está ok. Devemos ter outro para "Workplan". O combo de Goals e Strategic Plan são diferentes para cada um.
-    - [ ] Para o "Activities carried out in the past three years", vem de
-        - card 1: Sustainable Health Agenda for the Americas 2018–2030. Fonte: CollabActHealthAgenda (nsa.json) (ou Eng / Spa)
-        - card 2: PAHO Strategic Plan 2020 - 2025. Fonte: CollabActStrategicPlan (nsa.json) (ou Eng/Spa)
+    - [x] Para o "Activities carried out in the past three years", vem de
+        - [x] card 1: Sustainable Health Agenda for the Americas 2018–2030. Fonte: CollabActHealthAgenda (nsa.json) (ou Eng / Spa)
+
+
+
+        - [x] card 2: PAHO Strategic Plan 2020 - 2025. Fonte: CollabActStrategicPlan (nsa.json) (ou Eng/Spa)
+
+
     - [ ] Para o "Workplan for the next three years"
         - card 1: Sustainable Health Agenda for the Americas 2018–2030. Fonte: CollabWPActHealthAgenda (nsa.json) OU "HealthAgenda" (workplan.json) (ou Eng/Spa)
         - card 2: PAHO Strategic Plan 2020 - 2025. Fonte: CollabWPActStrategicPlan (nsa.json) OU "StrategicPlan" (workplan.json) (ou Eng/Spa)
