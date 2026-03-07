@@ -1,3 +1,7 @@
+/**
+ * @timestamp 06/03/2025 10:17
+ */
+
 import UI from './ui-language.js'
 const [nasasData, activity, workplan] = await Promise.all([
   fetchJson('./assets/database/nsa.json'),
@@ -13,7 +17,7 @@ for (let i = 0, len = nasasData.length; i < len; i += 1) {
 
 /* === State === */
 let currentLang = 'en'
-let currentId = 35 // 51 default value or fallback is first
+let currentId = 18 // 51 default value or fallback is first
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true // modo dev
@@ -50,6 +54,7 @@ const el = {
   strategicPlan: document.getElementById('strategicPlan'),
   card03: document.getElementById('card03'),
   card04: document.getElementById('card04'),
+  landingDisclaimer2: document.getElementById('landingDisclaimer2'),
 }
 
 init()
@@ -195,25 +200,41 @@ function render() {
   }
   const allActivities = activity.filter((a) => String(a.ParentID) === String(currentId))
   const allWorkplans = workplan.filter((w) => String(w.ParentID) === String(currentId))
+
+  // if necessary add aqui tratativa se todos os 3 relacionamentos foram encontrados
+  if (DEBUG) {
+    console.groupCollapsed('DEBUG ')
+    console.log('nsa', nsa)
+    console.log('nsa', nasas)
+    console.log('Collaboration with PAHO activities', allActivities)
+    console.log('Workplans', allWorkplans)
+    console.groupEnd()
+  }
+
   // if necessary add aqui tratativa se todos os 3 relacionamentos foram encontrados
 
   /**
    * =============================================  NSA Profile =============================================
-   * Find NSAFocalpoint from allActivities || Find allWorkplans
+   * Find NSAFocalpoint from allActivities (activity.json) ||  allWorkplans (workplans.json)
    */
   const firstActivityWithNSAFocalpoint = allActivities.find((item) => item && item.NSAFocalpoint)
   const segundActivityWithNSAFocalpoint = allWorkplans.find((item) => item && item.NSAFocalpoint)
   let nsaFocalpoint = firstActivityWithNSAFocalpoint?.NSAFocalpoint || segundActivityWithNSAFocalpoint?.NSAFocalpoint || null
 
-  /* === NSA is Process ReportType || NewAppType ?  */
+/*   console.log(`firstActivityWithNSAFocalpoint`, firstActivityWithNSAFocalpoint.NSAFocalpoint)
+  console.log(`segundActivityWithNSAFocalpoint`, segundActivityWithNSAFocalpoint.NSAFocalpoint) */
+  if (DEBUG) console.log(`nsaFocalpoint`, nsaFocalpoint)
+
+  /* === NSA is Process ReportType || NewAppType === */
   const isProcessReportType = nsa.TypeOfSubmission.includes('Progress Report - Reporte de Progreso')
   const isNewAppType = nsa.TypeOfSubmission.includes('New Application - Nueva Aplicación')
-
   renderNSAProfile(nsa, nsaFocalpoint, isProcessReportType)
 
+  el.landingDisclaimer2.classList.remove('none') // reseta o disclaimer2
   if (isProcessReportType) {
     // when is progress report the title is different
     setText('collabSubtitle', UI[currentLang].collabSubtitleProgresReport)
+    el.landingDisclaimer2.classList.add('none') // hide o disclaimer2
   } else if (isNewAppType) {
     // title is different
     setText('collabSubtitle', UI[currentLang].collabSubtitleNewApp)
@@ -240,13 +261,12 @@ function render() {
   }
 
   /**
-   * =================  Collaboration with PAHO - Activities carried out in the past three years  ======================
+   * =================  Collaboration with PAHO - sessão Activities  ======================
    */
-
   /**
-   * @section strategic Plans
    * @card 01: Sustainable Health Agenda for the Americas 2018–2030
-   * @find from CollabActHealthAgenda, CollabWPActHealthAgenda_txtENG e CollabWPActHealthAgenda_txtSPA
+   * @find from CollabActHealthAgenda(nsa)
+   * @missing referencia aos obj em SPA
    */
   const collabActHealthAgendaENG = nsa.CollabActHealthAgenda ?? nsa.CollabActHealthAgenda ?? null
   const collabActHealthAgendaSPA = nsa.CollabActHealthAgenda ?? null
@@ -255,9 +275,9 @@ function render() {
   rendercollabWPActHealthAgendaObj(healthAgendaNormalized)
 
   /**
-   * @section
    * @card 02: PAHO Strategic Plan 2020 - 2025 | strategic Plans
-   * @find from CollabActStrategicPlan, CollabWPActStrategicPlan_txtENG e CollabWPActStrategicPlan_txtSPA
+   * @find from CollabActStrategicPlan(nsa)
+   * @missing referencia aos obj em SPA
    */
   const strategicENG = nsa.CollabActStrategicPlan ?? nsa.CollabActStrategicPlan ?? null
   const strategicSPA = nsa.CollabActStrategicPlan ?? null
@@ -266,7 +286,7 @@ function render() {
   renderStrategicPlan(strategicPlansNormalized)
 
   /**
-   * @section Collaboration with PAHO - activities
+   * @card render activities
    * when is progress report get activities from workplan
    */
   if (isProcessReportType) {
@@ -275,32 +295,34 @@ function render() {
     renderActivities(allActivities)
   }
 
-  /* === NSA workplans === */
-  renderWorkplans(allWorkplans)
-
-  /* === NSA workplans children === */
-
   /**
-   * @section
-   * @card 03: PAHO Strategic Plan 2020 - 2025 | strategic Plans
-   * @find Fonte: CollabWPActHealthAgenda (nsa.json) OU "HealthAgenda" (workplan.json) (ou Eng/Spa)
+   * =================  Collaboration with PAHO - sessão workplans  ======================
    */
-  const preferredAgendaFromNsa1 = nsa.CollabWPActHealthAgenda ?? nsa.CollabWPActHealthAgenda_txtENG ?? allWorkplans?.HealthAgendaENG
-  const preferredAgendaFromWorkplan = nsa.CollabWPActHealthAgenda_txtSPA ?? allWorkplans?.HealthAgendaSPA ?? allWorkplans.CollabWPActHealthAgenda_txtSPA
-  const card03fim = currentLang === 'en' ? preferredAgendaFromNsa1 : preferredAgendaFromWorkplan
-  console.log(`normalizeObjects(card03fim)`, normalizeObjects(card03fim))
+  /**
+   * @card 03: PAHO Strategic Plan 2020 - 2025 | strategic Plans
+   * @find CollabWPActHealthAgenda (nsa.json) OU "HealthAgenda" (usar indice 0) (workplan.json) (ou Eng/Spa)
+   */
+  const preferredAgendaFromNsa1 = nsa.CollabWPActHealthAgenda ?? nsa.CollabWPActHealthAgenda_txtENG ?? allWorkplans[0].HealthAgendaENG
+  console.warn(`allWorkplans[0].HealthAgendaENG`, allWorkplans[0].HealthAgendaENG)
+  const preferredAgendaFromWorkplanSPA = nsa.CollabWPActHealthAgenda_txtSPA ?? allWorkplans?.HealthAgendaSPA ?? allWorkplans.CollabWPActHealthAgenda_txtSPA
+  const card03fim = currentLang === 'en' ? preferredAgendaFromNsa1 : preferredAgendaFromWorkplanSPA
+  // console.log(`normalizeObjects(card03fim)`, normalizeObjects(card03fim))
   renderCard03(normalizeObjects(card03fim))
 
   /**
-   * @section
    * @card 04: PAHO Strategic Plan 2020 - 2025 | strategic Plans
-   * @find Fonte: CollabWPActStrategicPlan (nsa.json) OU "StrategicPlan" (workplan.json) (ou Eng/Spa)
+   * @find CollabWPActStrategicPlan (nsa.json) OU "StrategicPlan" (workplan.json) (ou Eng/Spa)
    */
   const preferredStrategicNsa1ENG = nsa.CollabWPActStrategicPlan ?? nsa.CollabWPActStrategicPlan_txtENG ?? workplan.StrategicPlan
-  const preferredStrategicSPA = nsa.CollabWPActStrategicPlan_txtSPA ?? allWorkplans?.HealthAgendaSPA ?? allWorkplans.CollabWPActHealthAgenda_txtSPA
+  const preferredStrategicSPA = nsa.CollabWPActStrategicPlan_txtSPA ?? allWorkplans[0]?.HealthAgendaSPA ?? allWorkplans.CollabWPActHealthAgenda_txtSPA
   const card04fim = currentLang === 'en' ? preferredStrategicNsa1ENG : preferredStrategicSPA
-  console.log(`normalizeObjects(card04fim)`, normalizeObjects(card04fim))
+  //console.log(`normalizeObjects(card04fim)`, normalizeObjects(card04fim))
   renderCard04(normalizeObjects(card04fim))
+
+  /**
+   * @card render workplans
+   */
+  renderWorkplans(allWorkplans)
 
   applyLanguage()
 }
@@ -332,7 +354,7 @@ function renderActivities(list) {
 }
 
 /**
- * Render Activities from workplan when is Progress Report - Reporte de Progreso
+ * when is Progress Report - Render Activities from workplan.json
  * @return html
  */
 function renderActivitiesFromWorkplan(list) {
@@ -343,9 +365,14 @@ function renderActivitiesFromWorkplan(list) {
 
   el.activities.innerHTML = list
     .map((w) => {
-      const directResults = currentLang === 'en' ? w.StrategicPlanENG : w.StrategicPlanSPA
-      const ProgressReport = currentLang === 'en' ? w.ProgressReport : w.ProgressReport
-      //console.log(`ProgressReport to cut`, ProgressReport)
+      console.log('pra renderActivitiesFromWorkplan', w)
+
+      const directResultsENG = w.DirectResults ?? w.DirectResultsENG ?? null
+      const directResultsSPA = w.StrategicPlanENG ?? w.DirectResultsSPA ?? null
+      const directResults = currentLang === 'en' ? directResultsENG : directResultsSPA
+
+      const ProgressReport = currentLang === 'en' ? getTextAfterLastBold(w.ProgressReport) : getTextAfterLastBold(w.ProgressReport)
+      // console.log(`ProgressReport formatado`, ProgressReport)
 
       return `
       <div class="item">
@@ -358,12 +385,26 @@ function renderActivitiesFromWorkplan(list) {
     .join('')
 }
 
+function getTextAfterLastBold(str) {
+  const tag = '</b>'
+  const index = str.lastIndexOf(tag)
+
+  if (index === -1) return str
+
+  // pega o texto após o último </b>
+  let text = str.slice(index + tag.length)
+
+  // remove qualquer tag HTML
+  text = text.replace(/<[^>]*>/g, '')
+
+  return text.trim()
+}
+
 /**
  * Render workplans
  * @return html
  */
 function renderWorkplans(list) {
-  console.log(`renderWorkplans`, list)
   if (!list.length) {
     el.workplans.innerHTML = `<p class="meta">No workplans found for this nas.</p>`
     return
@@ -371,44 +412,20 @@ function renderWorkplans(list) {
 
   el.workplans.innerHTML = list
     .map((w) => {
-      const desc = currentLang === 'en' ? w.DescriptionENG : w.DescriptionSPA
-      const desc2 = currentLang === 'en' ? w.Description : w.Description
-      const duration = currentLang === 'en' ? w.DurationENG : w.DurationSPA
-      const HealthAgenda = currentLang === 'en' ? w.HealthAgendaENG : w.HealthAgendaSPA
+      const descENG = w.Description ?? w.DescriptionENG
+      const descSPA = w.DescriptionSPA ?? '-'
+      const description = currentLang === 'en' ? descENG : descSPA
       const ExpectedResults = currentLang === 'en' ? w.ExpectedResultsENG : w.ExpectedResultsSPA
 
       return `
       <div class="item">
-        <p><strong>${UI[currentLang].descTitle}:</strong>  ${escapeHtml(desc || '-').replace(/\n/g, '<br/>')}</p>
-        <p><strong>${UI[currentLang].thResults}:</strong> ${ExpectedResults || '-'}</p>
+        <p><strong>${UI[currentLang].descTitle}:</strong>  ${escapeHtml(description || '-').replace(/\n/g, '<br/>')}</p>
+        <p><strong>${UI[currentLang].thExpectResults}:</strong> ${ExpectedResults || '-'}</p>
         <p><strong>${UI[currentLang].thResp}:</strong> ${w.ResponsibleEntity}</p>
       </div>
       `
     })
     .join('')
-}
-
-/**
- * Render rendercollabWPActHealthAgendaObj (Collaboration with PAHO card)
- * @return html
- */
-function rendercollabWPActHealthAgendaObj(list) {
-  if (!list) {
-    el.collabWPActHealthAgendaObj.innerHTML = `<p class="meta">No Health Agenda found for this nas.</p>`
-    return
-  }
-
-  el.collabWPActHealthAgendaObj.innerHTML = `
-    <h3>${UI[currentLang].Goal}</h3>
-    ${list
-      ?.map((val) => {
-        return `
-      <ul class="list-tag">
-          <li  class="tag">${val.Label}</li>
-      </ul>`
-      })
-      .join('')}
-  `
 }
 
 /**
@@ -457,6 +474,28 @@ function renderCard04(list) {
   `
 }
 
+/**
+ * Render rendercollabWPActHealthAgendaObj (Collaboration with PAHO card)
+ * @return html
+ */
+function rendercollabWPActHealthAgendaObj(list) {
+  if (!list) {
+    el.collabWPActHealthAgendaObj.innerHTML = `<p class="meta">No Health Agenda found for this nas.</p>`
+    return
+  }
+
+  el.collabWPActHealthAgendaObj.innerHTML = `
+    <h3>${UI[currentLang].Goal}</h3>
+    ${list
+      ?.map((val) => {
+        return `
+      <ul class="list-tag">
+          <li  class="tag">${val.Label}</li>
+      </ul>`
+      })
+      .join('')}
+  `
+}
 
 /**
  * Render strategicPlan (Collaboration with PAHO card)

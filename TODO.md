@@ -101,30 +101,33 @@
 
 - [ ] O guarda-chuva em cima de "Activities" está ok. Devemos ter outro para "Workplan". O combo de Goals e Strategic Plan são diferentes para cada um.
     - [x] Para o "Activities carried out in the past three years", vem de
-        - [x] card 1: Sustainable Health Agenda for the Americas 2018–2030. Fonte: CollabActHealthAgenda (nsa.json) (ou Eng / Spa)
-        - [x] card 2: PAHO Strategic Plan 2020 - 2025. Fonte: CollabActStrategicPlan (nsa.json) (ou Eng/Spa)
+        - [x] card 1: Sustainable Health Agenda for the Americas 2018–2030. Fonte: `CollabActHealthAgenda` (nsa.json) (ou Eng / Spa)
+        - [x] card 2: PAHO Strategic Plan 2020 - 2025. Fonte: `CollabActStrategicPlan` (nsa.json) (ou Eng/Spa)
 
-    - [ ] Para o "Workplan for the next three years"
-        - card 3: Sustainable Health Agenda for the Americas 2018–2030. Fonte: CollabWPActHealthAgenda (nsa.json) OU "HealthAgenda" (workplan.json) (ou Eng/Spa)
-
-        - card 4: PAHO Strategic Plan 2020 - 2025. Fonte: CollabWPActStrategicPlan (nsa.json) OU "StrategicPlan" (workplan.json) (ou Eng/Spa)
+    - [x] Para o "Workplan for the next three years"
+        - [x] card 3: Sustainable Health Agenda for the Americas 2018–2030. Fonte: CollabWPActHealthAgenda (nsa.json) OU "HealthAgenda" (workplan.json) (ou Eng/Spa)
+        - [x] card 4: PAHO Strategic Plan 2020 - 2025. Fonte: CollabWPActStrategicPlan (nsa.json) OU "StrategicPlan" (workplan.json) (ou Eng/Spa)
 
 - [x] Quando for "Progress Report", remover esta parte "user has provided the following results". Lembrar que a mesma ordem tem que aparecer aqui tambem eg: 
     1: "Description" (Description)
     2: "ExpectedResults" (Expected Results)
     3: "ResponsibleEntity" (ResponsibleEntity)
 
-- [ ] activity ainda falta trocar "Entity" por "Responsible Entity". Dar uma conferida extra pra ver se todos os "Entity" foram trocados por "Responsible Entity" (tambem checar o espanhol: Entidad responsable)
-- [ ] Algumas vezes, os campos do Workplan estao vindo vazios (testar com os tres tipos de submissao). Exemplo: Clean Air Institute (CAI) (ingles: ou Description ou DescriptionENG / espanhol: DescriptionESP somente) - se tiver vazio, so lamento
-- [ ] Quando é "New Application", bajo "Colaboración con la OPS", "Atividades realizadas nos últimos dois anos" sale en Portugues. reemplazar por Espanol: "Actividades realizadas en los últimos dos años"
-- [ ] Quando for Progress report, o disclaimer de baixo pode ser escondido. 
-- [ ] Quando é Progress report, o Direct Results esta puxando de um campo equivocado. (ENG: DirectResults / DirectResultsENG .... SPA: DirectResultsSPA) fonte: activity.json
-- [ ] Na parte de "Focal points": trocar "Focal point role" por "Focal point title", e em espanhol deve ser: "Cargo del punto focal"
-- [ ] trocar string: Miembros y afiliaciones del órgano rector -> Miembros del órgano de governanza y afiliaciones
-- [ ] trocar string: Naciones Unidas y ONG en relaciones formales con la NSA -> Naciones Unidas y ONG en relaciones formales con el ANE
+- [x] activity ainda falta trocar "Entity" por "Responsible Entity". Dar uma conferida extra pra ver se todos os "Entity" foram trocados por "Responsible Entity" (tambem checar o espanhol: Entidad responsable)
+- [x] Algumas vezes, os campos do Workplan estao vindo vazios (testar com os tres tipos de submissao). Exemplo: Clean Air Institute (CAI) (ingles: ou Description ou DescriptionENG / espanhol: DescriptionESP somente) - se tiver vazio, so lamento
+- [x] Quando é "New Application", bajo "Colaboración con la OPS", "Atividades realizadas nos últimos dois anos" sale en Portugues. reemplazar por Espanol: "Actividades realizadas en los últimos dos años"
+- [x] Quando for Progress report, o disclaimer de baixo pode ser escondido. 
+- [OBS] Quando é Progress report, o Direct Results esta puxando de um campo equivocado. (ENG: DirectResults / DirectResultsENG .... SPA: DirectResultsSPA) fonte: activity.json (OBS: mas quando é progress report as activity vem do workplans)
+
+
+- [x] Na parte de "Focal points": trocar "Focal point role" por "Focal point title", e em espanhol deve ser: "Cargo del punto focal"
+- [x] trocar string: Miembros y afiliaciones del órgano rector -> Miembros del órgano de governanza y afiliaciones
+- [x] trocar string: Naciones Unidas y ONG en relaciones formales con la NSA -> Naciones Unidas y ONG en relaciones formales con el ANE
 - [ ] Quando põe-se a página em Espanhol, os nomes da NSA na parte de búsca também tem que estar em espanhol. No momento, está em inglês (ps: o titulo em espanhol vem de TitleENGSPA)
-- [ ] Há casos em que há mais de um PAHO Focal Point. Nestes casos, temos que trazer todos, eg: Instituto del Aire Limpio. O mesmos nao acontece com a NSA, somente PAHO. 
-- [ ] No filtro, Type of Submission tem que ser a primeira opção. Logo depois, Collaboration period, Organization type
+
+- [ ] Há casos em que há mais de um PAHO Focal Point. Nestes casos, temos que trazer todos, eg: Instituto del Aire Limpio. O mesmos nao acontece com a NSA, somente PAHO. (OBS: agora buscar de (nsa.json) PAHOFocalPoint apenas?)
+
+- [x] No filtro, Type of Submission tem que ser a primeira opção. Logo depois, Collaboration period, Organization type
 
 ### ATE AQUI
 
