@@ -41,7 +41,7 @@ export default {
     collabSubtitleNewApp: 'Activities carried out over the past two years',
     thEntity: 'Entity',
     thDesc: 'Activity description',
-    thResults: 'Direct Results',
+    thResults: 'Current Results',
     thExpectResults: 'Expected Results',
     wpTitle: 'Workplan for the next three years',
     wpSubtitle: 'Planned activities and expected results for the selected cycle.',
@@ -79,6 +79,8 @@ export default {
     Duration: 'Duration',
     Goal: 'Sustainable Health Agenda for the Americas 2018–2030',
     StrategicPlan: 'PAHO Strategic Plan 2020 - 2025',
+    year1: 'Year 1 Results',
+    year2: 'Year 2 Results',
   },
   es: {
     disclaimer:
@@ -120,7 +122,7 @@ export default {
     collabSubtitleNewApp: 'Actividades realizadas en los últimos dos años',
     thEntity: 'Entidad',
     thDesc: 'Descripción de la actividad',
-    thResults: 'Resultados directos',
+    thResults: 'Resultados actuales',
     thExpectResults: 'Resultados esperados',
     wpTitle: 'Plan de trabajo para los próximos tres años',
     wpSubtitle: 'Actividades planificadas y resultados esperados para el ciclo seleccionado.',
@@ -158,5 +160,7 @@ export default {
     Duration: 'Duración',
     Goal: 'Agenda de Salud Sostenible para las Américas 2018–2030',
     StrategicPlan: 'Plan Estratégico de la OPS 2020–2025',
+    year1: 'Resultados Año 1',
+    year2: 'Resultados Año 2',
   },
 }

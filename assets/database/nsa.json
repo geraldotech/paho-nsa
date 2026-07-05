@@ -632,7 +632,7 @@
         "TranslationComplete": "Yes",
         "PAHOFocalPoint": [
             {
-                "LookupValue": "Sanchez Otero, Luis Francisco (WDC)"
+                "LookupValue": "Sanchez Otero, Francisco (WDC)"
             },
             {
                 "LookupValue": "Castillo-Lugo, Juan J. (WDC)"
@@ -1647,7 +1647,7 @@
         "NSAFocalpointRoleSPA": "Director Asociado de Operaciones",
         "CollabWPActStrategicPlan_txtENG": "OCM 13: Risk factors for non-communicable diseases (NCDs)",
         "CollabWPActStrategicPlan_txtSPA": "OCM 13: Factores de riesgo para las ENCD",
-        "CollabWPActHealthAgenda_txtENG": "now Goal 9: Noncommunicable Diseases; Goal 4: Health Financing", 
+        "CollabWPActHealthAgenda_txtENG": "Goal 9: Noncommunicable Diseases; Goal 4: Health Financing",
         "CollabWPActHealthAgenda_txtSPA": "Meta 9: Enfermedades no transmisibles; Meta 4: Financiamiento de la salud",
         "TitleFRE": "Alliance mondiale pour le contr\u00f4le du tabac (AGCT)",
         "TitlePOR": "Alian\u00e7a Global para o Controle do Tabaco (AGCT)",
@@ -1749,9 +1749,9 @@
                 "Label": "OCM 26: Cross-Cutting Themes: Equity, Ethnicity, Gender, and Human Rights"
             }
         ],
-        "xCollabWPActHealthAgenda": [
-            { 
-                "Label": "thiss Goal 1: Equitable Access to Health Services"
+        "CollabWPActHealthAgenda": [
+            {
+                "Label": "Goal 1: Equitable Access to Health Services"
             },
             {
                 "Label": "Goal 11: Health Inequalities and Inequities"
@@ -1774,8 +1774,8 @@
         "FinTotalNGOs": 0.0,
         "FinTotalGovernmentEntities": 826889.0,
         "FinTotalGeneralPublic": 0.0,
-        "CollabWPActStrategicPlan_txt": "this OCM 01: Access to comprehensive and quality health services;OCM 05: 5 Access to services for NCDs and mental health conditions;OCM 16: Intersectoral action on mental health;OCM 18: Social and environmental determinants;OCM 21: Data, information, knowledge, and evidence;OCM 26: Cross-Cutting Themes: Equity, Ethnicity, Gender, and Human Rights",
-        "CollabWPActHealthAgenda_txt": "falll3434Goal 1: Equitable Access to Health Services;Goal 11: Health Inequalities and Inequities;Goal 5: Medicines, Vaccines and Technologies",  
+        "CollabWPActStrategicPlan_txt": "OCM 01: Access to comprehensive and quality health services;OCM 05: 5 Access to services for NCDs and mental health conditions;OCM 16: Intersectoral action on mental health;OCM 18: Social and environmental determinants;OCM 21: Data, information, knowledge, and evidence;OCM 26: Cross-Cutting Themes: Equity, Ethnicity, Gender, and Human Rights",
+        "CollabWPActHealthAgenda_txt": "Goal 1: Equitable Access to Health Services;Goal 11: Health Inequalities and Inequities;Goal 5: Medicines, Vaccines and Technologies",
         "NextRenewalYear": "2,004",
         "LinkTitleNoMenu": "March of Dimes",
         "TitleENG": "March of Dimes",
@@ -1790,9 +1790,9 @@
         "NSAOrganizationBodiesSPA": "OPS/OMS",
         "NSAFocalpointRoleENG": "Senior Vice President, Chief Impact Officer",
         "NSAFocalpointRoleSPA": "SVP, Director de Impacto",
-        "CollabWPActStrategicPlan_txtENG": "222 OCM 01: Access to comprehensive and quality health services; OCM 05: Access to services for non-communicable diseases (NCDs) and mental health conditions; OCM 16: Intersectoral action on mental health; OCM 18: Social and environmental determinants; OCM 21: Data, information, knowledge, and evidence; OCM 26: Cross-Cutting Themes: Equity, Ethnicity, Gender, and Human Rights.",
+        "CollabWPActStrategicPlan_txtENG": "OCM 01: Access to comprehensive and quality health services; OCM 05: Access to services for non-communicable diseases (NCDs) and mental health conditions; OCM 16: Intersectoral action on mental health; OCM 18: Social and environmental determinants; OCM 21: Data, information, knowledge, and evidence; OCM 26: Cross-Cutting Themes: Equity, Ethnicity, Gender, and Human Rights.",
         "CollabWPActStrategicPlan_txtSPA": "OCM 01: Acceso a servicios de salud integrales y de calidad; OCM 05: Acceso a servicios para enfermedades no transmisibles y condiciones de salud mental; OCM 16: Acci\u00f3n intersectorial en salud mental; OCM 18: Determinantes sociales y ambientales; OCM 21: Datos, informaci\u00f3n, conocimiento y evidencia; OCM 26: Temas transversales: Equidad, Etnicidad, G\u00e9nero y Derechos Humanos.",
-        "CollabWPActHealthAgenda_txtENGXXXX": "Goal 1: Equitable Access to Health Services; Goal 11: Health Inequalities and Inequities; Goal 5: Medicines, Vaccines, and Technologies",
+        "CollabWPActHealthAgenda_txtENG": "Goal 1: Equitable Access to Health Services; Goal 11: Health Inequalities and Inequities; Goal 5: Medicines, Vaccines, and Technologies",
         "CollabWPActHealthAgenda_txtSPA": "Objetivo 1: Acceso Equitativo a los Servicios de Salud; Objetivo 11: Desigualdades e Inequidades en Salud; Objetivo 5: Medicamentos, Vacunas y Tecnolog\u00edas",
         "TitleFRE": "Mars des Dimes",
         "TitlePOR": "March of Dimes in Portuguese is \"Mar\u00e7o dos Dimes\".",
@@ -2898,7 +2898,7 @@
         "TranslationComplete": "Yes",
         "PAHOFocalPoint": [
             {
-                "LookupValue": "Elkhoury, Ana Nilce (AFT)"
+                "LookupValue": "Elkhoury, Ana Nilce (BRA)"
             },
             {
                 "LookupValue": "Coto, Hector Daniel (WDC)"

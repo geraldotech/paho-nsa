@@ -1,21 +1,3 @@
-﻿# paho-nsa
+# paho-erp-non-state-actors
 
- <img width="1896" height="873" alt="image" src="https://github.com/user-attachments/assets/faefa804-4010-4993-90b4-5af9c53c5370" />
-
-
-### 23/02 a 24/02
-
-- [x] new jsons + fetch data
-- [x] adicionado `TypeOfSubmission` no NSA
-- [x] if has Progress Report - not show `financial report`
-- [x] logo apenas pan ameican (do meio)
-- [x] toggle language
-- [x] quando for `Progress Report` - não precisa exibir o `financial report`
-- [x] Financial information - falta o ano fiscal
-- [x] font ui-sans-serif
-
-
-### pontos
-- [-] abaixo do NSA adicionar o ano mas o `CollaborationPeriod` nao está novo json
-- Collaboration with PAHO  só mostrar o ano mais recente
-
+THIS ONE.

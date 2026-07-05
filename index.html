@@ -8,11 +8,11 @@
     <title>PAHO • Non-State Actors (NSA)</title>
     <link
       rel="icon"
-      href="./assets/img/favicon.ico"
+      href="/assets/img/favicon.ico"
       type="image/vnd.microsoft.icon" />
     <link
       rel="stylesheet"
-      href="./assets/css/styles.css" />
+      href="/assets/css/styles.css" />
   </head>
   <body>
     <!-- SIDEBAR FIXA -->
@@ -21,7 +21,7 @@
         <div class="logo-box">
           <img
             id="logobrand"
-            src="./assets/img/logo-en.png"
+            src="/assets/img/logo-en.png"
             alt="OPAS"
             class="brand-logo" />
           <div
@@ -67,7 +67,7 @@
           <option value="Philanthropic Foundation">Philanthropic Foundation</option>
         </select>
 
-        <!--    Collaboration Period -->
+        <!-- Collaboration Period -->
         <label
           class="label"
           for="period-select"
@@ -79,6 +79,7 @@
           class="input">
           <option value="all">All</option>
         </select>
+
         <!-- Organization type -->
         <label
           class="label"
@@ -124,7 +125,7 @@
           </li>
           <li>
             <a
-              href="#collaboraionWihPAHO"
+              href="#collaborationWithPAHO"
               id="CollaborationNav"
               rel="noopener noreferrer"
               >Collaboration with PAHO</a
@@ -151,15 +152,21 @@
         </a>
       </div>
 
-      <!-- language -->
       <header class="header">
         <h1 id="nsa-title"></h1>
         <p id="nsa-subtitle"></p>
       </header>
 
+      <!-- Progress Report disclaimer only -->
+      <section
+        class="disclaimer none"
+        id="landingDisclaimerTop">
+        <strong id="uiDisclaimerTitleTop">Note:</strong>
+        <span id="uiDisclaimerTextTop"></span>
+      </section>
+
       <!-- NSA profile starts -->
       <section class="card">
-        <!-- disclaimer -->
         <section
           class="disclaimer"
           id="landingDisclaimer2">
@@ -187,9 +194,8 @@
           <canvas id="financialBarChart"></canvas>
         </div>
       </div>
-      <!-- NSA profile ends -->
 
-      <!-- disclaimer -->
+      <!-- keep original lower disclaimer -->
       <section
         class="disclaimer"
         id="landingDisclaimer">
@@ -200,7 +206,7 @@
       <!-- Collaboration with PAHO Activities -->
       <section
         class="card"
-        id="collaboraionWihPAHO">
+        id="collaborationWithPAHO">
         <h2 id="collabTitle">Collaboration with PAHO</h2>
 
         <div>
@@ -209,17 +215,14 @@
             class="subtitle"></h4>
         </div>
 
-        <!--  rendercollabWPActHealthAgendaObj  -->
         <div
           id="collabWPActHealthAgendaObj"
           class="list item"></div>
 
-        <!--  StrategicPlan  -->
         <div
           id="strategicPlan"
           class="list item"></div>
 
-        <!-- activities -->
         <div id="nsa-activities"></div>
       </section>
 
@@ -233,12 +236,10 @@
           Work Plans
         </h4>
 
-        <!-- card03 do workplan -->
         <div
           id="card03"
           class="list item"></div>
 
-        <!-- card04 do workplan -->
         <div
           id="card04"
           class="list item"></div>
@@ -254,9 +255,10 @@
         <p>© 2026 Pan American Health Organization (PAHO) • Non-State Actors Portal</p>
       </footer>
     </main>
+
     <script
-      src="./assets/js/app.js"
+      src="/assets/js/app.js"
       type="module"></script>
-    <script src="./assets/js/vendors/chart.js"></script>
+    <script src="/assets/js/vendors/chart.js"></script>
   </body>
 </html>
