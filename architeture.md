@@ -22,10 +22,18 @@ Key characteristics:
 
 
 #### NSA profile section:
-- `TitleENG`, `TitleENGSPA`, `NSAWebsite`, `NSAYearOfEstablishment`, `NSAOrganizationType`, `CollaborationPeriod`, `TypeOfSubmission`
+- fields: `TitleENG`, `TitleENGSPA`, `NSAWebsite`, `NSAYearOfEstablishment`, `NSAOrganizationType`, `CollaborationPeriod`, `TypeOfSubmission`
 
 #### Focal points:
 
+- PAHO focal point
+  -  comes from PAHOFocalPoint `(nsa.json)`
+
+- NSA focal point
+  - coming from NSAFocalpoint `(activity.json)` or `(workplan.json)`
+
+- Focal point title
+  - coming from NSAFocalpointRoleENG `(nsa.json)`
 
 #### Description:
 
