@@ -1,10 +1,11 @@
 # Data Architecture and UI Integration
 
-## Table of Contents
+## Glossary
 
 - [Quick Architecture Overview](#quick-architecture-overview)
 - [Status](#status)
-- [Scope and Purpose](#scope-and-purpose)
+- [Scope](#scope)
+- [Purpose](#purpose)
 - [Runtime Flow](#runtime-flow)
 - [Data Model](#data-model)
 - [Relationships](#relationships)
@@ -33,11 +34,17 @@ The NSA viewer is a client-side application. At runtime, `app.js` loads three st
 - Runtime database: none
 - Last reviewed: 2026-07-06
 
-## Scope and Purpose
+## Scope
 
-This document describes the current data architecture and UI integration used by the NSA viewer in the `main` branch.
+This document describes the current data architecture used by the NSA viewer in the `main` branch.
+The application does not query a relational database at runtime. Instead, it loads static JSON files from `assets/database/` and resolves relationships client-side through `app.js`.
 
-The application does not query a relational database at runtime. Instead, `assets/js/app.js` loads static JSON files from `assets/database/`, keeps the current UI state, applies sidebar filters, resolves relationships client-side, and renders the selected NSA profile, activities, workplans, collaboration data, and financial chart.
+## Purpose
+
+`assets/js/app.js` is the main client-side orchestration file for the NSA viewer.
+It loads the JSON datasets, keeps the current UI state, applies sidebar filters,
+and renders the selected NSA profile, activities, workplans, collaboration data,
+and financial chart.
 
 ## Runtime Flow
 
@@ -142,6 +149,7 @@ It is used mainly for standard activity rendering.
 
 This is another child dataset linked by `ParentID`.
 It is used for workplans and also for progress-report activity rendering.
+
 
 <details>
 <summary>Important fields used by <code>app.js</code></summary>
