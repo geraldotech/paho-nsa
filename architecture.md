@@ -1,5 +1,40 @@
 # Data Architecture and UI Integration
 
+## Glossary
+
+- [Glossary](#glossary)
+- [Quick Architecture Overview](#quick-architecture-overview)
+- [Status](#status)
+- [Scope](#scope)
+- [Purpose](#purpose)
+- [Runtime Flow](#runtime-flow)
+- [Data Model](#data-model)
+- [Relationships](#relationships)
+- [Relationship Diagram](#relationship-diagram)
+- [Behavioral Relationships Derived From Code](#behavioral-relationships-derived-from-code)
+- [Sidebar Behavior](#sidebar-behavior)
+- [Rendering Rules](#rendering-rules)
+- [Collaboration Data Resolution](#collaboration-data-resolution)
+- [Activities and Workplans](#activities-and-workplans)
+- [Financial Chart](#financial-chart)
+- [Language Behavior](#language-behavior)
+- [DOM Dependencies](#dom-dependencies)
+- [External Dependencies](#external-dependencies)
+- [Maintenance Notes](#maintenance-notes)
+- [Short Summary](#short-summary)
+
+## Quick Architecture Overview
+
+The NSA viewer is a client-side application. At runtime, `app.js` loads three static JSON files, filters completed NSA records, keeps the selected NSA in global state, and renders the profile, activities, workplans, collaboration information, and financial chart directly in the browser.
+
+## Status
+
+- Branch analyzed: `main`
+- Main file analyzed: `assets/js/app.js`
+- Data source type: static JSON files
+- Runtime database: none
+- Last reviewed: 2026-07-06
+
 ## Scope
 
 This document describes the current data architecture used by the NSA viewer in the `main` branch.
@@ -51,7 +86,8 @@ The file keeps global UI state in these variables:
 This is the parent dataset.
 Each row represents one NSA profile.
 
-Important fields used by `app.js`:
+<details>
+<summary>Important fields used by <code>app.js</code></summary>
 
 - `id`
 - `Status`
@@ -90,12 +126,15 @@ Important fields used by `app.js`:
 - `CollabWPActStrategicPlan_txtENG`
 - `CollabWPActStrategicPlan_txtSPA`
 
+</details>
+
 ### 2. `activity.json`
 
 This is a child dataset linked by `ParentID`.
 It is used mainly for standard activity rendering.
 
-Important fields:
+<details>
+<summary>Important fields used by <code>app.js</code></summary>
 
 - `ParentID`
 - `DescriptionENG`
@@ -105,12 +144,16 @@ Important fields:
 - `Entity`
 - `NSAFocalpoint`
 
+</details>
+
 ### 3. `workplan.json`
 
 This is another child dataset linked by `ParentID`.
 It is used for workplans and also for progress-report activity rendering.
 
-Important fields:
+
+<details>
+<summary>Important fields used by <code>app.js</code></summary>
 
 - `ParentID`
 - `DescriptionENG`
@@ -132,6 +175,8 @@ Important fields:
 - `Year2_ResultsENG`
 - `Year2_ResultsSPA`
 - `NSAFocalpoint`
+
+</details>
 
 ## Relationships
 
