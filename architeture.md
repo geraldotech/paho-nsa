@@ -26,14 +26,11 @@ Key characteristics:
 
 #### Focal points:
 
-- PAHO focal point
-  -  comes from PAHOFocalPoint `(nsa.json)`
+- PAHO focal point -comes from PAHOFocalPoint `(nsa.json)`
 
-- NSA focal point
-  - coming from NSAFocalpoint `(activity.json)` or `(workplan.json)`
+- NSA focal point - coming from NSAFocalpoint `(activity.json)` or `(workplan.json)`
 
-- Focal point title
-  - coming from NSAFocalpointRoleENG `(nsa.json)`
+- Focal point title - coming from NSAFocalpointRoleENG `(nsa.json)`
 
 #### Description:
 
