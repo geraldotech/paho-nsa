@@ -117,7 +117,7 @@ Some fields are not sourced from a single table:
   - `nsa.json` summary fields, or
   - the first related `workplan.json` record
 
-This means the frontend behaves more like a read model than a strictly normalized relational schema.
+This means the frontend is designed to handle JSON data, arrays, and pre-assembled records.
 
 ## Relationship Diagram
 
