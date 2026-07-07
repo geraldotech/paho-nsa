@@ -37,17 +37,48 @@ Key characteristics:
 
 #### Description:
 
+- Objectives
+  - coming from NSAObjetivesENG `(nsa.json)`
+
+- Main areas of work
+  - coming from NSAWorkFieldsENG `(nsa.json)`
+
+
 
 #### Governance & formal relations
 
+- Governing body members and affiliations
+  - coming from NSABoardMembersENG `(nsa.json)`
+
+- UN & NGOs in Formal Relations with the NSA
+  - coming from NSAOrganizationBodiesENG `(nsa.json)`
+
 
 #### Financial information
-- fields: `FinAnnualIncome`, `FinAnnualExpenses`, `FinAssets` and `fiscal year`.
+
+  - `FinAnnualIncome`  coming from FinAnnualIncome `(nsa.json)`
+  - `FinAnnualExpenses`, coming from FinAnnualExpenses `(nsa.json)`
+  - `FinAssets` coming from FinAssets `(nsa.json)`
+  - `fiscal year`. coming from FinAnnualIncomeYear `(nsa.json)`
 
 #### Collaboration with PAHO
 
+- Activities carried out over the past two years
 
-- Collaboration summary fields: `CollabActHealthAgenda`, `CollabActStrategicPlan`, `CollabWPActHealthAgenda`, `CollabWPActStrategicPlan`
+- Sustainable Health Agenda for the Americas 2018–2030
+
+- PAHO Strategic Plan 2020 - 2025
+
+
+- Collaboration summary fields: 
+
+- `CollabActHealthAgenda`, 
+- `CollabActStrategicPlan`, 
+- `CollabWPActHealthAgenda`, 
+- `CollabWPActStrategicPlan`
+
+
+
 
 
 #### Sidebar:
