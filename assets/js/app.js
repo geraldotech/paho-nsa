@@ -246,6 +246,12 @@ function render() {
     renderFinancialCharts(nsa)
   }
 
+  
+  /**
+  * Resolves the collaboration summary sources for
+  * CollabActHealthAgenda, CollabActStrategicPlan,
+  * CollabWPActHealthAgenda, and CollabWPActStrategicPlan.
+  */
   const collaborationHealthAgendaSource = getFirstNonEmpty(
     isProcessReportType
       ? [

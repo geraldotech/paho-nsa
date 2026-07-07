@@ -18,14 +18,18 @@ This is the primary master dataset. Each record represents one NSA profile and a
 Key characteristics:
 
 - Primary key used by the UI: `id`
-- Main identity fields: `TitleENG`, `TitleENGSPA`, `NSAOrganizationType`, `NSAWebsite`
-- Submission and lifecycle fields: `Status`, `TypeOfSubmission`, `CollaborationPeriod`
-- Financial fields: `FinAnnualIncome`, `FinAnnualExpenses`, `FinAssets`, and related totals
+- The application filters only completed NSA status records.
+- Main profile fields shown in the frontend: `TitleENG`, `TitleENGSPA`, `NSAWebsite`, `NSAYearOfEstablishment`, `NSAOrganizationType`, `CollaborationPeriod`, `TypeOfSubmission`
 - Collaboration summary fields: `CollabActHealthAgenda`, `CollabActStrategicPlan`, `CollabWPActHealthAgenda`, `CollabWPActStrategicPlan`
+- Financial fields: `FinAnnualIncome`, `FinAnnualExpenses`, `FinAssets` and `fiscal year`.
 
+#### Sidebar:
+
+- type of submission select: unique `TypeOfSubmission` values such as `New Application - Nueva Aplicación`, `Progress Report - Reporte de Progreso`, and `Renewal - Renovación`
+- collaboration period select: year ranges from `CollaborationPeriod`
+- organization type select: `Non-governmental Organizations`, `Philanthropic Foundation` (matched against `NSAOrganizationType`)
 Runtime rule:
 
-- The application filters only completed NSA status records.
 
 ### 2. `activity.json`
 
