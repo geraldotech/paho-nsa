@@ -19,12 +19,32 @@ Key characteristics:
 
 - Primary key used by the UI: `id`
 - The application filters only completed NSA status records.
-- Main profile fields shown in the frontend: `TitleENG`, `TitleENGSPA`, `NSAWebsite`, `NSAYearOfEstablishment`, `NSAOrganizationType`, `CollaborationPeriod`, `TypeOfSubmission`
+
+
+#### NSA profile section:
+- `TitleENG`, `TitleENGSPA`, `NSAWebsite`, `NSAYearOfEstablishment`, `NSAOrganizationType`, `CollaborationPeriod`, `TypeOfSubmission`
+
+#### Focal points:
+
+
+#### Description:
+
+
+#### Governance & formal relations
+
+
+#### Financial information
+- fields: `FinAnnualIncome`, `FinAnnualExpenses`, `FinAssets` and `fiscal year`.
+
+#### Collaboration with PAHO
+
+
 - Collaboration summary fields: `CollabActHealthAgenda`, `CollabActStrategicPlan`, `CollabWPActHealthAgenda`, `CollabWPActStrategicPlan`
-- Financial fields: `FinAnnualIncome`, `FinAnnualExpenses`, `FinAssets` and `fiscal year`.
+
 
 #### Sidebar:
 
+- Search uses the NSA title fields from `nsa.json`. It lowercases the search term and matches it against `TitleENG` and `TitleENGSPA`, so users can find an NSA by either English or Spanish title text.
 - type of submission select: unique `TypeOfSubmission` values such as `New Application - Nueva Aplicación`, `Progress Report - Reporte de Progreso`, and `Renewal - Renovación`
 - collaboration period select: year ranges from `CollaborationPeriod`
 - organization type select: `Non-governmental Organizations`, `Philanthropic Foundation` (matched against `NSAOrganizationType`)
