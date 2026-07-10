@@ -1,14 +1,11 @@
 /**
- * @timestamp 06/03/2025 10:17
+ * @timestamp 09/07/2026 10:17
  */
 
 import UI from './ui-language.js'
+import { fetchJson, setText, getTextAfterLastBold, toNumber, formatNumber, escapeHtml, normalizeObjects, getFirstNonEmpty, clearSearchResults } from './helpers.js'
 
-const [nasasData, activity, workplan] = await Promise.all([
-  fetchJson('./assets/database/nsa.json'),
-  fetchJson('./assets/database/activity.json'),
-  fetchJson('./assets/database/workplan.json'),
-])
+const [nasasData, activity, workplan] = await Promise.all([fetchJson('./assets/database/nsa.json'), fetchJson('./assets/database/activity.json'), fetchJson('./assets/database/workplan.json')])
 
 /* === ONLY COMPLETED NAS === */
 const nasas = []
@@ -22,7 +19,7 @@ let currentLang = 'en'
 let currentId = 18
 let barChart = null
 const MIN_SEARCH_CHARS = 1
-const DEBUG = true
+const DEBUG = false
 
 const filters = {
   term: '',
@@ -209,8 +206,7 @@ function render() {
 
   const firstActivityWithNSAFocalpoint = allActivities.find((item) => item && item.NSAFocalpoint)
   const secondActivityWithNSAFocalpoint = allWorkplans.find((item) => item && item.NSAFocalpoint)
-  const nsaFocalpoint =
-    firstActivityWithNSAFocalpoint?.NSAFocalpoint || secondActivityWithNSAFocalpoint?.NSAFocalpoint || null
+  const nsaFocalpoint = firstActivityWithNSAFocalpoint?.NSAFocalpoint || secondActivityWithNSAFocalpoint?.NSAFocalpoint || null
 
   const submissionType = String(nsa.TypeOfSubmission || '')
   const isProcessReportType = submissionType.includes('Progress Report - Reporte de Progreso')
@@ -246,12 +242,11 @@ function render() {
     renderFinancialCharts(nsa)
   }
 
-  
   /**
-  * Resolves the collaboration summary sources for
-  * CollabActHealthAgenda, CollabActStrategicPlan,
-  * CollabWPActHealthAgenda, and CollabWPActStrategicPlan.
-  */
+   * Resolves the collaboration summary sources for
+   * CollabActHealthAgenda, CollabActStrategicPlan,
+   * CollabWPActHealthAgenda, and CollabWPActStrategicPlan.
+   */
   const collaborationHealthAgendaSource = getFirstNonEmpty(
     isProcessReportType
       ? [
@@ -264,7 +259,7 @@ function render() {
           currentLang === 'en' ? nsa.CollabActHealthAgenda_txtENG : nsa.CollabActHealthAgenda_txtSPA,
           nsa.CollabWPActHealthAgenda,
           currentLang === 'en' ? firstWorkplan?.HealthAgendaENG : firstWorkplan?.HealthAgendaSPA,
-        ],
+        ]
   )
 
   const collaborationStrategicPlanSource = getFirstNonEmpty(
@@ -279,7 +274,7 @@ function render() {
           currentLang === 'en' ? nsa.CollabActStrategicPlan_txtENG : nsa.CollabActStrategicPlan_txtSPA,
           nsa.CollabWPActStrategicPlan,
           currentLang === 'en' ? firstWorkplan?.StrategicPlanENG : firstWorkplan?.StrategicPlanSPA,
-        ],
+        ]
   )
 
   const healthAgendaNormalized = normalizeObjects(collaborationHealthAgendaSource)
@@ -318,15 +313,9 @@ function renderYearlyResults(w) {
 
   // YEAR 1
   const year1Date = w.Year1_Date
-  const year1Results =
-    currentLang === 'en' ? w.Year1_ResultsENG : w.Year1_ResultsSPA
+  const year1Results = currentLang === 'en' ? w.Year1_ResultsENG : w.Year1_ResultsSPA
 
-  if (
-    year1Date &&
-    String(year1Date).trim() !== '' &&
-    year1Results &&
-    String(year1Results).trim() !== ''
-  ) {
+  if (year1Date && String(year1Date).trim() !== '' && year1Results && String(year1Results).trim() !== '') {
     html += `
       <div class="year-block">
         <p><strong>${UI[currentLang].year1} (${year1Date})</strong></p>
@@ -337,15 +326,9 @@ function renderYearlyResults(w) {
 
   // YEAR 2
   const year2Date = w.Year2_Date
-  const year2Results =
-    currentLang === 'en' ? w.Year2_ResultsENG : w.Year2_ResultsSPA
+  const year2Results = currentLang === 'en' ? w.Year2_ResultsENG : w.Year2_ResultsSPA
 
-  if (
-    year2Date &&
-    String(year2Date).trim() !== '' &&
-    year2Results &&
-    String(year2Results).trim() !== ''
-  ) {
+  if (year2Date && String(year2Date).trim() !== '' && year2Results && String(year2Results).trim() !== '') {
     html += `
       <div class="year-block">
         <p><strong>${UI[currentLang].year2} (${year2Date})</strong></p>
@@ -365,13 +348,9 @@ function renderActivities(list) {
 
   el.activities.innerHTML = list
     .map((w) => {
-      const description = currentLang === 'en'
-        ? w.DescriptionENG ?? '-'
-        : w.DescriptionSPA ?? '-'
+      const description = currentLang === 'en' ? w.DescriptionENG ?? '-' : w.DescriptionSPA ?? '-'
 
-      const directResults = currentLang === 'en'
-        ? w.DirectResultsENG ?? '-'
-        : w.DirectResultsSPA ?? '-'
+      const directResults = currentLang === 'en' ? w.DirectResultsENG ?? '-' : w.DirectResultsSPA ?? '-'
 
       return `
       <div class="item">
@@ -392,15 +371,9 @@ function renderActivitiesFromWorkplan(list) {
 
   el.activities.innerHTML = list
     .map((w) => {
-      const description =
-        currentLang === 'en'
-          ? w.DescriptionENG ?? '-'
-          : w.DescriptionSPA ?? '-'
+      const description = currentLang === 'en' ? w.DescriptionENG ?? '-' : w.DescriptionSPA ?? '-'
 
-      const directResults =
-        currentLang === 'en'
-          ? getTextAfterLastBold(w.ProgressReportENG || '')
-          : getTextAfterLastBold(w.ProgressReportSPA || '')
+      const directResults = currentLang === 'en' ? getTextAfterLastBold(w.ProgressReportENG || '') : getTextAfterLastBold(w.ProgressReportSPA || '')
 
       const yearly = renderYearlyResults(w)
 
@@ -415,18 +388,6 @@ function renderActivitiesFromWorkplan(list) {
       `
     })
     .join('')
-}
-
-function getTextAfterLastBold(str) {
-  const tag = '</b>'
-  const index = String(str).lastIndexOf(tag)
-
-  if (index === -1) return String(str || '')
-
-  let text = String(str).slice(index + tag.length)
-  text = text.replace(/<[^>]*>/g, '')
-
-  return text.trim()
 }
 
 function renderWorkplans(list) {
@@ -665,8 +626,7 @@ function renderNSAProfile(nsa, nsafocalPoint, isProcessReportType) {
         <dt>${UI[currentLang].pahoFocal}</dt>
         <dd>${
           Array.isArray(nsa.PAHOFocalPoint) && nsa.PAHOFocalPoint.length
-            ? nsa.PAHOFocalPoint
-                .map((item) => item?.LookupValue)
+            ? nsa.PAHOFocalPoint.map((item) => item?.LookupValue)
                 .filter(Boolean)
                 .join('<br>')
             : '-'
@@ -747,11 +707,6 @@ function buildTypeOfSubmissionTypeInput(nasas) {
   })
 }
 
-function setText(id, text) {
-  const node = document.getElementById(id)
-  if (node) node.textContent = text
-}
-
 function applyLanguage() {
   const t = UI[currentLang]
   setText('uiLanguageLabel', t.language)
@@ -786,24 +741,6 @@ function applyLanguage() {
   updateBrandLogo()
 }
 
-function toNumber(value) {
-  if (!value) return 0
-  return Number(String(value).replace(/[^\d.-]/g, '')) || 0
-}
-
-function formatNumber(n) {
-  return Number(n || 0).toLocaleString('en-US')
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;')
-}
-
 function updateBrandLogo() {
   const logo = document.getElementById('logobrand')
   if (!logo) return
@@ -822,9 +759,7 @@ function setSearchResultsPosition() {
   el.searchResults.style.setProperty('--search-results-top', `${top}px`)
 }
 
-function clearSearchResults() {
-  el.searchResults.innerHTML = ''
-}
+
 
 function handleSearchInput(event) {
   const term = String(event.target.value || '')
@@ -856,10 +791,7 @@ function renderSearchResults(results) {
 
   el.searchResults.innerHTML = results
     .map((n) => {
-      const label =
-        currentLang === 'es'
-          ? n.TitleENGSPA || n.TitleENG || n.Title || 'Untitled'
-          : n.TitleENG || n.TitleENGSPA || n.Title || 'Untitled'
+      const label = currentLang === 'es' ? n.TitleENGSPA || n.TitleENG || n.Title || 'Untitled' : n.TitleENG || n.TitleENGSPA || n.Title || 'Untitled'
 
       return `<li data-id="${n.id}">${escapeHtml(label)}</li>`
     })
@@ -873,10 +805,7 @@ function showSearchResults() {
     .trim()
     .toLowerCase()
 
-  const periodFilter =
-    typeof filters.period === 'object' && filters.period !== null
-      ? String(filters.period.CollaborationPeriod || filters.period.value || '')
-      : String(filters.period || '')
+  const periodFilter = typeof filters.period === 'object' && filters.period !== null ? String(filters.period.CollaborationPeriod || filters.period.value || '') : String(filters.period || '')
 
   const normalizedPeriodFilter = periodFilter.trim().toLowerCase()
 
@@ -940,92 +869,4 @@ function handleOutsideSearchClick(event) {
   el.searchInput.value = ''
   filters.term = ''
   clearSearchResults()
-}
-
-function normalizeObjects(value) {
-  if (value == null) return []
-
-  const items = Array.isArray(value) ? value : [value]
-
-  return items
-    .flatMap((item) => {
-      if (item == null) return []
-
-      if (typeof item === 'object' && item.Label) {
-        return [{ Label: String(item.Label).trim() }].filter((x) => x.Label)
-      }
-
-      if (typeof item !== 'string') {
-        return [{ Label: String(item).trim() }].filter((x) => x.Label)
-      }
-
-      const text = item.trim()
-      if (!text) return []
-
-      if (text.includes(';')) {
-        return text
-          .split(';')
-          .map((part) => part.trim())
-          .filter(Boolean)
-          .map((part) => ({ Label: part }))
-      }
-
-      return [{ Label: text }]
-    })
-    .filter((item) => item.Label)
-}
-
-function getFirstNonEmpty(values) {
-  for (const value of values) {
-    if (Array.isArray(value) && value.length > 0) return value
-    if (typeof value === 'string' && value.trim()) return value
-    if (value && typeof value === 'object') return value
-  }
-  return null
-}
-
-async function fetchJson(url) {
-  try {
-    if (!url || typeof url !== 'string') {
-      throw new Error('URL inválida ou não informada')
-    }
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error(`Recurso não encontrado (404): ${url}`)
-      }
-
-      if (response.status >= 500) {
-        throw new Error(`Erro interno do servidor (${response.status})`)
-      }
-
-      throw new Error(`Erro HTTP: ${response.status}`)
-    }
-
-    const contentType = response.headers.get('content-type')
-
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Resposta não é um JSON válido')
-    }
-
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error('fetchJson erro:', error.message)
-    return null
-  }
-}
-
-function getNsaDisplayTitle(n) {
-  if (currentLang === 'es') {
-    return n.TitleENGSPA || n.TitleENG || n.Title || 'Untitled'
-  }
-  return n.TitleENG || n.TitleENGSPA || n.Title || 'Untitled'
 }
