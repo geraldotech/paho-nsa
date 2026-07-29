@@ -4,22 +4,48 @@
 
 import UI from './ui-language.js'
 
-const [nasasData, activity, workplan] = await Promise.all([
+const [profilesData, submissionsData, activityData, workplanData] = await Promise.all([
+  fetchJson('./assets/database/nsa-profiles.json'),
   fetchJson('./assets/database/nsa.json'),
   fetchJson('./assets/database/activity.json'),
   fetchJson('./assets/database/workplan.json'),
 ])
 
-/* === ONLY COMPLETED NAS === */
-const nasas = []
-for (let i = 0, len = nasasData.length; i < len; i += 1) {
-  const item = nasasData[i]
-  if (item && item.Status === 'Completed') nasas.push(item)
-}
+const profiles = Array.isArray(profilesData) ? profilesData : []
+const submissions = Array.isArray(submissionsData) ? submissionsData : []
+const activity = Array.isArray(activityData) ? activityData : []
+const workplan = Array.isArray(workplanData) ? workplanData : []
+const profilesById = new Map(profiles.map((profile) => [String(profile.ID), profile]))
+
+/* === ONLY PUBLIC NAS === */
+const nasas = submissions
+  .filter((submission) => submission?.GovBodies_Status === 'Approved')
+  .map((submission) => {
+    const profile = profilesById.get(String(submission.NSAProfileID)) || {}
+
+    return {
+      ...submission,
+      id: submission.ID,
+      TitleENG: profile.Title || submission.Title,
+      TitleENGSPA: profile.Title || submission.Title,
+      TypeOfSubmission: submission.NSA_Status || submission.TypeOfSubmission,
+      NSAObjectives: profile.NSAObjectives || submission.NSAObjectives,
+      NSAWorkFieldsENG: profile.NSAWorkFields || submission.NSAWorkFields,
+      NSAWorkFieldsSPA: profile.NSAWorkFields || submission.NSAWorkFields,
+      NSABoardMembersENG: profile.NSABoardMembers || submission.NSABoardMembers,
+      NSABoardMembersSPA: profile.NSABoardMembers || submission.NSABoardMembers,
+      NSAOrganizationBodiesENG: profile.NSAOrganizationBodies || submission.NSAOrganizationBodies,
+      NSAOrganizationBodiesSPA: profile.NSAOrganizationBodies || submission.NSAOrganizationBodies,
+      NSAOrganizationType: profile.NSAOrganizationType || submission.NSAOrganizationType,
+      NSAWebsite: profile.NSAWebsite,
+      NSAYearOfEstablishment: profile.NSAYearOfEstablishment,
+      PAHOFocalPoint: profile.PAHO_Focal_Point,
+    }
+  })
 
 /* === State === */
 let currentLang = 'en'
-let currentId = 18
+let currentId = nasas[0]?.id ?? null
 let barChart = null
 const MIN_SEARCH_CHARS = 1
 const DEBUG = true
@@ -669,7 +695,7 @@ function renderNSAProfile(nsa, nsafocalPoint, isProcessReportType) {
                 .map((item) => item?.LookupValue)
                 .filter(Boolean)
                 .join('<br>')
-            : '-'
+            : escapeHtml(nsa.PAHOFocalPoint || '-').replace(/[;\n]+/g, '<br>')
         }</dd>
 
         <dt>${UI[currentLang].nsaFocal}</dt>
@@ -1023,9 +1049,3 @@ async function fetchJson(url) {
   }
 }
 
-function getNsaDisplayTitle(n) {
-  if (currentLang === 'es') {
-    return n.TitleENGSPA || n.TitleENG || n.Title || 'Untitled'
-  }
-  return n.TitleENG || n.TitleENGSPA || n.Title || 'Untitled'
-}
