@@ -60,18 +60,32 @@ submission/cycle. This separation prevents a submission ID from being treated
 as the permanent organization identifier.
 
 ```mermaid
-graph TD
+graph LR
     P[NSA Profiles]
     N[NSAs]
     A[Collaboration Activity]
     W[Collaboration Workplan]
 
-    P -->|Profiles.ID = NSAs.NSAProfileID| N
-    N -->|NSAs.ID = Activity.ParentID| A
-    N -->|NSAs.ID = Workplan.ParentID| W
-    P -->|Direct join by NSAProfileID| A
-    P -->|Direct join by NSAProfileID| W
+    P -->|NSAProfileID| N
+    N -->|ParentID| A
+    N -->|ParentID| W
+    P -->|NSAProfileID direct| A
+    P -->|NSAProfileID direct| W
 ```
+
+### How to use both relationships
+
+The PDF defines both relationships, with different purposes:
+
+- Use `Activity.ParentID = NSAs.ID` and `Workplan.ParentID = NSAs.ID` to
+  retrieve records for a specific submission/cycle.
+- Use child `NSAProfileID = NSA Profiles.ID` only for a direct
+  organization-level join, such as grouping records across cycles or validating
+  organization ownership.
+
+When the submission/cycle matters, `ParentID` is the primary relationship.
+`NSAProfileID` does not replace it because one organization may have multiple
+NSAs records.
 
 [Back to top](#top)
 
