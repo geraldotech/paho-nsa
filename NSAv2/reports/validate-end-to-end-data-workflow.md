@@ -33,9 +33,9 @@
 <a id="objective"></a>
 ## Objective
 
-Validate the new DEV data structure, including the additional `NSA Profiles`
-("abuela") table, and verify the new relationships against
-`NSA.Tool.Data.Structure.for.Public.Report.pdf`.
+Validate that the complete workflow captures and processes data correctly
+across all supported scenarios, including new applications, renewals, and
+extensions. Document the validation results and hand them over to ITS.
 
 [Back to top](#top)
 
