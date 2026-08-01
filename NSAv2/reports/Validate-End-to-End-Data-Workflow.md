@@ -8,6 +8,37 @@
 | Result | **Pass with source-data exceptions** |
 | Handover | **Ready for ITS review** |
 
+<a id="top"></a>
+## Contents
+
+1. [Objective](#objective)
+2. [Executive summary](#executive-summary)
+3. [Validated application flow](#validated-application-flow)
+   - [Expected relationships](#expected-relationships)
+4. [Test execution](#test-execution)
+   - [Loading results](#loading-results)
+   - [Profile-to-interface results](#profile-to-interface-results)
+     - [Profile 43](#profile-43)
+     - [Profile 44](#profile-44)
+     - [Profile 46](#profile-46)
+5. [NSA indexing/association regression](#nsa-indexingassociation-regression)
+6. [Field behavior reaching the interface](#field-behavior-reaching-the-interface)
+7. [Integrity controls](#integrity-controls)
+8. [Source-data exceptions](#source-data-exceptions)
+9. [Acceptance and handover](#acceptance-and-handover)
+
+
+
+
+<a id="objective"></a>
+## Objective
+
+Validate the new DEV data structure, including the additional `NSA Profiles`
+("abuela") table, and verify the new relationships against
+`NSA.Tool.Data.Structure.for.Public.Report.pdf`.
+
+[Back to top](#top)
+
 ## Executive summary
 
 This report validates the complete path followed by the data in the application,
