@@ -5,8 +5,6 @@
 | Application | NSA relationship viewer |
 | Environment | Local DEV build using DEV JSON exports |
 | Validation date | 2026-08-01 |
-| Application entry point | `NSAv2_starter_web_frontier/index.html` |
-| JavaScript under test | `NSAv2_starter_web_frontier/src/index.js` |
 | Result | **Pass with source-data exceptions** |
 | Handover | **Ready for ITS review** |
 
@@ -19,8 +17,6 @@ from executing the current JavaScript with the current JSON files.
 
 The end-to-end application flow passed for Profiles 43, 44, and 46:
 
-- All four JSON files were served successfully over HTTP and parsed.
-- `index.js` loaded the files into application state.
 - NSAs were related to the selected organization by `NSAProfileID`.
 - Activities and Workplans were related to the exact NSA cycle by `ParentID`.
 - The current implementation kept children from different cycles separate.
@@ -33,20 +29,10 @@ valid cycle. Four Profile 43 children whose parent cycle 60 is missing were
 shown separately as orphans. One additional NSA/Workplan chain cannot be shown
 under an organization because both records lack `NSAProfileID`.
 
-## Files validated
-
-- [index.html](../NSAv2_starter_web_frontier/index.html)
-- [index.js](../NSAv2_starter_web_frontier/src/index.js)
-- [nsa-profiles.json](../NSAv2_starter_web_frontier/src/database/nsa-profiles.json)
-- [nsa.json](../NSAv2_starter_web_frontier/src/database/nsa.json)
-- [activity.json](../NSAv2_starter_web_frontier/src/database/activity.json)
-- [workplan.json](../NSAv2_starter_web_frontier/src/database/workplan.json)
-- [Data Structure Reference PDF](../files/NSA.Tool.Data.Structure.for.Public.Report.pdf)
-
 ## Validated application flow
 
 ```mermaid
-flowchart LR
+flowchart TD
     J["4 JSON files"] --> L["loadData / Promise.all"]
     L --> S["Application state"]
     S --> P["Select NSA Profile"]
