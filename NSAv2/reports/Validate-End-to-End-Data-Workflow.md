@@ -1,189 +1,182 @@
-# End-to-End NSA Data Workflow Validation
+# End-to-End NSA Data Relationship Validation
 
 | Item | Value |
 |---|---|
 | System | PAHO Non-State Actors Public Report |
 | Environment | DEV |
 | Validation date | 2026-08-01 |
-| Result | **Pass for the supported data workflows, with documented export exceptions** |
+| Authoritative reference | `NSA.Tool.Data.Structure.for.Public.Report.pdf` |
+| Result | **Relationships validated with documented data exceptions** |
 | Handover status | **Ready for ITS review** |
 
-## Executive summary
+## Objective
 
-The validation was repeated using
-`NSA.Tool.Data.Structure.for.Public.Report.pdf` as the authoritative definition
-of the workflow and `Validate-DEV-Database-Changes.md` as the structural
-baseline already delivered.
+Validate that the four exported JSON datasets follow the relationships and
+report-field rules defined by `NSA.Tool.Data.Structure.for.Public.Report.pdf`.
+The detailed checks use Profiles 43, 44, and 46 because they contain the most
+complete relationship data. Profile 11 is included only as an informative case
+for missing `GovBodies_Status` values.
 
-The PDF defines three supported submission states: New Application, Renewal,
-and Progress Report. It does not define Extension as an NSA submission type;
-therefore Extension is not applicable to this data model.
-
-Profiles 43 and 44 were selected as representative end-to-end examples because
-each contains a stable organization record, an approved NSA cycle that has
-progressed to Progress Report, a separate Renewal cycle, Activity and Workplan
-children, and a populated indexed `RenewalKey`.
-
-Both examples pass the expected persistence rules:
-
-- `NSAProfileID` remains stable across cycles for the same organization.
-- Each cycle has its own `NSAs.ID`.
-- `RenewalKey` identifies the approved prior cycle.
-- Activity and Workplan records use the prior cycle ID as `ParentID` and retain
-  the same `NSAProfileID` as the organization.
-- Workplans preserve reported results by year.
-
-The full export still contains previously documented exceptions, but they do
-not affect the two validated chains. The JSON files are not generally missing
-workflow data; specifically, two Profile 43 Activity records and two Profile
-43 Workplan records are confirmed as having no parent because their
-`ParentID = 60` does not resolve to an exported NSA record. The export also
-contains one unrelated NSA row with no profile ID.
+This is a persisted-data validation. It does not use `TypeOfSubmission` as the
+current submission-type filter and does not infer workflow behavior beyond the
+rules documented in the PDF.
 
 ## Sources and scope
 
-| Source | Purpose |
-|---|---|
-| `../files/NSA.Tool.Data.Structure.for.Public.Report.pdf` | Authoritative list, field, relationship, filter, and supported-status definition |
-| `Validate-DEV-Database-Changes.md` | Previously delivered validation of the complete DEV export and its known exceptions |
-| `nsa-profiles.json`, `nsa.json`, `activity.json`, `workplan.json` | Record-level evidence for Profiles 43 and 44 |
+- `nsa-profiles.json`
+- `nsa.json`
+- `activity.json`
+- `workplan.json`
 
-The PDF establishes the following rules:
+Extension is not included because it is not a value defined by the PDF for
+`NSA_Status` or `TypeOfSubmission`.
+
+## Relationships defined by the PDF
 
 ```text
 NSA Profiles.ID -> NSAs.NSAProfileID
 NSAs.ID          -> Activity.ParentID
 NSAs.ID          -> Workplan.ParentID
-NSA Profiles.ID  -> child.NSAProfileID
+NSA Profiles.ID  -> Activity.NSAProfileID
+NSA Profiles.ID  -> Workplan.NSAProfileID
 ```
-
-It also establishes that:
-
-- `NSA Profiles` is the stable organization source across cycles.
-- `NSAs` stores one record per submission/collaboration-period cycle.
-- `NSA_Status` is the current submission-state field.
-- `TypeOfSubmission` retains New Application or Renewal and must not be used as
-  the current state after the record advances to Progress Report.
-- `GovBodies_Status` is the durable Governing Bodies decision.
-- `RenewalKey` is indexed and stores the ID of the most recently extracted NSA
-  submission.
-
-## Supported scenario coverage
-
-| Scenario | Result | Evidence |
-|---|---|---|
-| New Application | Pass | Cycles 96 and 100 retain `TypeOfSubmission = New Application`; their Activities and Workplans were persisted |
-| Progress Report | Pass | Cycles 96 and 100 have `NSA_Status = Progress Report`; Workplans preserve Year 1 and Year 2 reported results |
-| Renewal | Pass | Cycles 97 and 101 are distinct Renewal records and retain the organization ID of their prior cycles |
-| Extension | Not applicable | The authoritative PDF does not define Extension in `NSA_Status` or `TypeOfSubmission` |
-
-## Validated relationship samples
 
 ```mermaid
 flowchart LR
-    subgraph E1["Example 1 — Profile 43"]
-        P43["NSA Profile 43<br/>RenewalKey: 96"]
-        N96["NSA 96<br/>Approved · Progress Report"]
-        N97["NSA 97<br/>Renewal"]
-        A96["Activities 42, 43<br/>ParentID: 96"]
-        W96["Workplans 73, 74<br/>ParentID: 96"]
-        P43 --> N96
-        P43 --> N97
-        N96 --> A96
-        N96 --> W96
-    end
-
-    subgraph E2["Example 2 — Profile 44"]
-        P44["NSA Profile 44<br/>RenewalKey: 100"]
-        N100["NSA 100<br/>Approved · Progress Report"]
-        N101["NSA 101<br/>Renewal"]
-        A100["Activities 45, 46<br/>ParentID: 100"]
-        W100["Workplans 79, 80<br/>ParentID: 100"]
-        P44 --> N100
-        P44 --> N101
-        N100 --> A100
-        N100 --> W100
-    end
+    P["NSA Profiles<br/>organization"] -->|"NSAProfileID"| N["NSAs<br/>submission / cycle"]
+    N -->|"ParentID"| A["Activity"]
+    N -->|"ParentID"| W["Workplan"]
+    P -.->|"NSAProfileID: direct organization join"| A
+    P -.->|"NSAProfileID: direct organization join"| W
 ```
 
-### Example 1 — NSA Profile 43
+The two child relationships have different purposes:
 
-| List | IDs | Relationship and state | Result |
-|---|---|---|---|
-| NSA Profiles | 43 | `RenewalKey = 96` | Pass |
-| NSAs | 96 | `NSAProfileID = 43`; `GovBodies_Status = Approved`; current `NSA_Status = Progress Report` | Pass |
-| NSAs | 97 | `NSAProfileID = 43`; `NSA_Status = Renewal` | Pass |
-| Activity | 42, 43 | `ParentID = 96`; `NSAProfileID = 43` | Pass |
-| Workplan | 73, 74 | `ParentID = 96`; `NSAProfileID = 43`; Year 1 and Year 2 reported | Pass |
+- `ParentID = NSAs.ID` identifies the exact submission/cycle.
+- Child `NSAProfileID = NSA Profiles.ID` confirms organization ownership.
 
-This chain demonstrates that the organization remains Profile 43 while cycles
-96 and 97 remain distinct. The approved prior cycle is retrievable through
-`RenewalKey = 96`, and the validated children belong to that exact cycle.
+`NSAProfileID` must not replace `ParentID` when retrieving records for a
+specific cycle because one organization can have multiple NSA records.
 
-### Example 2 — NSA Profile 44
+## Field usage defined by the PDF
 
-| List | IDs | Relationship and state | Result |
-|---|---|---|---|
-| NSA Profiles | 44 | `RenewalKey = 100` | Pass |
-| NSAs | 100 | `NSAProfileID = 44`; `GovBodies_Status = Approved`; current `NSA_Status = Progress Report` | Pass |
-| NSAs | 101 | `NSAProfileID = 44`; `NSA_Status = Renewal` | Pass |
-| Activity | 45, 46 | `ParentID = 100`; `NSAProfileID = 44` | Pass |
-| Workplan | 79, 80 | `ParentID = 100`; `NSAProfileID = 44`; Year 1 and Year 2 reported | Pass |
-
-This chain demonstrates the same result independently: Profile 44 remains the
-organization identity, the prior and Renewal cycles are not overwritten, and
-all four children resolve to approved cycle 100.
-
-## Validation results
-
-| Requirement | Result | Conclusion |
+| Requirement | Correct field | Rule |
 |---|---|---|
-| Organization identity persists across cycles | Pass | Profiles 43 and 44 remain unchanged across their prior and Renewal cycles |
-| New Application data is captured | Pass | Prior cycles and their Activity and Workplan rows are present |
-| Progress Report data is processed and retained | Pass | Current state and per-year Workplan results are persisted |
-| Renewal creates a separate cycle | Pass | IDs 97 and 101 are separate from prior cycles 96 and 100 |
-| Children resolve to the correct cycle | Pass | All children cited in the two validation samples have matching `ParentID` and `NSAProfileID` |
-| Approved status remains available | Pass | Cycles 96 and 100 retain `GovBodies_Status = Approved` |
-| Indexed join value is populated correctly | Pass at data level | `RenewalKey` values 96 and 100 resolve to the intended approved cycles |
-| Results are documented for ITS | Pass | Sources, IDs, expected relationships, actual results, exceptions, and acceptance are recorded here |
+| Current submission type | `NSAs.NSA_Status` | Use for New Application, Renewal, or Progress Report filtering |
+| Original submission type | `NSAs.TypeOfSubmission` | Stores New Application or Renewal origin; **do not use as the current type filter** |
+| Governing Bodies decision | `NSAs.GovBodies_Status` | Durable decision used for report filtering/display |
+| Workflow progress | `NSAs.Status` | Internal progress only; not the type or eligibility filter |
+| Public-report eligibility | `NSAs.GovBodies_Status` | Eligible when Pending or Approved, according to the PDF |
+| Organization type | `NSA Profiles.NSAOrganizationType` | Use for organization-type filtering |
+| Collaboration period | `NSAs.CollaborationPeriod` | Use for collaboration-period filtering |
+| Backend extracted-cycle lookup | `NSA Profiles.RenewalKey` | Indexed backend key only; no report-facing role |
 
-## Export exceptions and interpretation
+`RenewalKey` stores the ID, as text, of the organization's most recently
+extracted NSA submission. It does not replace `NSAProfileID` or `ParentID` and
+must not be used for public display, filtering, or eligibility. “Most recently
+extracted” does not necessarily mean the highest ID, newest cycle, or approved
+cycle.
 
-The complete-export exceptions remain as recorded in
-`Validate-DEV-Database-Changes.md`:
+## Relationship validation results
 
-1. `NSAs.ID = 41` has a blank `NSAProfileID`.
-2. Profile 43 has four confirmed orphan child rows with `ParentID = 60`, while
-   `NSAs.ID = 60` is absent from the supplied export:
-   - Activities `38` and `39`
-   - Workplans `60` and `61`
+### Summary
 
-This confirms two Activity and two Workplan records without a parent in the
-validated dataset. It does not invalidate the separate, complete Profile 43
-chain through cycle 96, but the four orphan records must remain a documented
-data-integrity exception for ITS.
+| Profile | Profile to NSAs | Children by `ParentID` | Child organization ownership | `RenewalKey` | Result |
+|---:|---|---|---|---|---|
+| 43 | Cycles 96 and 97 match Profile 43 | 4 valid; 4 orphan records use missing parent 60 | All 8 children retain `NSAProfileID = 43` | 96 resolves to cycle 96 | Partial pass |
+| 44 | Cycles 100 and 101 match Profile 44 | All 4 children resolve to cycle 100 | All 4 children retain `NSAProfileID = 44` | 100 resolves to cycle 100 | Pass |
+| 46 | Cycles 94, 95, 98, and 99 match Profile 46 | All 8 children resolve to an exported cycle | All 8 children retain `NSAProfileID = 46` | 95 resolves to cycle 95 | Pass |
+| 11 | All 13 cycles match Profile 11 | All 27 children resolve to an exported cycle | All 27 children retain `NSAProfileID = 11` | 91 resolves to cycle 91 | Relationship pass; status case only |
 
-## Indexing conclusion
+### Profile 43
 
-The data-level regression condition passes for the representative examples:
-the indexed `RenewalKey` is populated with `96` for Profile 43 and `100` for
-Profile 44, and each value identifies the correct approved prior cycle.
+Valid chain:
 
-The PDF confirms that `RenewalKey` is indexed. The exports cannot inspect the
-deployed SharePoint list configuration or prove query performance; those are
-infrastructure checks rather than missing data in the validated JSON chains.
-If ITS requires operational index certification, the handover should include a
-SharePoint index-settings capture and an execution trace of the Renewal lookup.
+```text
+NSA Profile 43
+  -> NSA 96 (NSAProfileID 43, GovBodies_Status Approved)
+     -> Activities 42, 43 (ParentID 96, NSAProfileID 43)
+     -> Workplans 73, 74 (ParentID 96, NSAProfileID 43)
+  -> NSA 97 (NSAProfileID 43)
+```
 
-## Acceptance and ITS handover
+The organization and cycle relationships above pass. Separately, Activities
+38 and 39 and Workplans 60 and 61 also carry `NSAProfileID = 43`, but their
+`ParentID = 60` does not resolve because `NSAs.ID = 60` is absent. These four
+records pass the direct organization join but fail the required cycle join.
 
-The supported data workflows defined by the authoritative PDF are represented
-and persist correctly in the two detailed examples. New Application data,
-Progress Report results, Governing Bodies approval, and separate Renewal cycles
-remain connected through the intended organization and cycle keys.
+### Profile 44
 
-**Acceptance:** Pass for the supported end-to-end data workflow, with the known
-export exceptions above.
+```text
+NSA Profile 44
+  -> NSA 100 (NSAProfileID 44, GovBodies_Status Approved)
+     -> Activities 45, 46 (ParentID 100, NSAProfileID 44)
+     -> Workplans 79, 80 (ParentID 100, NSAProfileID 44)
+  -> NSA 101 (NSAProfileID 44)
+```
 
-**ITS handover:** This report is ready for ITS review together with the PDF,
-`Validate-DEV-Database-Changes.md`, and the four DEV exports.
+All organization and cycle relationships pass. There are no orphan children
+for Profile 44.
+
+### Profile 46
+
+```text
+NSA Profile 46
+  -> NSAs 94, 95, 98, 99 (all use NSAProfileID 46)
+  -> Activities 41 and 44 (parents 94 and 99)
+  -> Workplans 71, 72, 75, 76, 77, 78 (parents 94, 95, and 99)
+```
+
+All organization and cycle relationships pass. There are no orphan children.
+`RenewalKey = 95` resolves to `NSAs.ID = 95`, which belongs to Profile 46.
+Cycle 95 has `GovBodies_Status = Not Approved`; this confirms that
+`RenewalKey` is a backend extracted-cycle key, not an approval or eligibility
+field.
+
+### Profile 11 — informative status case
+
+Profile 11 has 13 NSA cycles, 6 Activities, and 21 Workplans. All child
+`ParentID` values resolve and all records retain `NSAProfileID = 11`, so its
+relationships pass.
+
+However, every Profile 11 NSA record has `GovBodies_Status = null`. Cycles 91
+and 92 contain `GovBodies_Outcome = Approved`, but the PDF says
+`GovBodies_Outcome` is a working field and is not reliable as a report filter.
+Without a durable `GovBodies_Status`, Profile 11 cannot be used as a positive
+example of Governing Bodies approval or public-report eligibility.
+
+## Full-export exceptions
+
+The relationship review confirms two data-integrity exceptions:
+
+1. `NSAs.ID = 41` has a blank `NSAProfileID`; its organization relationship
+   cannot be resolved.
+2. Four Profile 43 children have no exported cycle parent:
+   - Activities 38 and 39 use `ParentID = 60`.
+   - Workplans 60 and 61 use `ParentID = 60`.
+   - `NSAs.ID = 60` is not present in `nsa.json`.
+
+These exceptions do not invalidate the separate valid Profile 43 chain through
+cycle 96, but they remain failures of the PDF-defined relationship model.
+
+## Conclusion and ITS handover
+
+The JSON structure implements the relationship model defined by the PDF:
+
+- `NSAProfileID` consistently identifies the organization in the validated
+  Profiles 43, 44, and 46.
+- `ParentID` correctly identifies the exact cycle for every cited child except
+  the four confirmed Profile 43 orphans.
+- Profiles 44 and 46 pass all examined relationship checks.
+- Profile 43 passes through cycle 96 and partially passes overall because of
+  the missing cycle 60.
+- Profile 11 passes relationship checks but cannot validate approval or public
+  eligibility because `GovBodies_Status` is null.
+
+The report must use `NSA_Status`, `GovBodies_Status`,
+`NSAOrganizationType`, and `CollaborationPeriod` according to the PDF. It must
+not use `TypeOfSubmission`, `Status`, or `RenewalKey` as substitutes for those
+report-facing fields.
+
+**Handover:** Ready for ITS review with the two confirmed data-integrity
+exceptions documented above.
