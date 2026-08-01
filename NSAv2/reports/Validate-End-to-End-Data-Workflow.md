@@ -1,182 +1,206 @@
-# End-to-End NSA Data Relationship Validation
+# End-to-End Data Workflow Validation Report
 
 | Item | Value |
 |---|---|
-| System | PAHO Non-State Actors Public Report |
-| Environment | DEV |
+| Application | NSA relationship viewer |
+| Environment | Local DEV build using DEV JSON exports |
 | Validation date | 2026-08-01 |
-| Authoritative reference | `NSA.Tool.Data.Structure.for.Public.Report.pdf` |
-| Result | **Relationships validated with documented data exceptions** |
-| Handover status | **Ready for ITS review** |
+| Application entry point | `NSAv2_starter_web_frontier/index.html` |
+| JavaScript under test | `NSAv2_starter_web_frontier/src/index.js` |
+| Result | **Pass with source-data exceptions** |
+| Handover | **Ready for ITS review** |
 
-## Objective
+## Executive summary
 
-Validate that the four exported JSON datasets follow the relationships and
-report-field rules defined by `NSA.Tool.Data.Structure.for.Public.Report.pdf`.
-The detailed checks use Profiles 43, 44, and 46 because they contain the most
-complete relationship data. Profile 11 is included only as an informative case
-for missing `GovBodies_Status` values.
+This report validates the complete path followed by the data in the application,
+from the four JSON files to the rendered interface. The PDF is used only to
+define the expected relationships and field roles; the evidence below comes
+from executing the current JavaScript with the current JSON files.
 
-This is a persisted-data validation. It does not use `TypeOfSubmission` as the
-current submission-type filter and does not infer workflow behavior beyond the
-rules documented in the PDF.
+The end-to-end application flow passed for Profiles 43, 44, and 46:
 
-## Sources and scope
+- All four JSON files were served successfully over HTTP and parsed.
+- `index.js` loaded the files into application state.
+- NSAs were related to the selected organization by `NSAProfileID`.
+- Activities and Workplans were related to the exact NSA cycle by `ParentID`.
+- The current implementation kept children from different cycles separate.
+- The expected cycles and children reached the interface.
+- No duplicate IDs, duplicate references, or cross-organization mismatches were
+  found.
 
-- `nsa-profiles.json`
-- `nsa.json`
-- `activity.json`
-- `workplan.json`
+The application also handled incomplete source data without mixing it into a
+valid cycle. Four Profile 43 children whose parent cycle 60 is missing were
+shown separately as orphans. One additional NSA/Workplan chain cannot be shown
+under an organization because both records lack `NSAProfileID`.
 
-Extension is not included because it is not a value defined by the PDF for
-`NSA_Status` or `TypeOfSubmission`.
+## Files validated
 
-## Relationships defined by the PDF
+- [index.html](../NSAv2_starter_web_frontier/index.html)
+- [index.js](../NSAv2_starter_web_frontier/src/index.js)
+- [nsa-profiles.json](../NSAv2_starter_web_frontier/src/database/nsa-profiles.json)
+- [nsa.json](../NSAv2_starter_web_frontier/src/database/nsa.json)
+- [activity.json](../NSAv2_starter_web_frontier/src/database/activity.json)
+- [workplan.json](../NSAv2_starter_web_frontier/src/database/workplan.json)
+- [Data Structure Reference PDF](../files/NSA.Tool.Data.Structure.for.Public.Report.pdf)
 
-```text
-NSA Profiles.ID -> NSAs.NSAProfileID
-NSAs.ID          -> Activity.ParentID
-NSAs.ID          -> Workplan.ParentID
-NSA Profiles.ID  -> Activity.NSAProfileID
-NSA Profiles.ID  -> Workplan.NSAProfileID
-```
+## Validated application flow
 
 ```mermaid
 flowchart LR
-    P["NSA Profiles<br/>organization"] -->|"NSAProfileID"| N["NSAs<br/>submission / cycle"]
-    N -->|"ParentID"| A["Activity"]
-    N -->|"ParentID"| W["Workplan"]
-    P -.->|"NSAProfileID: direct organization join"| A
-    P -.->|"NSAProfileID: direct organization join"| W
+    J["4 JSON files"] --> L["loadData / Promise.all"]
+    L --> S["Application state"]
+    S --> P["Select NSA Profile"]
+    P --> N["Find cycles by NSAProfileID"]
+    N --> C["Index cycle IDs"]
+    C --> R["Find children by ParentID"]
+    R --> V["Validate child NSAProfileID"]
+    V --> U["Render cycles and children"]
+    R --> O["Render missing-parent children separately"]
 ```
 
-The two child relationships have different purposes:
+### Expected relationships
 
-- `ParentID = NSAs.ID` identifies the exact submission/cycle.
-- Child `NSAProfileID = NSA Profiles.ID` confirms organization ownership.
+The PDF defines the expected joins. The application implements them as follows:
 
-`NSAProfileID` must not replace `ParentID` when retrieving records for a
-specific cycle because one organization can have multiple NSA records.
-
-## Field usage defined by the PDF
-
-| Requirement | Correct field | Rule |
+| Expected relationship | JavaScript behavior | Result |
 |---|---|---|
-| Current submission type | `NSAs.NSA_Status` | Use for New Application, Renewal, or Progress Report filtering |
-| Original submission type | `NSAs.TypeOfSubmission` | Stores New Application or Renewal origin; **do not use as the current type filter** |
-| Governing Bodies decision | `NSAs.GovBodies_Status` | Durable decision used for report filtering/display |
-| Workflow progress | `NSAs.Status` | Internal progress only; not the type or eligibility filter |
-| Public-report eligibility | `NSAs.GovBodies_Status` | Eligible when Pending or Approved, according to the PDF |
-| Organization type | `NSA Profiles.NSAOrganizationType` | Use for organization-type filtering |
-| Collaboration period | `NSAs.CollaborationPeriod` | Use for collaboration-period filtering |
-| Backend extracted-cycle lookup | `NSA Profiles.RenewalKey` | Indexed backend key only; no report-facing role |
+| `NSA Profiles.ID = NSAs.NSAProfileID` | Filters NSAs by the selected Profile ID | Pass |
+| `NSAs.ID = Activity.ParentID` | Builds the selected cycle-ID set and filters Activities by `ParentID` | Pass with 2 source-data orphans |
+| `NSAs.ID = Workplan.ParentID` | Builds the selected cycle-ID set and filters Workplans by `ParentID` | Pass with 2 source-data orphans |
+| `NSA Profiles.ID = child.NSAProfileID` | Checks that each rendered child belongs to the selected organization | Pass for all verifiable records |
 
-`RenewalKey` stores the ID, as text, of the organization's most recently
-extracted NSA submission. It does not replace `NSAProfileID` or `ParentID` and
-must not be used for public display, filtering, or eligibility. “Most recently
-extracted” does not necessarily mean the highest ID, newest cycle, or approved
-cycle.
+The implementation correctly uses `NSAProfileID` for organization-level
+selection and `ParentID` for cycle-level selection. It does not substitute one
+relationship for the other.
 
-## Relationship validation results
+## Test execution
 
-### Summary
+The validation executed the actual `index.js` with a controlled DOM and the
+four current JSON files. A local HTTP server was also used to verify that every
+application resource is accessible through the same path used by the browser.
 
-| Profile | Profile to NSAs | Children by `ParentID` | Child organization ownership | `RenewalKey` | Result |
-|---:|---|---|---|---|---|
-| 43 | Cycles 96 and 97 match Profile 43 | 4 valid; 4 orphan records use missing parent 60 | All 8 children retain `NSAProfileID = 43` | 96 resolves to cycle 96 | Partial pass |
-| 44 | Cycles 100 and 101 match Profile 44 | All 4 children resolve to cycle 100 | All 4 children retain `NSAProfileID = 44` | 100 resolves to cycle 100 | Pass |
-| 46 | Cycles 94, 95, 98, and 99 match Profile 46 | All 8 children resolve to an exported cycle | All 8 children retain `NSAProfileID = 46` | 95 resolves to cycle 95 | Pass |
-| 11 | All 13 cycles match Profile 11 | All 27 children resolve to an exported cycle | All 27 children retain `NSAProfileID = 11` | 91 resolves to cycle 91 | Relationship pass; status case only |
+### Loading results
 
-### Profile 43
+| Resource | HTTP result | Parsed records |
+|---|---:|---:|
+| `nsa-profiles.json` | 200 | 46 |
+| `nsa.json` | 200 | 22 |
+| `activity.json` | 200 | 14 |
+| `workplan.json` | 200 | 34 |
 
-Valid chain:
+The test confirmed that the four JSON paths were requested once, all responses
+were parsed, `loadData()` completed, and the interface reported successful data
+loading.
 
-```text
-NSA Profile 43
-  -> NSA 96 (NSAProfileID 43, GovBodies_Status Approved)
-     -> Activities 42, 43 (ParentID 96, NSAProfileID 43)
-     -> Workplans 73, 74 (ParentID 96, NSAProfileID 43)
-  -> NSA 97 (NSAProfileID 43)
-```
+### Profile-to-interface results
 
-The organization and cycle relationships above pass. Separately, Activities
-38 and 39 and Workplans 60 and 61 also carry `NSAProfileID = 43`, but their
-`ParentID = 60` does not resolve because `NSAs.ID = 60` is absent. These four
-records pass the direct organization join but fail the required cycle join.
+| Profile | Cycles rendered | Activities rendered with a parent | Workplans rendered with a parent | Orphans shown separately | Result |
+|---:|---:|---:|---:|---:|---|
+| 43 | 2 | 2 | 2 | 4 | Partial pass due to source data |
+| 44 | 2 | 2 | 2 | 0 | Pass |
+| 46 | 4 | 2 | 6 | 0 | Pass |
 
-### Profile 44
+#### Profile 43
 
-```text
-NSA Profile 44
-  -> NSA 100 (NSAProfileID 44, GovBodies_Status Approved)
-     -> Activities 45, 46 (ParentID 100, NSAProfileID 44)
-     -> Workplans 79, 80 (ParentID 100, NSAProfileID 44)
-  -> NSA 101 (NSAProfileID 44)
-```
+- Cycles 96 and 97 reached the cycle table.
+- Activities 42 and 43 and Workplans 73 and 74 reached cycle 96.
+- Activities 38 and 39 and Workplans 60 and 61 did not enter cycle 96 because
+  their `ParentID` is 60.
+- The four records were preserved and displayed in the missing-parent section.
 
-All organization and cycle relationships pass. There are no orphan children
-for Profile 44.
+#### Profile 44
 
-### Profile 46
+- The application selected Profile 44 by default.
+- Cycles 100 and 101 reached the cycle table.
+- Activities 45 and 46 and Workplans 79 and 80 reached cycle 100.
+- No orphan section was displayed.
 
-```text
-NSA Profile 46
-  -> NSAs 94, 95, 98, 99 (all use NSAProfileID 46)
-  -> Activities 41 and 44 (parents 94 and 99)
-  -> Workplans 71, 72, 75, 76, 77, 78 (parents 94, 95, and 99)
-```
+#### Profile 46
 
-All organization and cycle relationships pass. There are no orphan children.
-`RenewalKey = 95` resolves to `NSAs.ID = 95`, which belongs to Profile 46.
-Cycle 95 has `GovBodies_Status = Not Approved`; this confirms that
-`RenewalKey` is a backend extracted-cycle key, not an approval or eligibility
-field.
+- Cycles 94, 95, 98, and 99 reached the cycle table.
+- Activities 41 and 44 reached their respective cycles.
+- Workplans 71, 72, 75, 76, 77, and 78 reached their respective cycles.
+- No orphan section was displayed.
 
-### Profile 11 — informative status case
+## NSA indexing/association regression
 
-Profile 11 has 13 NSA cycles, 6 Activities, and 21 Workplans. All child
-`ParentID` values resolve and all records retain `NSAProfileID = 11`, so its
-relationships pass.
+The correction is present in the current JavaScript:
 
-However, every Profile 11 NSA record has `GovBodies_Status = null`. Cycles 91
-and 92 contain `GovBodies_Outcome = Approved`, but the PDF says
-`GovBodies_Outcome` is a working field and is not reliable as a report filter.
-Without a durable `GovBodies_Status`, Profile 11 cannot be used as a positive
-example of Governing Bodies approval or public-report eligibility.
+1. It first finds every NSA cycle whose `NSAProfileID` matches the selected
+   organization.
+2. It creates a set containing the matching `NSAs.ID` values.
+3. It retrieves Activities and Workplans only when their `ParentID` exists in
+   that cycle-ID set.
+4. It validates the child's `NSAProfileID` against the selected organization.
+5. Children that match the organization but reference an absent cycle are
+   isolated as orphans instead of being assigned to another cycle.
 
-## Full-export exceptions
+This prevents the previous association/indexing symptom in which an
+organization ID could be confused with a cycle ID or children from different
+cycles could be mixed. The regression passed for Profiles 43, 44, and 46.
 
-The relationship review confirms two data-integrity exceptions:
+This is an application-level regression result. The static frontend does not
+query SharePoint, and it does not use `RenewalKey`; therefore this test does not
+certify the physical SharePoint index configuration or SharePoint query
+performance.
 
-1. `NSAs.ID = 41` has a blank `NSAProfileID`; its organization relationship
-   cannot be resolved.
-2. Four Profile 43 children have no exported cycle parent:
-   - Activities 38 and 39 use `ParentID = 60`.
-   - Workplans 60 and 61 use `ParentID = 60`.
-   - `NSAs.ID = 60` is not present in `nsa.json`.
+## Field behavior reaching the interface
 
-These exceptions do not invalidate the separate valid Profile 43 chain through
-cycle 96, but they remain failures of the PDF-defined relationship model.
+The JavaScript follows the PDF guidance for the report-facing fields:
 
-## Conclusion and ITS handover
+- The cycle table displays the current type from `NSA_Status`.
+- `TypeOfSubmission` is not used as the current type filter.
+- Eligibility is calculated only from `GovBodies_Status`, accepting Pending or
+  Approved.
+- `Status` is displayed as workflow progress and is not used for eligibility.
+- `RenewalKey` is not exposed in the interface.
 
-The JSON structure implements the relationship model defined by the PDF:
+Profile 11 confirms the importance of this distinction: its relationships are
+complete, but every cycle has `GovBodies_Status = null`. Even though cycles 91
+and 92 have `GovBodies_Outcome = Approved`, the interface correctly cannot use
+that working field as durable approval evidence.
 
-- `NSAProfileID` consistently identifies the organization in the validated
-  Profiles 43, 44, and 46.
-- `ParentID` correctly identifies the exact cycle for every cited child except
-  the four confirmed Profile 43 orphans.
-- Profiles 44 and 46 pass all examined relationship checks.
-- Profile 43 passes through cycle 96 and partially passes overall because of
-  the missing cycle 60.
-- Profile 11 passes relationship checks but cannot validate approval or public
-  eligibility because `GovBodies_Status` is null.
+## Integrity controls
 
-The report must use `NSA_Status`, `GovBodies_Status`,
-`NSAOrganizationType`, and `CollaborationPeriod` according to the PDF. It must
-not use `TypeOfSubmission`, `Status`, or `RenewalKey` as substitutes for those
-report-facing fields.
+| Control | Result | Evidence |
+|---|---|---|
+| Duplicate Profile IDs | Pass | 0 duplicates |
+| Duplicate NSA cycle IDs | Pass | 0 duplicates |
+| Duplicate Activity IDs or references | Pass | 0 duplicates |
+| Duplicate Workplan IDs or references | Pass | 0 duplicates |
+| Parent/child organization mismatch | Pass | 0 mismatches where the parent and organization IDs are available |
+| Valid selected records lost before rendering | Pass | Expected records for Profiles 43, 44, and 46 reached the interface |
+| Children assigned to the wrong cycle | Pass | Cycle lookup uses `ParentID`; missing parents are isolated |
 
-**Handover:** Ready for ITS review with the two confirmed data-integrity
-exceptions documented above.
+## Source-data exceptions
+
+1. `NSAs.ID = 60` is absent from `nsa.json`. Consequently, these Profile 43
+   records have no cycle parent:
+   - Activities 38 and 39
+   - Workplans 60 and 61
+2. `NSAs.ID = 41` has a blank `NSAProfileID`.
+3. Workplan 44 uses `ParentID = 41` but also has a blank `NSAProfileID`.
+
+The NSA 41/Workplan 44 pair has a cycle relationship, but it cannot be attached
+to any organization or reached through the profile selector. This is a source
+data limitation, not a loss introduced by the JavaScript.
+
+## Acceptance and handover
+
+| Requirement | Result |
+|---|---|
+| Four JSON files are loaded | Pass |
+| JavaScript reads and relates the data | Pass |
+| Tables and relationships operate correctly | Pass with documented source-data exceptions |
+| NSA association/indexing correction is applied | Pass at application level |
+| Resulting information reaches the interface | Pass for all valid records tested |
+| No application-introduced loss, duplication, or incorrect association | Pass |
+
+**Conclusion:** The current application correctly carries valid data from the
+four JSON files through relationship processing to the rendered interface. It
+does not mix cycles, duplicate records, or silently discard the four detected
+orphans. The remaining failures originate in the exported data and are listed
+above for correction or clarification.
+
+**Handover:** Ready for ITS review with the test results and source-data
+exceptions documented in this report.
