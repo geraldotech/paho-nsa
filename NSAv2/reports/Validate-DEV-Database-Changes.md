@@ -1,7 +1,7 @@
 # DEV Data Structure Validation Report
 
 **System:** PAHO Non-State Actors Public Report  
-**Environment:** DEV  
+**Environment:** DEV   
 **Validation date:** 2026-07-24  
 **Result:** **Functional structure passed with data/export exceptions**
 
