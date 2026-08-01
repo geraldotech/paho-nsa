@@ -33,7 +33,7 @@ under an organization because both records lack `NSAProfileID`.
 
 ```mermaid
 flowchart TD
-    J["4 JSON files"] --> L["loadData / Promise.all"]
+    J["4 JSON files"] --> L["Load and parse data"]
     L --> S["Application state"]
     S --> P["Select NSA Profile"]
     P --> N["Find cycles by NSAProfileID"]
@@ -51,13 +51,18 @@ The PDF defines the expected joins. The application implements them as follows:
 | Expected relationship | JavaScript behavior | Result |
 |---|---|---|
 | `NSA Profiles.ID = NSAs.NSAProfileID` | Filters NSAs by the selected Profile ID | Pass |
-| `NSAs.ID = Activity.ParentID` | Builds the selected cycle-ID set and filters Activities by `ParentID` | Pass with 2 source-data orphans |
-| `NSAs.ID = Workplan.ParentID` | Builds the selected cycle-ID set and filters Workplans by `ParentID` | Pass with 2 source-data orphans |
+| `NSAs.ID = Activity.ParentID` | Builds the selected cycle-ID set and filters Activities by `ParentID` | Pass for Profiles 44 and 46 and for Profile 43 cycle 96 |
+| `NSAs.ID = Workplan.ParentID` | Builds the selected cycle-ID set and filters Workplans by `ParentID` | Pass for Profiles 44 and 46 and for Profile 43 cycle 96 |
 | `NSA Profiles.ID = child.NSAProfileID` | Checks that each rendered child belongs to the selected organization | Pass for all verifiable records |
 
 The implementation correctly uses `NSAProfileID` for organization-level
 selection and `ParentID` for cycle-level selection. It does not substitute one
 relationship for the other.
+
+Profiles 44 and 46 pass all relationship checks. The valid Profile 43 chain
+through cycle 96 also passes. Profile 43 remains a partial result only because
+Activities 38 and 39 and Workplans 60 and 61 reference missing cycle 60; these
+source-data exceptions are documented separately below.
 
 ## Test execution
 
@@ -67,16 +72,15 @@ application resource is accessible through the same path used by the browser.
 
 ### Loading results
 
-| Resource | HTTP result | Parsed records |
-|---|---:|---:|
-| `nsa-profiles.json` | 200 | 46 |
-| `nsa.json` | 200 | 22 |
-| `activity.json` | 200 | 14 |
-| `workplan.json` | 200 | 34 |
+| Resource | Parsed records |
+|---|---:|
+| `nsa-profiles.json` | 46 |
+| `nsa.json` | 22 |
+| `activity.json` | 14 |
+| `workplan.json` | 34 |
 
-The test confirmed that the four JSON paths were requested once, all responses
-were parsed, `loadData()` completed, and the interface reported successful data
-loading.
+The test confirmed that all four JSON datasets were parsed and that the
+interface reported successful data loading.
 
 ### Profile-to-interface results
 
