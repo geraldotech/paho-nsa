@@ -1,14 +1,15 @@
-# End-to-End Data Workflow Validation Report 
+# End-to-End Data Workflow Validation Report
 
-| Item | Value |
-|---|---|
-| Application | NSA relationship viewer |
-| Environment | Local DEV build using DEV JSON exports |
-| Validation date | 2026-08-01 |
-| Result | **Pass with source-data exceptions** |
-| Handover | **Ready for ITS review** |
+| Item            | Value                                  |
+| --------------- | -------------------------------------- |
+| Application     | NSA relationship viewer                |
+| Environment     | Local DEV build using DEV JSON exports |
+| Validation date | 2026-08-01                             |
+| Result          | **Pass with source-data exceptions**   |
+| Handover        | **Ready for ITS review**               |
 
 <a id="top"></a>
+
 ## Contents
 
 1. [Objective](#objective)
@@ -27,15 +28,19 @@
 8. [Source-data exceptions](#source-data-exceptions)
 9. [Acceptance and handover](#acceptance-and-handover)
 
-
-
-
 <a id="objective"></a>
+
 ## Objective
 
 Validate that the complete workflow captures and processes data correctly
 across all supported scenarios, including new applications, renewals, and
 extensions. Document the validation results and hand them over to ITS.
+
+The DEV data structure and relationship model are documented separately in
+`validate-dev-database-changes.md` or `dev-data-structure-validation-report.md`. This
+report focuses on validating their end-to-end use by the application, from
+data loading and relationship processing through scenario handling and
+interface rendering.
 
 [Back to top](#top)
 
@@ -79,12 +84,12 @@ flowchart TD
 
 The PDF defines the expected joins. The application implements them as follows:
 
-| Expected relationship | JavaScript behavior | Result |
-|---|---|---|
-| `NSA Profiles.ID = NSAs.NSAProfileID` | Filters NSAs by the selected Profile ID | Pass |
-| `NSAs.ID = Activity.ParentID` | Builds the selected cycle-ID set and filters Activities by `ParentID` | Pass for Profiles 44 and 46 and for Profile 43 cycle 96 |
-| `NSAs.ID = Workplan.ParentID` | Builds the selected cycle-ID set and filters Workplans by `ParentID` | Pass for Profiles 44 and 46 and for Profile 43 cycle 96 |
-| `NSA Profiles.ID = child.NSAProfileID` | Checks that each rendered child belongs to the selected organization | Pass for all verifiable records |
+| Expected relationship                  | JavaScript behavior                                                   | Result                                                  |
+| -------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
+| `NSA Profiles.ID = NSAs.NSAProfileID`  | Filters NSAs by the selected Profile ID                               | Pass                                                    |
+| `NSAs.ID = Activity.ParentID`          | Builds the selected cycle-ID set and filters Activities by `ParentID` | Pass for Profiles 44 and 46 and for Profile 43 cycle 96 |
+| `NSAs.ID = Workplan.ParentID`          | Builds the selected cycle-ID set and filters Workplans by `ParentID`  | Pass for Profiles 44 and 46 and for Profile 43 cycle 96 |
+| `NSA Profiles.ID = child.NSAProfileID` | Checks that each rendered child belongs to the selected organization  | Pass for all verifiable records                         |
 
 The implementation correctly uses `NSAProfileID` for organization-level
 selection and `ParentID` for cycle-level selection. It does not substitute one
@@ -103,23 +108,23 @@ application resource is accessible through the same path used by the browser.
 
 ### Loading results
 
-| Resource | Parsed records |
-|---|---:|
-| `nsa-profiles.json` | 46 |
-| `nsa.json` | 22 |
-| `activity.json` | 14 |
-| `workplan.json` | 34 |
+| Resource            | Parsed records |
+| ------------------- | -------------: |
+| `nsa-profiles.json` |             46 |
+| `nsa.json`          |             22 |
+| `activity.json`     |             14 |
+| `workplan.json`     |             34 |
 
 The test confirmed that all four JSON datasets were parsed and that the
 interface reported successful data loading.
 
 ### Profile-to-interface results
 
-| Profile | Cycles rendered | Activities rendered with a parent | Workplans rendered with a parent | Orphans shown separately | Result |
-|---:|---:|---:|---:|---:|---|
-| 43 | 2 | 2 | 2 | 4 | Partial pass due to source data |
-| 44 | 2 | 2 | 2 | 0 | Pass |
-| 46 | 4 | 2 | 6 | 0 | Pass |
+| Profile | Cycles rendered | Activities rendered with a parent | Workplans rendered with a parent | Orphans shown separately | Result                          |
+| ------: | --------------: | --------------------------------: | -------------------------------: | -----------------------: | ------------------------------- |
+|      43 |               2 |                                 2 |                                2 |                        4 | Partial pass due to source data |
+|      44 |               2 |                                 2 |                                2 |                        0 | Pass                            |
+|      46 |               4 |                                 2 |                                6 |                        0 | Pass                            |
 
 #### Profile 43
 
@@ -183,15 +188,15 @@ that working field as durable approval evidence.
 
 ## Integrity controls
 
-| Control | Result | Evidence |
-|---|---|---|
-| Duplicate Profile IDs | Pass | 0 duplicates |
-| Duplicate NSA cycle IDs | Pass | 0 duplicates |
-| Duplicate Activity IDs or references | Pass | 0 duplicates |
-| Duplicate Workplan IDs or references | Pass | 0 duplicates |
-| Parent/child organization mismatch | Pass | 0 mismatches where the parent and organization IDs are available |
-| Valid selected records lost before rendering | Pass | Expected records for Profiles 43, 44, and 46 reached the interface |
-| Children assigned to the wrong cycle | Pass | Cycle lookup uses `ParentID`; missing parents are isolated |
+| Control                                      | Result | Evidence                                                           |
+| -------------------------------------------- | ------ | ------------------------------------------------------------------ |
+| Duplicate Profile IDs                        | Pass   | 0 duplicates                                                       |
+| Duplicate NSA cycle IDs                      | Pass   | 0 duplicates                                                       |
+| Duplicate Activity IDs or references         | Pass   | 0 duplicates                                                       |
+| Duplicate Workplan IDs or references         | Pass   | 0 duplicates                                                       |
+| Parent/child organization mismatch           | Pass   | 0 mismatches where the parent and organization IDs are available   |
+| Valid selected records lost before rendering | Pass   | Expected records for Profiles 43, 44, and 46 reached the interface |
+| Children assigned to the wrong cycle         | Pass   | Cycle lookup uses `ParentID`; missing parents are isolated         |
 
 ## Source-data exceptions
 
@@ -208,14 +213,14 @@ data limitation, not a loss introduced by the JavaScript.
 
 ## Acceptance and handover
 
-| Requirement | Result |
-|---|---|
-| Four JSON files are loaded | Pass |
-| JavaScript reads and relates the data | Pass |
-| Tables and relationships operate correctly | Pass with documented source-data exceptions |
-| NSA association/indexing correction is applied | Pass at application level |
-| Resulting information reaches the interface | Pass for all valid records tested |
-| No application-introduced loss, duplication, or incorrect association | Pass |
+| Requirement                                                           | Result                                      |
+| --------------------------------------------------------------------- | ------------------------------------------- |
+| Four JSON files are loaded                                            | Pass                                        |
+| JavaScript reads and relates the data                                 | Pass                                        |
+| Tables and relationships operate correctly                            | Pass with documented source-data exceptions |
+| NSA association/indexing correction is applied                        | Pass at application level                   |
+| Resulting information reaches the interface                           | Pass for all valid records tested           |
+| No application-introduced loss, duplication, or incorrect association | Pass                                        |
 
 **Conclusion:** The current application correctly carries valid data from the
 four JSON files through relationship processing to the rendered interface. It
