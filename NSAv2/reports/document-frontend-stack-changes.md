@@ -2,39 +2,54 @@
 
 ## Objective
 
-Validate whether `index.html` must change when `app.js` is refactored for the
-new DEV data structure.
+Validate what must change or be preserved in `index.html` when `app.js` is
+refactored for the new DEV data structure. The existing layout and CSS remain
+unchanged.
 
-## Validation result
+## Classification
 
-**No mandatory HTML change is required.**
+- **Critical:** required for the frontend to use the new fields or distinguish
+  the new relationships correctly.
+- **Not critical:** optional cleanup or accessibility improvement that does not
+  block the data refactor.
+- **No change:** the existing HTML already supports the refactored behavior.
 
-The current page already contains the search, filters, cards, navigation,
-language controls, disclaimers, and chart targets needed by the refactored
-JavaScript. The new `NSA Profiles` dataset and relationship logic affect data
-loading and processing in `app.js`, not the page structure.
+## Current frontend use vs. HTML change
 
-`app.js` can continue using the existing selects and replace their options at
-startup:
+| Location in `index.html` | Current frontend use | Must change? | Required change | Implemented in |
+| --- | --- | --- | --- | --- |
+| `#typeOfSubmission-type-input` | Displays the Type of Submission filter | **Critical** | Populate its options from `NSAs.NSA_Status` | `app.js`; the existing HTML select remains |
+| `#organization-type-input` | Contains hard-coded Organization Type options | **Critical** | Populate its options from `NSA Profiles.NSAOrganizationType` | `app.js`; the HTML may keep only **All** as its initial option |
+| `#period-select` | Displays Collaboration Period options | **Critical** | Continue populating from `NSAs.CollaborationPeriod` | `app.js`; no HTML change |
+| `#search-results` | Displays organization names returned by the search | **Critical** | Distinguish cycles using organization name, `NSA_Status`, and `CollaborationPeriod` | `app.js`; keep the existing `<ul>` |
+| Type of Submission label | Uses `for="period-select"` | **Not critical** | Change to `for="typeOfSubmission-type-input"` for accessibility | `index.html` |
+| Organization Type label | Uses `for="period-select"` | **Not critical** | Change to `for="organization-type-input"` for accessibility | `index.html` |
+| Hard-coded Type of Submission options | Replaced by JavaScript at startup | **Not critical** | Remove unused options and keep only **All** | `index.html` |
+| Profile, financial, collaboration, and workplan cards | Receive content rendered by `app.js` | No change | Preserve the existing sections and IDs | None |
+| Sidebar, navigation, language controls, disclaimers, and footer | Existing page structure | No change | Preserve the existing markup | None |
 
-- populate Type of Submission from `NSAs.NSA_Status`;
-- populate Organization Type from `NSA Profiles.NSAOrganizationType`;
-- populate Collaboration Period from `NSAs.CollaborationPeriod`.
+## HTML edits
 
-No new input, select, card, section, or navigation item is needed.
+The refactor does not require a new HTML component. If the optional markup
+cleanup is applied, both dynamic selects should start with only **All**:
 
-## Optional HTML cleanup
+```html
+<select id="typeOfSubmission-type-input" class="input">
+  <option value="all" id="TypeOfSubmission-all">All</option>
+</select>
 
-These corrections are useful but are not required by the DEV data migration:
+<select id="organization-type-input" class="input">
+  <option value="all" id="organization-all">All</option>
+</select>
+```
 
-- remove the hard-coded options from the Type of Submission and Organization
-  Type selects, leaving only **All** as the initial option;
-- change the Type of Submission label to
-  `for="typeOfSubmission-type-input"`;
-- change the Organization Type label to
-  `for="organization-type-input"`.
+`app.js` then inserts the values from `NSA_Status` and
+`NSAOrganizationType`. The existing search list and content cards do not need
+new markup.
 
-## Conclusion
+## Final assessment
 
-Preserve the existing HTML and CSS. The required refactoring belongs in
-`assets/js/app.js`; `index.html` needs no functional or structural change.
+The critical changes concern the data placed into existing HTML controls; they
+are implemented in `app.js`. The HTML structure itself remains compatible with
+the DEV refactor. Changes made directly in `index.html` are limited to optional
+cleanup and accessibility corrections. No CSS or layout change is required.
