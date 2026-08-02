@@ -6,7 +6,6 @@
 | Environment     | Local DEV build using DEV JSON exports |
 | Validation date | 2026-08-01                             |
 | Result          | **Pass with source-data exceptions**   |
-| Handover        | **Ready for ITS review**               |
 
 <a id="top"></a>
 
@@ -17,11 +16,9 @@
 3. [Validated application flow](#validated-application-flow)
    - [Expected relationships](#expected-relationships)
 4. [Test execution](#test-execution)
+   - [Profile selection rationale](#profile-selection-rationale)
    - [Loading results](#loading-results)
    - [Profile-to-interface results](#profile-to-interface-results)
-     - [Profile 43](#profile-43)
-     - [Profile 44](#profile-44)
-     - [Profile 46](#profile-46)
 5. [NSA indexing/association regression](#nsa-indexingassociation-regression)
 6. [Field behavior reaching the interface](#field-behavior-reaching-the-interface)
 7. [Integrity controls](#integrity-controls)
@@ -102,9 +99,18 @@ source-data exceptions are documented separately below.
 
 ## Test execution
 
-The validation executed the actual `index.js` with a controlled DOM and the
-four current JSON files. A local HTTP server was also used to verify that every
-application resource is accessible through the same path used by the browser.
+The application PoC was validated using the four current JSON files, covering
+data loading, relationship processing, and interface rendering.
+
+### Profile selection rationale
+
+Profiles 43, 44, and 46 were selected because they are the profiles in the
+current dataset with at least one cycle approved for the public report. They
+also provide representative multi-cycle data, valid Activity and Workplan
+relationships, and, through Profile 43, a missing-parent exception. Profile 11
+was used only as a negative field-behavior check because all its cycles have a
+blank `GovBodies_Status`; the record with `NSAs.ID = 41` cannot be selected
+because it has no `NSAProfileID`.
 
 ### Loading results
 
@@ -222,11 +228,12 @@ data limitation, not a loss introduced by the JavaScript.
 | Resulting information reaches the interface                           | Pass for all valid records tested           |
 | No application-introduced loss, duplication, or incorrect association | Pass                                        |
 
-**Conclusion:** The current application correctly carries valid data from the
-four JSON files through relationship processing to the rendered interface. It
-does not mix cycles, duplicate records, or silently discard the four detected
-orphans. The remaining failures originate in the exported data and are listed
-above for correction or clarification.
+**Conclusion:** The application demo provides a successful **Proof of Concept
+(PoC)** for the corrected end-to-end relationships. Profiles 44 and 46 passed
+100% of the application checks, and Profile 43 passed for its valid cycle. The
+overall result is **Pass at application/PoC level, with documented source-data
+exceptions**. This does not certify SharePoint's physical index configuration
+or internal write operations.
 
 **Handover:** Ready for ITS review with the test results and source-data
 exceptions documented in this report.
