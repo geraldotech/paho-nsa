@@ -12,7 +12,6 @@
 1. [Objective](#objective)
 2. [Executive summary](#executive-summary)
 3. [Validated data flow](#validated-data-flow)
-   - [Expected relationships](#expected-relationships)
 4. [Test execution](#test-execution)
    - [Profile selection rationale](#profile-selection-rationale)
    - [Scenario coverage](#scenario-coverage)
@@ -38,7 +37,7 @@ from the four JSON files to the rendered interface. The reference document
 defines the expected relationships and field roles; the evidence below comes
 from the validated JavaScript and JSON files.
 
-The end-to-end application flow passed for Profiles 43, 44, and 46:
+The validation confirmed that:
 
 - NSAs were related to the selected organization by `NSAProfileID`.
 - Activities and Workplans were related to the exact NSA cycle by `ParentID`.
@@ -63,40 +62,6 @@ flowchart TD
     C --> O["Isolate missing-parent records"]
 ```
 
-### Expected relationships
-
-```mermaid
-erDiagram
-    NSA_PROFILES ||--o{ NSAS : "NSAProfileID"
-    NSA_PROFILES ||--o{ ACTIVITIES : "NSAProfileID"
-    NSA_PROFILES ||--o{ WORKPLANS : "NSAProfileID"
-    NSAS ||--o{ ACTIVITIES : "ParentID"
-    NSAS ||--o{ WORKPLANS : "ParentID"
-
-    NSA_PROFILES {
-        int ID PK
-    }
-
-    NSAS {
-        int ID PK
-        int NSAProfileID FK
-        string NSA_Status
-        string GovBodies_Status
-    }
-
-    ACTIVITIES {
-        int ID PK
-        int ParentID FK
-        int NSAProfileID FK
-    }
-
-    WORKPLANS {
-        int ID PK
-        int ParentID FK
-        int NSAProfileID FK
-    }
-```
-
 ## Test execution
 
 ### Profile selection rationale
@@ -108,13 +73,14 @@ relationships, and, through Profile 43, a missing-parent exception.
 
 ### Scenario coverage
 
-Scenarios are identified by `TypeOfSubmission`, while `NSA_Status` represents
-the cycle's current type in the interface.
+The reference document defines `NSAs.NSA_Status` as the report field for the
+current submission type: New Application, Renewal, or Progress Report. The
+application follows this guidance instead of using `TypeOfSubmission`.
 
-| Scenario | Profile 43 | Profile 44 | Profile 46 | Result |
+| Current cycle type | Profile 43 | Profile 44 | Profile 46 | Result |
 | --- | --- | --- | --- | --- |
-| New application | Cycle 96 | Cycle 100 | Cycles 94 and 99 | Pass |
-| Renewal | Cycle 97 | Cycle 101 | Cycles 95 and 98 | Pass |
+| Progress report | Cycle 96 | Cycle 100 | Cycles 94, 95, and 99 | Pass |
+| Renewal | Cycle 97 | Cycle 101 | Cycle 98 | Pass |
 
 ### Profile-to-interface results
 
@@ -150,6 +116,38 @@ Workplans by `ParentID`, and isolates missing-parent records. This prevents
 organization and cycle IDs from being confused or records from different
 cycles from being mixed. The regression passed for Profiles 43, 44, and 46
 within the application/PoC scope.
+
+```mermaid
+erDiagram
+    NSA_PROFILES ||--o{ NSAS : "NSAProfileID"
+    NSA_PROFILES ||--o{ ACTIVITIES : "NSAProfileID"
+    NSA_PROFILES ||--o{ WORKPLANS : "NSAProfileID"
+    NSAS ||--o{ ACTIVITIES : "ParentID"
+    NSAS ||--o{ WORKPLANS : "ParentID"
+
+    NSA_PROFILES {
+        int ID PK
+    }
+
+    NSAS {
+        int ID PK
+        int NSAProfileID FK
+        string NSA_Status
+        string GovBodies_Status
+    }
+
+    ACTIVITIES {
+        int ID PK
+        int ParentID FK
+        int NSAProfileID FK
+    }
+
+    WORKPLANS {
+        int ID PK
+        int ParentID FK
+        int NSAProfileID FK
+    }
+```
 
 ## Field behavior reaching the interface
 
