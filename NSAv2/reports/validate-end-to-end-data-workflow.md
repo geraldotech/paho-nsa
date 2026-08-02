@@ -1,11 +1,11 @@
 # End-to-End Data Workflow Validation Report
 
-| Item            | Value                                  |
-| --------------- | -------------------------------------- |
-| Application     | NSA relationship viewer                |
-| Environment     | Local DEV build using DEV JSON exports |
-| Validation date | 2026-08-01                             |
-| Result          | **Pass with source-data exceptions**   |
+| Item            | Value                                      |
+| --------------- | ------------------------------------------ |
+| Application     | NSA relationship viewer                    |
+| Environment     | Local DEV build using DEV JSON exports     |
+| Validation date | 2026-08-01                                 |
+| Result          | **Pass with source-data exceptions**       |
 
 <a id="top"></a>
 
@@ -17,6 +17,7 @@
    - [Expected relationships](#expected-relationships)
 4. [Test execution](#test-execution)
    - [Profile selection rationale](#profile-selection-rationale)
+   - [Scenario coverage](#scenario-coverage)
    - [Loading results](#loading-results)
    - [Profile-to-interface results](#profile-to-interface-results)
 5. [NSA indexing/association regression](#nsa-indexingassociation-regression)
@@ -29,24 +30,24 @@
 
 ## Objective
 
-Validate that the complete workflow captures and processes data correctly
-across all supported scenarios, including new applications, renewals, and
-extensions. Document the validation results and hand them over to ITS.
+Validate that the complete workflow captures and processes data correctly for
+the scenarios represented in the current DEV exports. Document the validation
+results and hand them over to ITS.
 
 The DEV data structure and relationship model are documented separately in
-`validate-dev-database-changes.md` or `dev-data-structure-validation-report.md`. This
-report focuses on validating their end-to-end use by the application, from
-data loading and relationship processing through scenario handling and
-interface rendering.
+[`validate-dev-database-changes.md`](validate-dev-database-changes.md). This
+report focuses on validating their end-to-end use by the application, from data
+loading and relationship processing through scenario handling and interface
+rendering.
 
-[Back to top](#top)
 
 ## Executive summary
 
 This report validates the complete path followed by the data in the application,
-from the four JSON files to the rendered interface. The PDF is used only to
-define the expected relationships and field roles; the evidence below comes
-from executing the current JavaScript with the current JSON files.
+from the four JSON files to the rendered interface. The supplied
+[`NSA.Tool.Data.Structure.for.Public.Report.pdf`](../NSAv2_starter_web_frontier/NSA.Tool.Data.Structure.for.Public.Report.pdf)
+defines the expected relationships and field roles; the evidence below comes
+from the JavaScript and JSON files at the tested commit.
 
 The end-to-end application flow passed for Profiles 43, 44, and 46:
 
@@ -79,7 +80,8 @@ flowchart TD
 
 ### Expected relationships
 
-The PDF defines the expected joins. The application implements them as follows:
+The supplied `NSA.Tool.Data.Structure.for.Public.Report.pdf` defines the
+expected joins. The application implements them as follows:
 
 | Expected relationship                  | JavaScript behavior                                                   | Result                                                  |
 | -------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
@@ -92,10 +94,10 @@ The implementation correctly uses `NSAProfileID` for organization-level
 selection and `ParentID` for cycle-level selection. It does not substitute one
 relationship for the other.
 
-Profiles 44 and 46 pass all relationship checks. The valid Profile 43 chain
-through cycle 96 also passes. Profile 43 remains a partial result only because
-Activities 38 and 39 and Workplans 60 and 61 reference missing cycle 60; these
-source-data exceptions are documented separately below.
+Profiles 44 and 46 pass all relationship checks. Profile 43 passes with
+source-data exceptions: its valid chain through cycle 96 passes, while
+Activities 38 and 39 and Workplans 60 and 61 reference missing cycle 60. These
+exceptions are documented separately below.
 
 ## Test execution
 
@@ -111,6 +113,20 @@ relationships, and, through Profile 43, a missing-parent exception. Profile 11
 was used only as a negative field-behavior check because all its cycles have a
 blank `GovBodies_Status`; the record with `NSAs.ID = 41` cannot be selected
 because it has no `NSAProfileID`.
+
+### Scenario coverage
+
+Scenarios are identified by `TypeOfSubmission`, while `NSA_Status` represents
+the cycle's current type in the interface.
+
+| Scenario | Test profiles/cycles | Result |
+| --- | --- | --- |
+| New application | 43/96, 44/100, 46/94 and 46/99 | Pass |
+| Renewal | 43/97, 44/101, 46/95 and 46/98 | Pass |
+| Extension | No representative record in the current exports | Not tested |
+
+Extension is not included in the overall result because the supplied dataset
+does not contain a representative record for that scenario.
 
 ### Loading results
 
@@ -128,7 +144,7 @@ interface reported successful data loading.
 
 | Profile | Cycles rendered | Activities rendered with a parent | Workplans rendered with a parent | Orphans shown separately | Result                          |
 | ------: | --------------: | --------------------------------: | -------------------------------: | -----------------------: | ------------------------------- |
-|      43 |               2 |                                 2 |                                2 |                        4 | Partial pass due to source data |
+|      43 |               2 |                                 2 |                                2 |                        4 | Pass with source-data exceptions |
 |      44 |               2 |                                 2 |                                2 |                        0 | Pass                            |
 |      46 |               4 |                                 2 |                                6 |                        0 | Pass                            |
 
@@ -223,17 +239,17 @@ data limitation, not a loss introduced by the JavaScript.
 | --------------------------------------------------------------------- | ------------------------------------------- |
 | Four JSON files are loaded                                            | Pass                                        |
 | JavaScript reads and relates the data                                 | Pass                                        |
-| Tables and relationships operate correctly                            | Pass with documented source-data exceptions |
-| NSA association/indexing correction is applied                        | Pass at application level                   |
+| Tables and relationships operate correctly                            | Pass with source-data exceptions            |
+| NSA association/indexing correction is applied                        | Pass within the application/PoC scope       |
 | Resulting information reaches the interface                           | Pass for all valid records tested           |
 | No application-introduced loss, duplication, or incorrect association | Pass                                        |
 
 **Conclusion:** The application demo provides a successful **Proof of Concept
 (PoC)** for the corrected end-to-end relationships. Profiles 44 and 46 passed
 100% of the application checks, and Profile 43 passed for its valid cycle. The
-overall result is **Pass at application/PoC level, with documented source-data
-exceptions**. This does not certify SharePoint's physical index configuration
-or internal write operations.
+overall result is **Pass with source-data exceptions** within the
+application/PoC scope. This does not certify SharePoint's physical index
+configuration or internal write operations.
 
 **Handover:** Ready for ITS review with the test results and source-data
 exceptions documented in this report.
