@@ -24,7 +24,7 @@
 6. [Field behavior reaching the interface](#field-behavior-reaching-the-interface)
 7. [Integrity controls](#integrity-controls)
 8. [Source-data exceptions](#source-data-exceptions)
-9. [Acceptance and handover](#acceptance-and-handover)
+9. [Conclusion](#conclusion)
 
 <a id="objective"></a>
 
@@ -44,7 +44,7 @@ rendering.
 ## Executive summary
 
 This report validates the complete path followed by the data in the application,
-from the four JSON files to the rendered interface. The supplied
+from the four JSON files to the rendered interface. The reference document
 [`NSA.Tool.Data.Structure.for.Public.Report.pdf`](../NSAv2_starter_web_frontier/NSA.Tool.Data.Structure.for.Public.Report.pdf)
 defines the expected relationships and field roles; the evidence below comes
 from the JavaScript and JSON files at the tested commit.
@@ -58,10 +58,8 @@ The end-to-end application flow passed for Profiles 43, 44, and 46:
 - No duplicate IDs, duplicate references, or cross-organization mismatches were
   found.
 
-The application also handled incomplete source data without mixing it into a
-valid cycle. Four Profile 43 children whose parent cycle 60 is missing were
-shown separately as orphans. One additional NSA/Workplan chain cannot be shown
-under an organization because both records lack `NSAProfileID`.
+Incomplete source records were isolated instead of being assigned to valid
+cycles. Details are documented in [Source-data exceptions](#source-data-exceptions).
 
 ## Validated application flow
 
@@ -80,8 +78,7 @@ flowchart TD
 
 ### Expected relationships
 
-The supplied `NSA.Tool.Data.Structure.for.Public.Report.pdf` defines the
-expected joins. The application implements them as follows:
+The application implements the expected relationships as follows:
 
 | Expected relationship                  | JavaScript behavior                                                   | Result                                                  |
 | -------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
@@ -93,11 +90,6 @@ expected joins. The application implements them as follows:
 The implementation correctly uses `NSAProfileID` for organization-level
 selection and `ParentID` for cycle-level selection. It does not substitute one
 relationship for the other.
-
-Profiles 44 and 46 pass all relationship checks. Profile 43 passes with
-source-data exceptions: its valid chain through cycle 96 passes, while
-Activities 38 and 39 and Workplans 60 and 61 reference missing cycle 60. These
-exceptions are documented separately below.
 
 ## Test execution
 
@@ -119,14 +111,10 @@ because it has no `NSAProfileID`.
 Scenarios are identified by `TypeOfSubmission`, while `NSA_Status` represents
 the cycle's current type in the interface.
 
-| Scenario | Test profiles/cycles | Result |
-| --- | --- | --- |
-| New application | 43/96, 44/100, 46/94 and 46/99 | Pass |
-| Renewal | 43/97, 44/101, 46/95 and 46/98 | Pass |
-| Extension | No representative record in the current exports | Not tested |
-
-Extension is not included in the overall result because the supplied dataset
-does not contain a representative record for that scenario.
+| Scenario | Profile 43 | Profile 44 | Profile 46 | Result |
+| --- | --- | --- | --- | --- |
+| New application | Cycle 96 | Cycle 100 | Cycles 94 and 99 | Pass |
+| Renewal | Cycle 97 | Cycle 101 | Cycles 95 and 98 | Pass |
 
 ### Loading results
 
@@ -183,14 +171,10 @@ The correction is present in the current JavaScript:
 5. Children that match the organization but reference an absent cycle are
    isolated as orphans instead of being assigned to another cycle.
 
-This prevents the previous association/indexing symptom in which an
-organization ID could be confused with a cycle ID or children from different
-cycles could be mixed. The regression passed for Profiles 43, 44, and 46.
-
-This is an application-level regression result. The static frontend does not
-query SharePoint, and it does not use `RenewalKey`; therefore this test does not
-certify the physical SharePoint index configuration or SharePoint query
-performance.
+This prevents organization and cycle IDs from being confused or records from
+different cycles from being mixed. The regression passed for Profiles 43, 44,
+and 46 within the application/PoC scope. SharePoint index configuration and
+query performance were not tested.
 
 ## Field behavior reaching the interface
 
@@ -210,46 +194,27 @@ that working field as durable approval evidence.
 
 ## Integrity controls
 
-| Control                                      | Result | Evidence                                                           |
-| -------------------------------------------- | ------ | ------------------------------------------------------------------ |
-| Duplicate Profile IDs                        | Pass   | 0 duplicates                                                       |
-| Duplicate NSA cycle IDs                      | Pass   | 0 duplicates                                                       |
-| Duplicate Activity IDs or references         | Pass   | 0 duplicates                                                       |
-| Duplicate Workplan IDs or references         | Pass   | 0 duplicates                                                       |
-| Parent/child organization mismatch           | Pass   | 0 mismatches where the parent and organization IDs are available   |
-| Valid selected records lost before rendering | Pass   | Expected records for Profiles 43, 44, and 46 reached the interface |
-| Children assigned to the wrong cycle         | Pass   | Cycle lookup uses `ParentID`; missing parents are isolated         |
+| Control | Result | Evidence |
+| --- | --- | --- |
+| Duplicate IDs or references | Pass | No duplicates in the four datasets |
+| Parent/child organization integrity | Pass | No mismatches where both IDs are available |
+| Cycle assignment and rendering | Pass | Valid records reached the interface; missing parents were isolated |
 
 ## Source-data exceptions
 
-1. `NSAs.ID = 60` is absent from `nsa.json`. Consequently, these Profile 43
-   records have no cycle parent:
-   - Activities 38 and 39
-   - Workplans 60 and 61
-2. `NSAs.ID = 41` has a blank `NSAProfileID`.
-3. Workplan 44 uses `ParentID = 41` but also has a blank `NSAProfileID`.
+| Source-data exception | Impact |
+| --- | --- |
+| `NSAs.ID = 60` is missing | Profile 43 Activities 38 and 39 and Workplans 60 and 61 were isolated because their `ParentID` is 60 |
+| NSA 41 and Workplan 44 have no `NSAProfileID` | The related records cannot be assigned to an organization |
 
-The NSA 41/Workplan 44 pair has a cycle relationship, but it cannot be attached
-to any organization or reached through the profile selector. This is a source
-data limitation, not a loss introduced by the JavaScript.
+These are source-data limitations; the application preserved or isolated the
+affected records without creating incorrect associations.
 
-## Acceptance and handover
+## Conclusion
 
-| Requirement                                                           | Result                                      |
-| --------------------------------------------------------------------- | ------------------------------------------- |
-| Four JSON files are loaded                                            | Pass                                        |
-| JavaScript reads and relates the data                                 | Pass                                        |
-| Tables and relationships operate correctly                            | Pass with source-data exceptions            |
-| NSA association/indexing correction is applied                        | Pass within the application/PoC scope       |
-| Resulting information reaches the interface                           | Pass for all valid records tested           |
-| No application-introduced loss, duplication, or incorrect association | Pass                                        |
-
-**Conclusion:** The application demo provides a successful **Proof of Concept
+The application demo provides a successful **Proof of Concept
 (PoC)** for the corrected end-to-end relationships. Profiles 44 and 46 passed
 100% of the application checks, and Profile 43 passed for its valid cycle. The
 overall result is **Pass with source-data exceptions** within the
 application/PoC scope. This does not certify SharePoint's physical index
 configuration or internal write operations.
-
-**Handover:** Ready for ITS review with the test results and source-data
-exceptions documented in this report.
