@@ -1,234 +1,169 @@
-# Frontend Changes for the DEV Data Structure
+# Minimum Frontend Changes for the DEV Data Structure
 
 ## Objective
 
-Document the frontend changes required to migrate the V1 behavior described in
-[`architecture.md`](architecture.md) to the four-list DEV structure validated
-in [`validate-dev-database-changes.md`](validate-dev-database-changes.md), while
-preserving the current layout and user experience.
+Identify the minimum frontend changes still required for the current
+`assets/js/app.js` to comply with the DEV structure validated in
+[`validate-dev-database-changes.md`](validate-dev-database-changes.md), while
+preserving the existing HTML layout and CSS.
 
-## Conclusion first
+| Review item | Value |
+| --- | --- |
+| Main implementation | `assets/js/app.js` |
+| Reference | [`NSA.Tool.Data.Structure.for.Public.Report.pdf`](../files/NSA.Tool.Data.Structure.for.Public.Report.pdf) |
 
-The frontend stack and page layout do not need to change. The refactoring is
-primarily in `assets/js/app.js`, where the single V1 NSA model must become a
-joined view of `NSA Profiles`, `NSAs`, Activities, and Workplans.
+## Important baseline finding
 
-The HTML requires only minor filter cleanup. The CSS, cards, navigation,
-language switcher, charts, and responsive layout can remain unchanged.
+`architecture.md` documents the original V1 implementation with three JSON
+files. It is useful for understanding the previous model, but it is no longer
+an accurate description of the current `app.js`.
 
-## V1 compared with the DEV structure
+The current committed frontend has already implemented the core structural
+refactor:
 
-| Concern | V1 in `architecture.md` | DEV target |
+- it loads `nsa-profiles.json` in addition to the other three JSON files;
+- it indexes Profiles by `NSA Profiles.ID`;
+- it joins each `NSAs` cycle through `NSAProfileID`;
+- it keeps the selected ID as `NSAs.ID`;
+- it retrieves Activities and Workplans by `ParentID = NSAs.ID`;
+- it reads `NSA_Status` before the legacy `TypeOfSubmission` value.
+
+These items must not be reported as new work. The remaining changes are smaller
+and are listed below.
+
+## Minimum required changes
+
+| Current behavior | Minimum required change | Reason |
 | --- | --- | --- |
-| JSON sources | `nsa`, `activity`, `workplan` | Add `nsa-profiles` as the fourth source |
-| Organization and submission | Combined in one NSA row | Separate organization Profile from submission cycle |
-| Organization identity | NSA row ID | `NSA Profiles.ID` |
-| Cycle identity | NSA row ID | `NSAs.ID` |
-| Organization-to-cycle join | Not required | `NSA Profiles.ID = NSAs.NSAProfileID` |
-| Child-to-cycle join | `ParentID = nsa.id` | `ParentID = NSAs.ID` |
-| Public eligibility | `Status = Completed` | `GovBodies_Status = Pending` or `Approved` |
-| Current submission type | `TypeOfSubmission` | `NSAs.NSA_Status` |
-| Organization type and details | NSA row | `NSA Profiles` |
+| Public records are filtered only by `GovBodies_Status === 'Approved'` | Accept `Pending` or `Approved` | The reference document defines both as eligible for the public report |
+| The joined view assigns `TypeOfSubmission: NSA_Status || TypeOfSubmission` | Remove the fallback and use `NSA_Status` as the value | `TypeOfSubmission` can retain the original type after the cycle becomes Progress Report |
+| Organization Type options are hard-coded in `index.html` | Populate them from joined `NSA Profiles.NSAOrganizationType` values | The current NGO option does not match the exported singular value, and hard-coded options can omit valid types |
+| Search results show only the organization title | Add `NSA_Status` and `CollaborationPeriod` to each result label | Profiles can have multiple cycles with the same organization title |
 
-## Target frontend model
+### Minimal JavaScript changes
 
-```mermaid
-erDiagram
-    NSA_PROFILES ||--o{ NSAS : "NSAProfileID"
-    NSA_PROFILES ||--o{ ACTIVITIES : "NSAProfileID"
-    NSA_PROFILES ||--o{ WORKPLANS : "NSAProfileID"
-    NSAS ||--o{ ACTIVITIES : "ParentID"
-    NSAS ||--o{ WORKPLANS : "ParentID"
+#### 1. Eligibility
 
-    NSA_PROFILES {
-        int ID PK
-    }
-
-    NSAS {
-        int ID PK
-        int NSAProfileID FK
-        string NSA_Status
-        string GovBodies_Status
-        string CollaborationPeriod
-    }
-
-    ACTIVITIES {
-        int ID PK
-        int ParentID FK
-        int NSAProfileID FK
-    }
-
-    WORKPLANS {
-        int ID PK
-        int ParentID FK
-        int NSAProfileID FK
-    }
-```
-
-`NSAProfileID` identifies the organization. `NSAs.ID` identifies the exact
-submission cycle. The selected UI record must remain the cycle ID so that
-Activities and Workplans continue to resolve through `ParentID`.
-
-## Changes required in `assets/js/app.js`
-
-### 1. Load and index the fourth dataset
-
-Load `nsa-profiles.json` with the existing three JSON files and create a lookup
-map keyed by `NSA Profiles.ID`.
-
-```js
-const profilesById = new Map(
-  profiles.map((profile) => [String(profile.ID), profile]),
-)
-```
-
-### 2. Replace the V1 eligibility filter
-
-Remove the V1 dependency on `Status === 'Completed'`. Build the public cycle
-collection with the rule defined by the reference document:
+Change the public-cycle filter to:
 
 ```js
 const isPublicCycle = (cycle) =>
   ['Pending', 'Approved'].includes(cycle.GovBodies_Status)
 ```
 
-Do not use `Status`, `GovBodies_Outcome`, or
-`ActivitiesExtractionCompleted` for public eligibility.
+Do not replace this rule with `Status`, `GovBodies_Outcome`, or
+`ActivitiesExtractionCompleted`.
 
-### 3. Join each cycle to its organization Profile
+#### 2. Current submission type
 
-For every eligible `NSAs` record, locate its organization through
-`cycle.NSAProfileID`. The joined view model should keep both identities:
-
-- `profile.ID`: stable organization ID;
-- `cycle.ID`: submission/collaboration-cycle ID.
-
-Do not merge them into one generic `id`. Keep `currentId` as `cycle.ID` or
-rename it to `currentCycleId` to make its purpose explicit.
-
-### 4. Move fields to their authoritative source
-
-Update the existing render model according to this mapping:
-
-| Current frontend use | DEV source |
-| --- | --- |
-| Organization title | `NSA Profiles.Title` |
-| Objectives and work fields | `NSA Profiles` |
-| Board members and organization bodies | `NSA Profiles` |
-| Website and establishment year | `NSA Profiles` |
-| Organization type | `NSA Profiles.NSAOrganizationType` |
-| PAHO focal point | `NSA Profiles.PAHO_Focal_Point` |
-| Current Type of Submission | `NSAs.NSA_Status` |
-| Collaboration period | `NSAs.CollaborationPeriod` |
-| Governing Bodies decision | `NSAs.GovBodies_Status` |
-| Financial and cycle-specific fields | `NSAs` |
-
-`NSA Profiles` is the source of truth for organization data. Missing Profile
-joins should be treated as data errors rather than hidden with stale values
-from an `NSAs` cycle.
-
-### 5. Replace `TypeOfSubmission` reads with `NSA_Status`
-
-Use `NSA_Status` for:
-
-- the Type of Submission filter;
-- the page subtitle and profile detail;
-- New Application, Renewal, and Progress Report branching;
-- financial, workplan, disclaimer, and collaboration visibility rules.
-
-The user-facing label remains **Type of Submission**. The V1
-`TypeOfSubmission` field must not be used as a fallback because it can retain
-the original value after a cycle changes to Progress Report.
-
-### 6. Preserve and validate child relationships
-
-Continue retrieving children by the selected cycle:
+The smallest safe change is to keep the existing joined view-model property but
+remove the legacy fallback:
 
 ```js
-const activities = activity.filter(
-  (row) => String(row.ParentID) === String(currentCycleId),
-)
-
-const workplans = workplan.filter(
-  (row) => String(row.ParentID) === String(currentCycleId),
-)
+TypeOfSubmission: submission.NSA_Status
 ```
 
-Also verify that each child's `NSAProfileID` matches the selected cycle's
-`NSAProfileID`. A child with a missing parent or different organization must
-not be assigned to another cycle.
+This avoids rewriting every renderer immediately while ensuring that filters,
+subtitles, and conditional views use the value required by the reference
+document. Renaming the internal property to `NSA_Status` can be done later as a
+clarity refactor; it is not required for the minimum migration.
 
-### 7. Keep multiple cycles distinguishable
+#### 3. Organization Type filter
 
-One organization can have several eligible `NSAs` cycles. The search can keep
-the current interaction, but each result should identify the cycle:
+Build the select options from the eligible joined records:
+
+```js
+const organizationTypes = [
+  ...new Set(nasas.map((row) => row.NSAOrganizationType).filter(Boolean)),
+].sort()
+```
+
+The filter must use the value joined from `NSA Profiles`, not an organization
+type copied from the cycle.
+
+#### 4. Search result labels
+
+Keep `data-id` equal to `NSAs.ID`, but render a label that distinguishes cycles:
 
 ```text
 Organization name - NSA_Status - CollaborationPeriod
 ```
 
-Clicking the result must select `NSAs.ID`, not `NSA Profiles.ID`.
+No new selector or page component is required.
 
-### 8. Rebuild filter values from the joined model
+## Current frontend use vs. HTML change
 
-- Type of Submission: unique eligible `NSAs.NSA_Status` values;
-- Organization Type: unique
-  `NSA Profiles.NSAOrganizationType` values;
-- Collaboration Period: unique `NSAs.CollaborationPeriod` values.
-
-`RenewalKey` remains a backend field and must not be displayed or used as a
-frontend join.
-
-## Changes required in `index.html`
-
-No card, section, navigation, or layout change is required.
-
-Only the filter markup needs cleanup:
-
-1. Keep a single **All** option in the Type of Submission select and let
-   `app.js` populate the remaining options from `NSA_Status`.
-2. Keep a single **All** option in the Organization Type select and let
-   `app.js` populate the remaining options from `NSA Profiles`.
-3. Correct each label's `for` attribute so it points to its own select:
-   - Type of Submission -> `typeOfSubmission-type-input`;
-   - Collaboration Period -> `period-select`;
-   - Organization Type -> `organization-type-input`.
-4. Keep the existing result list, profile cards, financial card, collaboration
-   card, and workplan card.
-
-Renaming the internal Type of Submission element IDs is optional. The visible
-label is still correct; the important change is that its values come from
-`NSA_Status`.
-
-## Files that do not require structural changes
-
-| File or layer | Impact |
+| Current frontend use | Required change |
 | --- | --- |
-| `assets/css/*.css` | No change; preserve the current layout and responsive behavior |
-| `assets/js/ui-language.js` | No required text change; **Type of Submission** remains the UI label |
-| Chart.js and financial chart | Keep; continue reading financial values from the selected `NSAs` cycle |
-| `server.js` | No change |
+| Type of Submission select is rebuilt by `app.js` at startup | No functional HTML change required; removing its unused hard-coded options is optional cleanup |
+| Organization Type select contains hard-coded options | Keep only **All** in HTML and populate the remaining options in `app.js` |
+| Search results use the existing `search-results` list | No structural change; only the text generated by `app.js` changes |
+| Profile, financial, collaboration, and workplan cards | No change |
+| Sidebar, navigation, language switcher, and page layout | No change |
 
-If the longer search-result labels wrap poorly, CSS may receive a small
-presentation adjustment, but no layout refactoring is required.
+The incorrect `for="period-select"` attributes on the Type of Submission and
+Organization Type labels should be corrected for accessibility, but this is an
+existing HTML defect rather than a requirement of the DEV data migration.
 
-## Acceptance criteria
+## Already correct: no migration change required
 
-- The page loads all four JSON files.
-- Only cycles with `GovBodies_Status = Pending` or `Approved` enter the public
-  view.
-- Organization content comes from the matching `NSA Profiles` record.
-- Type filters and conditional rendering use `NSA_Status`.
-- Activities and Workplans use `ParentID = selected NSAs.ID`.
-- Child `NSAProfileID` matches the selected organization.
-- Multiple cycles for one organization remain distinct in search and filters.
-- Missing relationships do not create cross-cycle associations.
-- The existing HTML layout, CSS, language behavior, navigation, and charts
-  remain visually unchanged.
+| Area | Current implementation |
+| --- | --- |
+| Four data sources | Already loaded in parallel |
+| Organization join | `NSA Profiles.ID = NSAs.NSAProfileID` already implemented |
+| Selected record identity | Uses `submission.ID`, which is the cycle `NSAs.ID` |
+| Activities | Retrieved with `Activity.ParentID = selected NSAs.ID` |
+| Workplans | Retrieved with `Workplan.ParentID = selected NSAs.ID` |
+| Organization details | Profile values already take precedence in the joined view model |
+| Collaboration Period | Already read from the `NSAs` cycle |
+| Progress Report behavior | Already driven by the joined current-type value |
+| `RenewalKey` | Correctly absent from the UI |
+
+## Recommended hardening, not minimum migration work
+
+The following changes are useful but should not be reported as mandatory for
+the minimum frontend adaptation:
+
+- rename `currentId` to `currentCycleId` for clarity;
+- rename internal `TypeOfSubmission` variables and element IDs to
+  `NSA_Status`-based names;
+- remove legacy organization-field fallbacks after export completeness is
+  guaranteed;
+- validate child `NSAProfileID` against the selected cycle's `NSAProfileID` and
+  log mismatches;
+- log missing-parent records for export diagnostics;
+- remove unused hard-coded Type of Submission options from `index.html`;
+- correct the two label `for` attributes.
+
+These items improve maintainability and diagnostics but do not change the core
+four-list relationship used by the current public view.
+
+## CSS and layout impact
+
+No CSS or layout refactor is required. Existing cards, navigation, language
+switching, charts, and responsive behavior remain unchanged. A small wrapping
+adjustment would be needed only if the longer search-result labels do not fit
+the existing list width.
+
+## Minimum acceptance criteria
+
+- Pending and Approved cycles are available to the public view.
+- The displayed and filtered submission type comes only from `NSA_Status`.
+- The Organization Type filter contains the values supplied by eligible
+  `NSA Profiles` records and returns the matching organizations.
+- Search results distinguish multiple cycles for the same organization.
+- Clicking a search result still selects `NSAs.ID`.
+- Activities and Workplans remain associated through `ParentID`.
+- The current page layout and CSS remain unchanged.
+
+The current exports contain no Pending cycle, so the Pending eligibility rule
+must be verified with a controlled fixture or a later export containing that
+status.
 
 ## Final assessment
 
-The migration does not require a new frontend stack or a redesigned page. It
-requires a controlled refactor of the V1 data-loading and view-model logic in
-`assets/js/app.js`, plus minor cleanup of the existing filter markup in
-`index.html`.
+The current frontend has already completed the main four-list structural
+adaptation. The minimum remaining work is limited to two data-rule corrections
+(eligibility and current submission type) and two filter/search adjustments
+(dynamic organization types and distinguishable cycle labels). No frontend
+rewrite, new component, or CSS redesign is required.
