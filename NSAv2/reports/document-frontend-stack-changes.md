@@ -28,25 +28,6 @@ unchanged.
 | Profile, financial, collaboration, and workplan cards | Receive content rendered by `app.js` | No change | Preserve the existing sections and IDs | None |
 | Sidebar, navigation, language controls, disclaimers, and footer | Existing page structure | No change | Preserve the existing markup | None |
 
-## HTML edits
-
-The refactor does not require a new HTML component. If the optional markup
-cleanup is applied, both dynamic selects should start with only **All**:
-
-```html
-<select id="typeOfSubmission-type-input" class="input">
-  <option value="all" id="TypeOfSubmission-all">All</option>
-</select>
-
-<select id="organization-type-input" class="input">
-  <option value="all" id="organization-all">All</option>
-</select>
-```
-
-`app.js` then inserts the values from `NSA_Status` and
-`NSAOrganizationType`. The existing search list and content cards do not need
-new markup.
-
 ## Final assessment
 
 The critical changes concern the data placed into existing HTML controls; they
