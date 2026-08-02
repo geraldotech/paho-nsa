@@ -1,0 +1,1 @@
+Review the existing frontend codebase and UI/UX implementation. Assess code quality, identify technical debt, and document areas requiring improvement before further development.
