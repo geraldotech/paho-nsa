@@ -7,8 +7,6 @@
 | Validation date | 2026-08-01                                 |
 | Result          | **Pass with source-data exceptions**       |
 
-<a id="top"></a>
-
 ## Contents
 
 1. [Objective](#objective)
@@ -25,8 +23,6 @@
 8. [Source-data exceptions](#source-data-exceptions)
 9. [Conclusion](#conclusion)
 
-<a id="objective"></a>
-
 ## Objective
 
 Validate that the complete workflow captures and processes data correctly for
@@ -40,7 +36,7 @@ This report validates the complete path followed by the data in the application,
 from the four JSON files to the rendered interface. The reference document
 [`NSA.Tool.Data.Structure.for.Public.Report.pdf`](../NSAv2_starter_web_frontier/NSA.Tool.Data.Structure.for.Public.Report.pdf)
 defines the expected relationships and field roles; the evidence below comes
-from the JavaScript and JSON files at the tested commit.
+from the validated JavaScript and JSON files.
 
 The end-to-end application flow passed for Profiles 43, 44, and 46:
 
@@ -103,9 +99,6 @@ erDiagram
 
 ## Test execution
 
-The application PoC was validated using the four current JSON files, covering
-data loading, relationship processing, and interface rendering.
-
 ### Profile selection rationale
 
 Profiles 43, 44, and 46 were selected because they are the profiles in the
@@ -141,17 +134,14 @@ the cycle's current type in the interface.
 
 #### Profile 44
 
-- The application selected Profile 44 by default.
 - Cycles 100 and 101 reached the cycle table.
 - Activities 45 and 46 and Workplans 79 and 80 reached cycle 100.
-- No orphan section was displayed.
 
 #### Profile 46
 
 - Cycles 94, 95, 98, and 99 reached the cycle table.
 - Activities 41 and 44 reached their respective cycles.
 - Workplans 71, 72, 75, 76, 77, and 78 reached their respective cycles.
-- No orphan section was displayed.
 
 ## NSA indexing/association regression
 
@@ -159,8 +149,7 @@ The application selects cycles by `NSAProfileID`, relates Activities and
 Workplans by `ParentID`, and isolates missing-parent records. This prevents
 organization and cycle IDs from being confused or records from different
 cycles from being mixed. The regression passed for Profiles 43, 44, and 46
-within the application/PoC scope. SharePoint index configuration and query
-performance were not tested.
+within the application/PoC scope.
 
 ## Field behavior reaching the interface
 
