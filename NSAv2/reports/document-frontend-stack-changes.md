@@ -1,169 +1,72 @@
-# Minimum Frontend Changes for the DEV Data Structure
+# HTML Changes for the DEV Data Structure
 
 ## Objective
 
-Identify the minimum frontend changes still required for the current
-`assets/js/app.js` to comply with the DEV structure validated in
-[`validate-dev-database-changes.md`](validate-dev-database-changes.md), while
-preserving the existing HTML layout and CSS.
-
-| Review item | Value |
-| --- | --- |
-| Main implementation | `assets/js/app.js` |
-| Reference | [`NSA.Tool.Data.Structure.for.Public.Report.pdf`](../files/NSA.Tool.Data.Structure.for.Public.Report.pdf) |
-
-## Important baseline finding
-
-`architecture.md` documents the original V1 implementation with three JSON
-files. It is useful for understanding the previous model, but it is no longer
-an accurate description of the current `app.js`.
-
-The current committed frontend has already implemented the core structural
-refactor:
-
-- it loads `nsa-profiles.json` in addition to the other three JSON files;
-- it indexes Profiles by `NSA Profiles.ID`;
-- it joins each `NSAs` cycle through `NSAProfileID`;
-- it keeps the selected ID as `NSAs.ID`;
-- it retrieves Activities and Workplans by `ParentID = NSAs.ID`;
-- it reads `NSA_Status` before the legacy `TypeOfSubmission` value.
-
-These items must not be reported as new work. The remaining changes are smaller
-and are listed below.
-
-## Minimum required changes
-
-| Current behavior | Minimum required change | Reason |
-| --- | --- | --- |
-| Public records are filtered only by `GovBodies_Status === 'Approved'` | Accept `Pending` or `Approved` | The reference document defines both as eligible for the public report |
-| The joined view assigns `TypeOfSubmission: NSA_Status || TypeOfSubmission` | Remove the fallback and use `NSA_Status` as the value | `TypeOfSubmission` can retain the original type after the cycle becomes Progress Report |
-| Organization Type options are hard-coded in `index.html` | Populate them from joined `NSA Profiles.NSAOrganizationType` values | The current NGO option does not match the exported singular value, and hard-coded options can omit valid types |
-| Search results show only the organization title | Add `NSA_Status` and `CollaborationPeriod` to each result label | Profiles can have multiple cycles with the same organization title |
-
-### Minimal JavaScript changes
-
-#### 1. Eligibility
-
-Change the public-cycle filter to:
-
-```js
-const isPublicCycle = (cycle) =>
-  ['Pending', 'Approved'].includes(cycle.GovBodies_Status)
-```
-
-Do not replace this rule with `Status`, `GovBodies_Outcome`, or
-`ActivitiesExtractionCompleted`.
-
-#### 2. Current submission type
-
-The smallest safe change is to keep the existing joined view-model property but
-remove the legacy fallback:
-
-```js
-TypeOfSubmission: submission.NSA_Status
-```
-
-This avoids rewriting every renderer immediately while ensuring that filters,
-subtitles, and conditional views use the value required by the reference
-document. Renaming the internal property to `NSA_Status` can be done later as a
-clarity refactor; it is not required for the minimum migration.
-
-#### 3. Organization Type filter
-
-Build the select options from the eligible joined records:
-
-```js
-const organizationTypes = [
-  ...new Set(nasas.map((row) => row.NSAOrganizationType).filter(Boolean)),
-].sort()
-```
-
-The filter must use the value joined from `NSA Profiles`, not an organization
-type copied from the cycle.
-
-#### 4. Search result labels
-
-Keep `data-id` equal to `NSAs.ID`, but render a label that distinguishes cycles:
-
-```text
-Organization name - NSA_Status - CollaborationPeriod
-```
-
-No new selector or page component is required.
+Validate the changes required in `index.html` so the page continues to work
+when `app.js` is refactored for the new DEV data structure. The existing layout
+and CSS remain unchanged.
 
 ## Current frontend use vs. HTML change
 
-| Current frontend use | Required change |
+| Location in `index.html` | Current frontend use | Must change? | Required change |
+| --- | --- | --- | --- |
+| `#organization-type-input` | Contains hard-coded Organization Type options | **Yes** | Keep only the **All** option. `app.js` must populate the remaining options from `NSA Profiles.NSAOrganizationType` |
+| `#typeOfSubmission-type-input` | Contains hard-coded options, but `app.js` replaces them at startup | No | No functional HTML change. Removing the unused options and keeping only **All** is optional cleanup |
+| `label[for]` for Type of Submission | Points to `period-select` instead of its own select | No migration change | Optional accessibility fix: use `for="typeOfSubmission-type-input"` |
+| `label[for]` for Collaboration Period | Points to `period-select` | No | Keep unchanged |
+| `label[for]` for Organization Type | Points to `period-select` instead of its own select | No migration change | Optional accessibility fix: use `for="organization-type-input"` |
+| `#search-results` | Displays the options generated by `app.js` | No | Keep the existing `<ul>`. Cycle details are added by JavaScript, not by changing the HTML structure |
+| Profile, financial, collaboration, and workplan sections | Render the selected cycle | No | Keep unchanged |
+| Sidebar, navigation, language controls, and footer | Existing page structure | No | Keep unchanged |
+
+## HTML compatibility contract
+
+The refactored `app.js` must continue using the existing DOM structure. Do not
+remove or rename these selectors:
+
+| Frontend function | HTML selectors that must remain |
 | --- | --- |
-| Type of Submission select is rebuilt by `app.js` at startup | No functional HTML change required; removing its unused hard-coded options is optional cleanup |
-| Organization Type select contains hard-coded options | Keep only **All** in HTML and populate the remaining options in `app.js` |
-| Search results use the existing `search-results` list | No structural change; only the text generated by `app.js` changes |
-| Profile, financial, collaboration, and workplan cards | No change |
-| Sidebar, navigation, language switcher, and page layout | No change |
+| Search | `#searchInput`, `#search-results` |
+| Filters | `#typeOfSubmission-type-input`, `#period-select`, `#organization-type-input`, `#clear-filters` |
+| Profile rendering | `#nsa-title`, `#nsa-subtitle`, `#nsa-info` |
+| Activity and Workplan rendering | `#nsa-activities`, `#workplans`, `#workplans-card` |
+| Financial rendering | `#financial_card`, `#financialBarChart`, `#FinAnnualIncomeYear`, `.financialnav` |
+| Collaboration rendering | `#collaborationWithPAHO`, `#collabWPActHealthAgendaObj`, `#strategicPlan`, `#card03`, `#card04` |
+| Language behavior | `.lang-toggle` |
+| Disclaimer behavior | `#landingDisclaimerTop`, `#landingDisclaimer2`, `#landingDisclaimer` |
 
-The incorrect `for="period-select"` attributes on the Type of Submission and
-Organization Type labels should be corrected for accessibility, but this is an
-existing HTML defect rather than a requirement of the DEV data migration.
+The JavaScript data model can change without altering these rendering targets.
+If an internal JavaScript property is renamed from `TypeOfSubmission` to
+`NSA_Status`, the visible label and existing select ID can remain unchanged.
 
-## Already correct: no migration change required
+## Minimum required HTML edit
 
-| Area | Current implementation |
-| --- | --- |
-| Four data sources | Already loaded in parallel |
-| Organization join | `NSA Profiles.ID = NSAs.NSAProfileID` already implemented |
-| Selected record identity | Uses `submission.ID`, which is the cycle `NSAs.ID` |
-| Activities | Retrieved with `Activity.ParentID = selected NSAs.ID` |
-| Workplans | Retrieved with `Workplan.ParentID = selected NSAs.ID` |
-| Organization details | Profile values already take precedence in the joined view model |
-| Collaboration Period | Already read from the `NSAs` cycle |
-| Progress Report behavior | Already driven by the joined current-type value |
-| `RenewalKey` | Correctly absent from the UI |
+Replace the Organization Type select contents with a single initial option:
 
-## Recommended hardening, not minimum migration work
+```html
+<select id="organization-type-input" class="input">
+  <option value="all" id="organization-all">All</option>
+</select>
+```
 
-The following changes are useful but should not be reported as mandatory for
-the minimum frontend adaptation:
+The remaining Organization Type options must be inserted by `app.js` from the
+joined `NSA Profiles.NSAOrganizationType` values.
 
-- rename `currentId` to `currentCycleId` for clarity;
-- rename internal `TypeOfSubmission` variables and element IDs to
-  `NSA_Status`-based names;
-- remove legacy organization-field fallbacks after export completeness is
-  guaranteed;
-- validate child `NSAProfileID` against the selected cycle's `NSAProfileID` and
-  log mismatches;
-- log missing-parent records for export diagnostics;
-- remove unused hard-coded Type of Submission options from `index.html`;
-- correct the two label `for` attributes.
+## Validation checklist
 
-These items improve maintainability and diagnostics but do not change the core
-four-list relationship used by the current public view.
-
-## CSS and layout impact
-
-No CSS or layout refactor is required. Existing cards, navigation, language
-switching, charts, and responsive behavior remain unchanged. A small wrapping
-adjustment would be needed only if the longer search-result labels do not fit
-the existing list width.
-
-## Minimum acceptance criteria
-
-- Pending and Approved cycles are available to the public view.
-- The displayed and filtered submission type comes only from `NSA_Status`.
-- The Organization Type filter contains the values supplied by eligible
-  `NSA Profiles` records and returns the matching organizations.
-- Search results distinguish multiple cycles for the same organization.
-- Clicking a search result still selects `NSAs.ID`.
-- Activities and Workplans remain associated through `ParentID`.
-- The current page layout and CSS remain unchanged.
-
-The current exports contain no Pending cycle, so the Pending eligibility rule
-must be verified with a controlled fixture or a later export containing that
-status.
+- All selectors in the compatibility contract remain present after the
+  refactor.
+- Each filter label points to the correct select.
+- `app.js` repopulates both dynamic selects without adding new HTML controls.
+- Selecting a search result still renders into the existing cards.
+- Language switching, disclaimers, navigation, and charts still find their
+  current DOM targets.
+- No CSS selector or page section must be renamed for the data migration.
 
 ## Final assessment
 
-The current frontend has already completed the main four-list structural
-adaptation. The minimum remaining work is limited to two data-rule corrections
-(eligibility and current submission type) and two filter/search adjustments
-(dynamic organization types and distinguishable cycle labels). No frontend
-rewrite, new component, or CSS redesign is required.
+Only the Organization Type options require a functional HTML change. No new
+component, card, section, filter, navigation item, or CSS rule is required for
+the DEV data migration. The two incorrect label associations may be fixed at
+the same time, but they are accessibility corrections rather than migration
+requirements.
