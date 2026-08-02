@@ -13,7 +13,7 @@
 
 1. [Objective](#objective)
 2. [Executive summary](#executive-summary)
-3. [Validated application flow](#validated-application-flow)
+3. [Validated data flow](#validated-data-flow)
    - [Expected relationships](#expected-relationships)
 4. [Test execution](#test-execution)
    - [Profile selection rationale](#profile-selection-rationale)
@@ -33,12 +33,6 @@
 Validate that the complete workflow captures and processes data correctly for
 the scenarios represented in the current DEV exports. Document the validation
 results and hand them over to ITS.
-
-The DEV data structure and relationship model are documented separately in
-[`validate-dev-database-changes.md`](validate-dev-database-changes.md). This
-report focuses on validating their end-to-end use by the application, from data
-loading and relationship processing through scenario handling and interface
-rendering.
 
 
 ## Executive summary
@@ -61,19 +55,17 @@ The end-to-end application flow passed for Profiles 43, 44, and 46:
 Incomplete source records were isolated instead of being assigned to valid
 cycles. Details are documented in [Source-data exceptions](#source-data-exceptions).
 
-## Validated application flow
+## Validated data flow
 
 ```mermaid
 flowchart TD
-    J["4 JSON files"] --> L["Load and parse data"]
-    L --> S["Application state"]
-    S --> P["Select NSA Profile"]
-    P --> N["Find cycles by NSAProfileID"]
-    N --> C["Index cycle IDs"]
-    C --> R["Find children by ParentID"]
-    R --> V["Validate child NSAProfileID"]
-    V --> U["Render cycles and children"]
-    R --> O["Render missing-parent children separately"]
+    J["4 JSON files"] --> L["Load data"]
+    L --> P["Select NSA Profile"]
+    P --> N["Match cycles by NSAProfileID"]
+    N --> C["Match Activities and Workplans by ParentID"]
+    C --> V["Validate organization ownership"]
+    V --> U["Render valid records"]
+    C --> O["Isolate missing-parent records"]
 ```
 
 ### Expected relationships
@@ -101,10 +93,7 @@ data loading, relationship processing, and interface rendering.
 Profiles 43, 44, and 46 were selected because they are the profiles in the
 current dataset with at least one cycle approved for the public report. They
 also provide representative multi-cycle data, valid Activity and Workplan
-relationships, and, through Profile 43, a missing-parent exception. Profile 11
-was used only as a negative field-behavior check because all its cycles have a
-blank `GovBodies_Status`; the record with `NSAs.ID = 41` cannot be selected
-because it has no `NSAProfileID`.
+relationships, and, through Profile 43, a missing-parent exception.
 
 ### Scenario coverage
 
@@ -186,11 +175,6 @@ The JavaScript follows the PDF guidance for the report-facing fields:
   Approved.
 - `Status` is displayed as workflow progress and is not used for eligibility.
 - `RenewalKey` is not exposed in the interface.
-
-Profile 11 confirms the importance of this distinction: its relationships are
-complete, but every cycle has `GovBodies_Status = null`. Even though cycles 91
-and 92 have `GovBodies_Outcome = Approved`, the interface correctly cannot use
-that working field as durable approval evidence.
 
 ## Integrity controls
 
