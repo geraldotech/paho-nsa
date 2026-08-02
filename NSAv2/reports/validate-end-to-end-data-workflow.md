@@ -18,7 +18,6 @@
 4. [Test execution](#test-execution)
    - [Profile selection rationale](#profile-selection-rationale)
    - [Scenario coverage](#scenario-coverage)
-   - [Loading results](#loading-results)
    - [Profile-to-interface results](#profile-to-interface-results)
 5. [NSA indexing/association regression](#nsa-indexingassociation-regression)
 6. [Field behavior reaching the interface](#field-behavior-reaching-the-interface)
@@ -70,18 +69,37 @@ flowchart TD
 
 ### Expected relationships
 
-The application implements the expected relationships as follows:
+```mermaid
+erDiagram
+    NSA_PROFILES ||--o{ NSAS : "NSAProfileID"
+    NSA_PROFILES ||--o{ ACTIVITIES : "NSAProfileID"
+    NSA_PROFILES ||--o{ WORKPLANS : "NSAProfileID"
+    NSAS ||--o{ ACTIVITIES : "ParentID"
+    NSAS ||--o{ WORKPLANS : "ParentID"
 
-| Expected relationship                  | JavaScript behavior                                                   | Result                                                  |
-| -------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
-| `NSA Profiles.ID = NSAs.NSAProfileID`  | Filters NSAs by the selected Profile ID                               | Pass                                                    |
-| `NSAs.ID = Activity.ParentID`          | Builds the selected cycle-ID set and filters Activities by `ParentID` | Pass for Profiles 44 and 46 and for Profile 43 cycle 96 |
-| `NSAs.ID = Workplan.ParentID`          | Builds the selected cycle-ID set and filters Workplans by `ParentID`  | Pass for Profiles 44 and 46 and for Profile 43 cycle 96 |
-| `NSA Profiles.ID = child.NSAProfileID` | Checks that each rendered child belongs to the selected organization  | Pass for all verifiable records                         |
+    NSA_PROFILES {
+        int ID PK
+    }
 
-The implementation correctly uses `NSAProfileID` for organization-level
-selection and `ParentID` for cycle-level selection. It does not substitute one
-relationship for the other.
+    NSAS {
+        int ID PK
+        int NSAProfileID FK
+        string NSA_Status
+        string GovBodies_Status
+    }
+
+    ACTIVITIES {
+        int ID PK
+        int ParentID FK
+        int NSAProfileID FK
+    }
+
+    WORKPLANS {
+        int ID PK
+        int ParentID FK
+        int NSAProfileID FK
+    }
+```
 
 ## Test execution
 
@@ -104,18 +122,6 @@ the cycle's current type in the interface.
 | --- | --- | --- | --- | --- |
 | New application | Cycle 96 | Cycle 100 | Cycles 94 and 99 | Pass |
 | Renewal | Cycle 97 | Cycle 101 | Cycles 95 and 98 | Pass |
-
-### Loading results
-
-| Resource            | Parsed records |
-| ------------------- | -------------: |
-| `nsa-profiles.json` |             46 |
-| `nsa.json`          |             22 |
-| `activity.json`     |             14 |
-| `workplan.json`     |             34 |
-
-The test confirmed that all four JSON datasets were parsed and that the
-interface reported successful data loading.
 
 ### Profile-to-interface results
 
@@ -149,21 +155,12 @@ interface reported successful data loading.
 
 ## NSA indexing/association regression
 
-The correction is present in the current JavaScript:
-
-1. It first finds every NSA cycle whose `NSAProfileID` matches the selected
-   organization.
-2. It creates a set containing the matching `NSAs.ID` values.
-3. It retrieves Activities and Workplans only when their `ParentID` exists in
-   that cycle-ID set.
-4. It validates the child's `NSAProfileID` against the selected organization.
-5. Children that match the organization but reference an absent cycle are
-   isolated as orphans instead of being assigned to another cycle.
-
-This prevents organization and cycle IDs from being confused or records from
-different cycles from being mixed. The regression passed for Profiles 43, 44,
-and 46 within the application/PoC scope. SharePoint index configuration and
-query performance were not tested.
+The application selects cycles by `NSAProfileID`, relates Activities and
+Workplans by `ParentID`, and isolates missing-parent records. This prevents
+organization and cycle IDs from being confused or records from different
+cycles from being mixed. The regression passed for Profiles 43, 44, and 46
+within the application/PoC scope. SharePoint index configuration and query
+performance were not tested.
 
 ## Field behavior reaching the interface
 
