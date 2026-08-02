@@ -16,7 +16,7 @@ unchanged.
 
 ## Current frontend use vs. HTML change
 
-| Location in `index.html` | Current frontend use | Must change? | Required change | Implemented in |
+| Location in `index.html` | Current frontend use | Change level | Required change | Implemented in |
 | --- | --- | --- | --- | --- |
 | `#typeOfSubmission-type-input` | Displays the Type of Submission filter | **Critical** | Populate its options from `NSAs.NSA_Status` | `app.js`; the existing HTML select remains |
 | `#organization-type-input` | Contains hard-coded Organization Type options | **Critical** | Populate its options from `NSA Profiles.NSAOrganizationType` | `app.js`; the HTML may keep only **All** as its initial option |
