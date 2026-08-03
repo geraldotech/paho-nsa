@@ -53,143 +53,31 @@ a frontend rewrite is not required.
   instances.
 - An `escapeHtml()` helper already exists and can be reused more consistently.
 
-## High-priority findings
+## High priority
 
-### H1. Exported content is inserted into `innerHTML` without consistent escaping
+These findings should be resolved before further feature development.
 
-Several renderers interpolate JSON values directly into HTML, including
-Activity descriptions/results, Workplan expected results, yearly results,
-responsible entities, Profile fields, and the website `href`. Only some output
-paths call `escapeHtml()`.
+| ID | Area | Finding and evidence | Impact | Required improvement |
+| --- | --- | --- | --- | --- |
+| H1 | Security | Several renderers interpolate exported Activity, Workplan, yearly-result, responsible-entity, Profile, and website values directly into `innerHTML`. Only some output paths use `escapeHtml()`. | Malformed or hostile exported content can alter the page or execute as stored cross-site scripting. | Escape every plain-text value before interpolation. Sanitize intentionally supported rich text with an explicit allowlist. |
+| H2 | Data completeness | Renderers prefer translated fields even when they are blank and the base fields contain data. `renderYearlyResults()` handles only Years 1 and 2, although eight current Workplan records contain Year 3 data, including records 71 and 72 for approved cycle 94. | The interface can display `-` or omit report content present in the source data. | Define and document a consistent localized-field fallback; add Year 3 rendering, labels, and tests. |
+| H3 | Responsive layout | The sidebar is fixed at `320px` with `height: 100vh` and `overflow: hidden`; the main area always retains a `320px` left margin. Existing media queries do not alter this layout. | Narrow screens show little main content, and controls can become unreachable on short screens. | Add a mobile breakpoint with a normal, collapsible, or off-canvas sidebar; remove the fixed main margin and allow vertical scrolling. |
+| H4 | Data correctness and UX | Public data includes only `GovBodies_Status = Approved`, although Pending is also eligible. Organization Type options are hard-coded and include a mismatched NGO value. Search results do not distinguish multiple cycles for the same organization. | Valid records can be excluded, filters can return incorrect results, and users can select the wrong cycle. | Apply the validated eligibility rule, generate filter values from authoritative data, and label results with organization name, `NSA_Status`, and `CollaborationPeriod`. |
+| H5 | Accessibility | Search results are clickable `<li>` elements without keyboard behavior or listbox semantics. Language controls are anchors without `href`. Several labels target the wrong controls, and focus indication is insufficient. | Keyboard and assistive-technology users cannot reliably operate controls or identify focus. | Implement an accessible combobox/listbox or native controls; correct control semantics and labels; add visible `:focus-visible` styling and Escape, Arrow, and Enter behavior. |
 
-**Impact:** malformed or hostile content in a SharePoint export can alter the
-page or execute as stored cross-site scripting in the public site.
+## Medium priority
 
-**Required improvement:** escape all plain-text fields before interpolation.
-For fields that intentionally contain approved rich text, use an explicit HTML
-sanitizer and an allowlist instead of rendering the raw value.
+These findings should be included in the same remediation cycle when they
+overlap with high-priority work.
 
-### H2. Valid Activity, Workplan, and Year 3 data can be omitted
-
-The renderers prefer only translated fields such as `DescriptionENG`,
-`DescriptionSPA`, and `Year1_ResultsENG`. In the current exports, many of these
-translated fields are blank while the base fields (`Description`,
-`DirectResults`, `ExpectedResults`, and `Year*_Results`) contain data.
-
-`renderYearlyResults()` handles Year 1 and Year 2 only. The current Workplan
-export contains eight records with Year 3 data, including records 71 and 72 for
-approved cycle 94.
-
-**Impact:** the interface can display `-` or omit report content that is present
-in the source data.
-
-**Required improvement:** define a consistent localized-field fallback and add
-Year 3 rendering, labels, and tests. The fallback order should be documented so
-that missing translations do not silently remove the base value.
-
-### H3. The main layout is not responsive at mobile widths
-
-The sidebar is fixed at `320px`, uses `height: 100vh` and `overflow: hidden`,
-while the main area always keeps a `320px` left margin. Existing media queries
-adjust grids and charts but do not change the sidebar/main layout.
-
-**Impact:** narrow screens can show very little main content, and sidebar
-controls can become unreachable on short screens.
-
-**Required improvement:** add a mobile breakpoint that converts the sidebar to
-a normal, collapsible, or off-canvas region; remove the fixed main margin at
-that breakpoint; and allow the sidebar controls to scroll vertically.
-
-### H4. Search and filters do not fully represent the current data model
-
-- only `GovBodies_Status = Approved` enters the public collection, although the
-  reference rule accepts Pending or Approved;
-- Organization Type options are hard-coded and the NGO option does not match
-  the singular value in the export;
-- multiple cycles for one organization appear with the same title in search
-  results, so the user cannot identify which cycle will be selected.
-
-**Impact:** valid records can be excluded, a filter can return no expected
-results, and users can select the wrong cycle.
-
-**Required improvement:** apply the validated eligibility rule, generate filter
-values from authoritative data, and label search results with organization
-name, `NSA_Status`, and `CollaborationPeriod`.
-
-### H5. Core interactions are not keyboard-accessible
-
-The search results are clickable `<li>` elements without listbox/option
-semantics or keyboard handling. Language controls are `<a>` elements without an
-`href`. Search, Type of Submission, and Organization Type labels point to the
-wrong control. CSS removes the default input outline and supplies only a subtle
-border change.
-
-**Impact:** keyboard and assistive-technology users cannot reliably operate the
-search and language controls or identify focus.
-
-**Required improvement:** implement an accessible combobox/listbox interaction
-or use native controls, make language controls buttons or valid links, correct
-label associations, add visible `:focus-visible` styles, and support Escape,
-Arrow, and Enter behavior.
-
-## Medium-priority findings
-
-### M1. Data-loading failures have no user-facing state
-
-`fetchJson()` logs an error and returns `null`. Startup then converts the failed
-dataset to an empty array, and the page shows only `NSA not found` or empty
-sections.
-
-**Improvement:** add loading, empty, partial-data, and error states with a retry
-or clear support message. Identify which resource failed without exposing
-sensitive internals.
-
-### M2. Search and filter logic is duplicated
-
-Filtering is separately implemented in `applyFilters()`, `handleSearchInput()`,
-and `showSearchResults()`. The search input receives two `input` listeners, and
-the different paths do not apply identical limits and filters.
-
-**Improvement:** create one pure filtering function and one render path. Attach
-one listener per event and reuse the same result ordering, limit, and language
-rules.
-
-### M3. Clear Filters does not reset the complete visible state
-
-The clear handler resets the filter object and select indexes but does not
-clear the search input or results list. It also renders the previously selected
-cycle rather than explicitly defining the intended reset selection.
-
-**Improvement:** reset the input, list, select values, navigation visibility,
-and selected-cycle behavior together.
-
-### M4. Generated profile markup contains invalid semantics
-
-Some generated Profile sections place `<dt>` elements inside `<p>` elements.
-Definition terms are valid only inside `<dl>` structures.
-
-**Improvement:** use consistent `<dl><dt><dd>` markup or ordinary headings and
-paragraphs. Validate the generated DOM, not only the static HTML file.
-
-### M5. Language support is incomplete
-
-Changing language updates many labels but does not update the document
-`<html lang>` value. Several empty/error messages remain hard-coded in English,
-and search results are always sorted by the English title.
-
-**Improvement:** update `document.documentElement.lang`, move all user-facing
-messages to `ui-language.js`, and sort by the active-language label.
-
-### M6. `app.js` is a monolithic controller without automated coverage
-
-The file contains more than 1,000 lines and combines data access, normalization,
-state, filtering, rendering, localization, Chart.js, and DOM events. No test,
-lint, or formatting configuration is present in the reviewed frontend.
-
-**Improvement:** extract pure modules for data normalization/joins, filtering,
-localized field resolution, and formatting before adding more features. Add
-unit tests for those modules and a small end-to-end smoke test for the rendered
-workflow.
+| ID | Area | Finding and evidence | Impact | Required improvement |
+| --- | --- | --- | --- | --- |
+| M1 | Reliability | `fetchJson()` logs an error and returns `null`; startup converts the failed dataset to an empty array. | Users see only `NSA not found` or empty sections and cannot distinguish a loading failure from missing data. | Add loading, empty, partial-data, and error states with retry or a clear support message. Identify the failed resource without exposing sensitive internals. |
+| M2 | Maintainability | Filtering is implemented separately in `applyFilters()`, `handleSearchInput()`, and `showSearchResults()`. The search input has two `input` listeners, and the paths apply different limits and filters. | Behavior can diverge and regress as filtering changes. | Create one pure filtering function and one render path; use one listener per event and consistent ordering, limits, and language rules. |
+| M3 | UX | Clear Filters resets filter state and select indexes but leaves the search input and results list populated and renders the previously selected cycle. | The visible interface does not match its reset state. | Reset the input, results list, select values, navigation visibility, and selected-cycle behavior together. |
+| M4 | Semantics | Generated Profile sections place some `<dt>` elements inside `<p>` elements, although definition terms are valid only inside `<dl>`. | The generated DOM is invalid and less reliable for assistive technology. | Use consistent `<dl><dt><dd>` markup or ordinary headings and paragraphs; validate the generated DOM. |
+| M5 | Localization | Language changes do not update `<html lang>`. Several empty/error messages remain hard-coded in English, and search results are always sorted by the English title. | Document language, messages, and result order can conflict with the selected language. | Update `document.documentElement.lang`, move user-facing messages to `ui-language.js`, and sort using the active-language label. |
+| M6 | Maintainability and testing | `app.js` exceeds 1,000 lines and combines data access, normalization, state, filtering, rendering, localization, charts, and DOM events. No frontend test, lint, or formatting configuration is present. | Changes carry a high regression risk and are difficult to isolate. | Extract pure modules for normalization, joins, filtering, localized-field resolution, and formatting; add unit tests and a browser smoke test. |
 
 ## Low-priority technical debt
 
