@@ -39,3 +39,8 @@ The critical changes concern the data placed into existing HTML controls; they
 are implemented in `app.js`. The HTML structure itself remains compatible with
 the DEV refactor. Changes made directly in `index.html` are limited to optional
 cleanup and accessibility corrections. No CSS or layout change is required.
+
+
+# JS missing...
+
+### como vai me ajudar...
