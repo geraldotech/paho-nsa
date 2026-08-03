@@ -90,29 +90,6 @@ overlap with high-priority work.
 | User messages use inconsistent wording such as `nas`, `NSA`, and `organization` | Standardize terminology in both languages |
 | Internal names such as `isProcessReportType` contain inconsistent terminology | Rename for clarity when the JavaScript is modularized |
 
-## Recommended remediation order
-
-### Phase 1: protect data and restore complete output
-
-1. Escape or sanitize every exported value rendered as HTML.
-2. Add localized-field fallbacks and Year 3 rendering.
-3. Correct eligibility, filter sources, and cycle identification.
-4. Add explicit loading and failure states.
-
-### Phase 2: make the interface usable across devices and input methods
-
-1. Implement the mobile sidebar/main layout.
-2. Make search and language controls keyboard-accessible.
-3. Correct labels, focus states, semantic markup, and language state.
-4. Make Clear Filters reset all visible state.
-
-### Phase 3: reduce regression risk before new features
-
-1. Consolidate search/filter logic.
-2. Extract data, filter, render, and formatting modules from `app.js`.
-3. Add unit tests, a browser smoke test, linting, and formatting.
-4. Consolidate CSS and remove dead rules and debug code.
-
 ## Ready-for-development criteria
 
 The frontend is ready for further feature development when:
