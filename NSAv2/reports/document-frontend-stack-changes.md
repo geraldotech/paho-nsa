@@ -1,5 +1,12 @@
 #  Document Frontend Stack Changes
 
+| Item               | Value                                                            |
+| ------------------ | ---------------------------------------------------------------- |
+| Application        | PAHO NSA public report viewer                                    |
+| Environment        | Current public frontend using the DEV data structure             |
+| Documentation date | 2026-08-03                                                       |
+| Result             | **Preserve the existing HTML/CSS layout; implement critical data behavior in `app.js`** |
+
 ## Objective
 
 all planned changes to the frontend stack, including JavaScript, CSS, and HTML modifications, with enough detail to support implementation and future maintenance.
