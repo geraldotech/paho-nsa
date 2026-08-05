@@ -120,12 +120,11 @@ The JavaScript refactor is complete only when the following rules remain true:
 - Blank localized fields fall back to available source content, including Year
   3 Workplan results.
 - All plain exported text is escaped before insertion into HTML.
-
-Profiles 44 and 46 should continue to pass the application-level relationship
-and rendering checks. Profile 43 should retain the result **Pass with
-source-data exceptions** because its orphan child records cannot be assigned to
-a missing cycle. A controlled fixture is required to test `Pending` eligibility
-because the supplied export contains no Pending cycle.
+- Test `Pending` eligibility with a controlled fixture because the supplied
+  export contains no Pending cycle.
+- Re-run the validated scenarios for Profiles 43, 44, and 46. Profiles 44 and
+  46 must pass; Profile 43 must remain **Pass with source-data exceptions**, with
+  orphan children excluded from valid cycles.
 
 ## Final assessment
 
