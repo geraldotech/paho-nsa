@@ -4,8 +4,8 @@
 | ------------------ | ---------------------------------------------------------------- |
 | Application        | PAHO NSA public report viewer                                    |
 | Environment        | Current public frontend using the DEV data structure             |
-| Documentation date | 2026-08-04                                                       |
-| Result             | **Preserve the existing HTML/CSS layout; implement critical data behavior in `app.js`** |
+| Documentation date | 2026-08-05                                                       |
+| Result             | **Preserve the HTML/CSS structure and layout; apply two label corrections in `index.html`; implement critical data behavior in `app.js`** |
 
 ## Contents
 
@@ -21,33 +21,59 @@
 ## Objective
 
 Define the changes required in `app.js`, `ui-language.js`, and `index.html` to
-support the DEV data model without redesigning the existing interface.
+support the DEV data model without redesigning the existing interface. In this
+report, preserving the HTML means preserving its structure, controls, sections,
+and layout. It does not mean that `index.html` receives no edits.
 
 ## Classification
 
-- **Critical:** required for the frontend to use the new fields or distinguish
-  the new relationships correctly.
-- **Not critical:** optional cleanup or accessibility improvement that does not
-  block the data refactor.
-- **No change:** the existing HTML already supports the refactored behavior.
+- **Critical behavior:** required for the frontend to use the new fields or
+  distinguish the new relationships correctly. A critical behavior can be
+  implemented entirely in JavaScript and therefore does not necessarily imply
+  an HTML edit.
+- **Direct HTML correction:** an edit to existing markup that should be applied,
+  but does not add controls, sections, or layout changes.
+- **Optional HTML cleanup:** removes static content that JavaScript already
+  replaces; it is not required for the refactored behavior to work.
+- **No structural HTML change:** preserve the existing element, ID, section, or
+  layout. This classification does not mean that no line in `index.html` changes.
+
+### HTML conclusion
+
+The current HTML already contains the controls and content targets needed by the
+DEV data refactor, so no new page structure is required. However, the following
+direct edits to `index.html` should be made:
+
+1. Change the Type of Submission label to
+   `for="typeOfSubmission-type-input"`.
+2. Change the Organization Type label to
+   `for="organization-type-input"`.
+
+Removing the obsolete hard-coded select options is optional cleanup because the
+refactored JavaScript rebuilds those option lists at startup. Thus, the accurate
+conclusion is **no structural or layout change**, not **no HTML change**.
 
 ## Current frontend use vs. HTML change
 
-| Location in `index.html` | Current frontend use | Change level | Required change | Implementation location |
+| Location in `index.html` | Current frontend use | Behavior priority | Direct `index.html` impact | Implementation location |
 | --- | --- | --- | --- | --- |
-| `#typeOfSubmission-type-input` | Displays the Type of Submission filter | **Critical** | Populate its options from `NSAs.NSA_Status` | `app.js`; the existing HTML select remains |
-| `#organization-type-input` | Contains hard-coded Organization Type options | **Critical** | Populate its options from `NSA Profiles.NSAOrganizationType` | `app.js`; the HTML may keep only **All** as its initial option |
-| `#period-select` | Displays Collaboration Period options | **Critical** | Continue populating from `NSAs.CollaborationPeriod` | `app.js`; no HTML change |
-| `#search-results` | Displays organization names returned by the search | **Critical** | Distinguish cycles using organization name, `NSA_Status`, and `CollaborationPeriod` | `app.js`; keep the existing `<ul>` |
-| Type of Submission label | Uses `for="period-select"` | **Not critical** | Change to `for="typeOfSubmission-type-input"` for accessibility | `index.html` |
-| Organization Type label | Uses `for="period-select"` | **Not critical** | Change to `for="organization-type-input"` for accessibility | `index.html` |
-| Hard-coded Type of Submission options | Replaced by JavaScript at startup | **Not critical** | Remove unused options and keep only **All** | `index.html` |
-| Profile, financial, collaboration, and workplan cards | Receive content rendered by `app.js` | No change | Preserve the existing sections and IDs | None |
-| Sidebar, navigation, language controls, disclaimers, and footer | Existing page structure | No change | Preserve the existing markup | None |
+| `#typeOfSubmission-type-input` | Displays the Type of Submission filter | **Critical behavior**: populate from `NSAs.NSA_Status` | **No structural change**; optionally keep only **All** in the source markup | `app.js`; preserve the existing `<select>` and ID |
+| `#organization-type-input` | Contains hard-coded Organization Type options | **Critical behavior**: populate from `NSA Profiles.NSAOrganizationType` | **No structural change**; optionally keep only **All** in the source markup after the JavaScript builder is implemented | `app.js`; preserve the existing `<select>` and ID |
+| `#period-select` | Displays Collaboration Period options | **Critical verification**: continue using `NSAs.CollaborationPeriod` | **No structural change** | `app.js`; preserve the existing `<select>` and ID |
+| `#search-results` | Displays organization names returned by the search | **Critical behavior**: distinguish cycles using organization name, `NSA_Status`, and `CollaborationPeriod` | **No structural change** | `app.js`; preserve the existing `<ul>` and ID |
+| Type of Submission label | Incorrectly uses `for="period-select"` | Accessibility correction | **Direct HTML correction**: use `for="typeOfSubmission-type-input"` | `index.html` |
+| Organization Type label | Incorrectly uses `for="period-select"` | Accessibility correction | **Direct HTML correction**: use `for="organization-type-input"` | `index.html` |
+| Hard-coded Type of Submission options | Replaced by JavaScript at startup | Cleanup only | **Optional HTML cleanup**: remove obsolete options and keep only **All** | `index.html` |
+| Hard-coded Organization Type options | Must be replaced by the new JavaScript option builder | Cleanup only after the builder exists | **Optional HTML cleanup**: remove static values and keep only **All** | `index.html`, after the `app.js` change |
+| Profile, financial, collaboration, and workplan cards | Receive content rendered by `app.js` | Preserve behavior | **No structural change**: preserve the existing sections and IDs | None |
+| Sidebar, navigation, language controls, disclaimers, and footer | Existing page structure | Preserve behavior | **No structural change**: preserve the existing markup | None |
 
 ## JavaScript refactoring map
 
-Start with pure functions, then move them into ES modules after adding tests.
+Start with pure functions inside the existing `app.js`. Converting the code to ES
+modules is a separate, optional modularization step, not a requirement of the DEV
+data refactor. If that later step is approved, document and test its additional
+`index.html` impact because the current page loads `app.js` as a classic script.
 
 | Current responsibility in `app.js` | Refactoring target | How it helps implementation | Required verification |
 | --- | --- | --- | --- |
@@ -128,7 +154,11 @@ The JavaScript refactor is complete only when the following rules remain true:
 
 ## Final assessment
 
-Refactor `app.js` incrementally and keep the current HTML structure. Update
-`ui-language.js` for new and existing messages. Limit `index.html` changes to
-dynamic-option cleanup and label corrections. No CSS change is required for the
-DEV data refactor; responsive-layout remediation remains a separate task.
+Refactor `app.js` incrementally and preserve the current HTML structure and
+layout. Update `ui-language.js` for new and existing messages. Apply the two
+`label for` corrections in `index.html`; treat removal of hard-coded select
+options as optional source cleanup after JavaScript owns all three option lists.
+No CSS change is required for the DEV data refactor; responsive-layout
+remediation remains a separate task. A future ES-module conversion would require
+its own documented script-loading change in `index.html` and is outside this
+refactor.
