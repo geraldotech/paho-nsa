@@ -12,20 +12,16 @@
 1. [Objective](#objective)
 2. [Classification](#classification)
 3. [Current frontend use vs. HTML change](#current-frontend-use-vs-html-change)
-4. [How this document supports the JavaScript refactor](#how-this-document-supports-the-javascript-refactor)
-5. [PoC `index.js` compared with the current `app.js`](#poc-indexjs-compared-with-the-current-appjs)
-6. [JavaScript refactoring map](#javascript-refactoring-map)
-7. [`ui-language.js` impact](#ui-languagejs-impact)
-8. [Recommended implementation sequence](#recommended-implementation-sequence)
-9. [Data-refactor regression contract](#data-refactor-regression-contract)
-10. [Final assessment](#final-assessment)
+4. [JavaScript refactoring map](#javascript-refactoring-map)
+5. [`ui-language.js` impact](#ui-languagejs-impact)
+6. [Recommended implementation sequence](#recommended-implementation-sequence)
+7. [Data-refactor regression contract](#data-refactor-regression-contract)
+8. [Final assessment](#final-assessment)
 
 ## Objective
 
-Document the frontend changes required by the DEV data model and translate them
-into an implementation guide for refactoring `app.js`. The guide identifies
-which responsibilities must change, which behavior must be preserved, and how
-each change can be verified without redesigning the existing interface.
+Define the changes required in `app.js`, `ui-language.js`, and `index.html` to
+support the DEV data model without redesigning the existing interface.
 
 ## Classification
 
@@ -49,63 +45,17 @@ each change can be verified without redesigning the existing interface.
 | Profile, financial, collaboration, and workplan cards | Receive content rendered by `app.js` | No change | Preserve the existing sections and IDs | None |
 | Sidebar, navigation, language controls, disclaimers, and footer | Existing page structure | No change | Preserve the existing markup | None |
 
-## How this document supports the JavaScript refactor
-
-The refactor is not only a file-organization exercise. It must protect the
-validated data relationships while correcting behavior that is currently
-duplicated or incomplete in `app.js`. This document provides the implementation
-contract: developers can extract responsibilities in small steps and compare
-the result against the same field, relationship, filtering, and rendering
-rules.
-
-The main benefit is a separation between data rules and DOM rendering. At
-present, `app.js` loads the exports, creates joined records, manages state,
-filters results, resolves language-specific values, renders HTML, creates
-charts, and registers events. Because these responsibilities share global
-state, a change to a filter or field fallback can affect several UI paths. The
-target structure makes those rules explicit and independently testable while
-keeping `app.js` as the application coordinator.
-
-## PoC `index.js` compared with the current `app.js`
-
-The four JSON files under
-`NSAv2/NSAv2_starter_web_frontier/src/database/` are byte-for-byte identical to
-the four files under `assets/database/`. The PoC therefore provides valid
-behavioral evidence for the same supplied dataset. It is not, however, a
-replacement implementation for the public frontend: its purpose is to expose
-and validate relationships, while `app.js` must continue to support the public
-layout, filters, languages, cards, navigation, and charts.
-
-| Concern | PoC `src/index.js` | Current `assets/js/app.js` | Refactoring decision |
-| --- | --- | --- | --- |
-| Public eligibility | `isEligible()` correctly recognizes `Pending` and `Approved`, but the PoC displays eligible and non-eligible cycles for diagnostic purposes | The initial collection filters only `Approved` | Reuse the eligibility rule, but apply it as a public-data filter; do not copy the PoC behavior of displaying non-eligible cycles |
-| Organization-to-cycle join | `getJoinedData()` finds all cycles with `NSAs.NSAProfileID = NSA Profiles.ID` | The initial mapping merges the matching Profile into each eligible submission | Extract the current merge into a pure normalizer, require a valid Profile match, and retain one normalized item per eligible cycle |
-| Cycle-to-child join | Children are selected with `ParentID = NSAs.ID` | `render()` filters Activities and Workplans with `ParentID = currentId` | Preserve this rule and extract it from DOM rendering so it can be unit-tested |
-| Ownership validation | The PoC compares child `NSAProfileID` with the cycle's organization and identifies missing-parent records separately | The current public renderer relies on `ParentID` and does not explicitly validate child ownership | Add an integrity check; exclude or isolate invalid/orphan records rather than showing them under another cycle |
-| Identifier normalization | The PoC consistently normalizes IDs with `String(value ?? '').trim()` | The current code repeats `String(...)` and sometimes converts the selected ID to `Number` | Reuse a single string ID normalizer to avoid inconsistent comparisons and unnecessary numeric coercion |
-| Loading behavior | `loadData()` disables the control and shows visible loading or failure status | `fetchJson()` returns `null`, after which startup silently substitutes an empty array | Adapt the visible-state concept to the existing page and localize it; do not copy the PoC's Portuguese messages or diagnostic DOM |
-| Output safety | The PoC escapes every value inserted into its diagnostic HTML | The current renderers escape only some exported values | Reuse the safe-output principle across every public renderer, with a separate explicit policy if supported rich text must remain |
-| Orphan presentation | Missing-parent children are deliberately displayed for data diagnosis | The public report has no diagnostic section | Do not expose the PoC orphan table in the public UI; isolate the records and surface an appropriate operational error or diagnostic log |
-| Rendering and events | The PoC renders relationship tables for one Profile selector | The current frontend renders production cards, search, filters, language switching, navigation, and charts | Keep the current frontend renderers and DOM contract; none of the PoC table-rendering or event code should be ported |
-
-One additional naming correction is recommended during extraction. The current
-normalized object stores `NSA_Status` in a property named `TypeOfSubmission`.
-Although the displayed value is usually correct, that alias can be confused
-with the legacy source field of the same name. A name such as
-`currentSubmissionType` makes the authoritative source explicit and prevents a
-future renderer from reverting to legacy `TypeOfSubmission`.
-
 ## JavaScript refactoring map
 
-The names below describe responsibilities; they do not require a framework or a
-specific folder structure. They can first be introduced as pure functions and
-then moved into ES modules when covered by tests.
+Start with pure functions, then move them into ES modules after adding tests.
 
 | Current responsibility in `app.js` | Refactoring target | How it helps implementation | Required verification |
 | --- | --- | --- | --- |
 | Top-level JSON loading and conversion of failures to empty arrays | A data-loading function that returns explicit loading, success, partial-failure, and failure states | Prevents a failed export from appearing to the user as an organization with no data | Simulate one failed JSON request and confirm that the failed resource produces a visible error state |
 | Inline Profile/submission merge used to create `nasas` | A pure `buildPublicCycles(profiles, submissions)` function | Centralizes public eligibility and authoritative field selection instead of scattering aliases through renderers | Include `Approved` and `Pending`; take organization name/type from `NSA Profiles`, current type from `NSAs.NSA_Status`, and period from `NSAs.CollaborationPeriod` |
-| Global `currentId` plus Activity and Workplan filtering inside `render()` | A pure cycle-selection function using `NSAs.ID` and child `ParentID` | Preserves cycle-specific records when one organization has multiple submissions | Confirm that children are returned only when `child.ParentID = selected NSAs.ID`; never substitute `NSAProfileID` for this join |
+| Normalized `TypeOfSubmission` alias | Rename it to `currentSubmissionType` | Makes `NSAs.NSA_Status` explicit and avoids confusion with legacy `TypeOfSubmission` | Confirm filters, labels, and submission-type visibility rules use the renamed property |
+| Repeated string and numeric ID conversions | A shared `normalizeId(value)` function | Keeps Profile, cycle, and child comparisons consistent | Test numeric, string, whitespace, null, and empty IDs |
+| Global `currentId` plus Activity and Workplan filtering inside `render()` | A pure cycle-selection function using `NSAs.ID` and child `ParentID` | Preserves cycle-specific records and isolates invalid relationships | Return children only when `child.ParentID = selected NSAs.ID`; validate ownership with `NSAProfileID`; exclude missing-parent or mismatched records |
 | Language-specific ternaries repeated across renderers | A localized-value resolver with an explicit fallback order | Prevents blank translated fields from hiding populated base fields and gives all cards the same language behavior | Test English, Spanish, blank translation, base-field fallback, and Year 3 Workplan values |
 | `applyFilters()`, `handleSearchInput()`, and `showSearchResults()` | One pure filter/search function and one search-results renderer | Removes divergent limits, sorting, and filter combinations and allows all controls to use the same result set | Test search alone, every select alone, combined filters, no results, and sorting in the active language |
 | Period and submission-type option builders plus hard-coded Organization Type options | One option builder based on the normalized public-cycle collection | Keeps filters aligned with export values and removes the mismatched hard-coded organization type | Confirm unique values come from `CollaborationPeriod`, `NSA_Status`, and `NSA Profiles.NSAOrganizationType` |
@@ -117,11 +67,8 @@ then moved into ES modules when covered by tests.
 
 ## `ui-language.js` impact
 
-`ui-language.js` must change as part of the JavaScript refactor, but it does not
-need a structural rewrite. Both language objects currently contain the same set
-of keys, and every translation key referenced by `app.js` exists. The required
-work is to route remaining user-visible strings through that file and add the
-new states introduced by the refactor.
+Update `ui-language.js`; do not rewrite its structure. The English and Spanish
+objects currently have matching keys, and all keys used by `app.js` exist.
 
 | Change | Reason | Priority |
 | --- | --- | --- |
@@ -134,15 +81,9 @@ new states introduced by the refactor.
 | Review duplicate concepts such as `period`/`collabPeriod` and `orgType`/`orgTypeLabel` | Reduces ambiguity before removing unused keys | Maintenance |
 | Correct visible Spanish wording such as `selectInput: "Selecione NSA"` and `governanza` | The current strings contain terminology/spelling issues | Content review |
 
-The scan found no missing key currently referenced by `app.js` and no key-set
-difference between English and Spanish. It did find several defined but unused
-keys. They should not be deleted automatically: some represent intended UI
-copy and can replace current hard-coded messages. Remove a key only after its
-HTML and JavaScript consumers have both been checked.
-
-The source file is valid UTF-8. Any mojibake displayed by a shell that reads it
-with a legacy default encoding is a tooling/display issue and is not evidence
-that the translations should be re-encoded.
+Do not delete unused keys until both HTML and JavaScript consumers are checked;
+some can replace current hard-coded messages. The source is valid UTF-8 and
+does not require re-encoding.
 
 ## Recommended implementation sequence
 
@@ -161,10 +102,6 @@ that the translations should be re-encoded.
 6. Add visible loading/error states and complete reset and language behavior.
 7. Run a browser smoke test for loading, selection, combined filtering,
    language switching, card navigation, and empty/error states.
-
-This order allows each extraction to be behavior-preserving before correctness
-changes are added. It also creates testable seams without requiring a rewrite
-or a change to the static deployment model.
 
 ## Data-refactor regression contract
 
@@ -192,14 +129,7 @@ because the supplied export contains no Pending cycle.
 
 ## Final assessment
 
-The critical changes concern the data placed into existing HTML controls; they
-are implemented in `app.js`. The HTML structure itself remains compatible with
-the DEV refactor. Changes made directly in `index.html` are limited to optional
-cleanup and accessibility corrections. No CSS or layout change is required for
-the DEV data refactor itself; the separate responsive-layout remediation remains
-recommended by the UI/UX review.
-
-The document helps the JavaScript refactor by defining the target
-responsibilities, implementation order, and regression contract. This allows
-the monolithic file to be reduced incrementally while preserving the existing
-page and validating each data rule independently.
+Refactor `app.js` incrementally and keep the current HTML structure. Update
+`ui-language.js` for new and existing messages. Limit `index.html` changes to
+dynamic-option cleanup and label corrections. No CSS change is required for the
+DEV data refactor; responsive-layout remediation remains a separate task.
