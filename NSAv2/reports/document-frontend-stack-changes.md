@@ -1,176 +1,100 @@
-#  Document Frontend Stack Changes
+# Document Frontend Stack Changes
 
-| Item               | Value                                                            |
-| ------------------ | ---------------------------------------------------------------- |
-| Application        | PAHO NSA public report viewer                                    |
-| Environment        | Current public frontend using the DEV data structure             |
-| Documentation date | 2026-08-05                                                       |
-| Result             | **Preserve the report layout; add a loading state and two label corrections; implement critical data behavior in `app.js`** |
-
-## Contents
-
-1. [Objective](#objective)
-2. [Classification](#classification)
-3. [Current frontend use vs. HTML change](#current-frontend-use-vs-html-change)
-4. [JavaScript refactoring map](#javascript-refactoring-map)
-5. [`ui-language.js` impact](#ui-languagejs-impact)
-6. [Recommended implementation sequence](#recommended-implementation-sequence)
-7. [Data-refactor regression contract](#data-refactor-regression-contract)
-8. [Final assessment](#final-assessment)
+| Item | Value |
+| --- | --- |
+| Application | PAHO NSA public report viewer |
+| Environment | Current public frontend using the DEV data structure |
+| Documentation date | 2026-08-05 |
+| Result | **Preserve the report layout, add loading and error states, and implement the DEV data behavior in `app.js`.** |
 
 ## Objective
 
-Define the changes required in `app.js`, `ui-language.js`, and `index.html` to
-support the DEV data model without redesigning the existing interface. The
-report structure and layout remain unchanged, but `index.html` requires minor
-markup corrections and a loading-status element.
+Document the frontend changes required to support the DEV data model without
+redesigning the interface.
 
-## Classification
+## Frontend impact
 
-- **Critical behavior:** required for the frontend to use the new fields or
-  distinguish the new relationships correctly. A critical behavior can be
-  implemented entirely in JavaScript and therefore does not necessarily imply
-  an HTML edit.
-- **Direct HTML correction:** an edit to existing markup that should be applied,
-  but does not add controls, sections, or layout changes.
-- **UI state addition:** a small element or style needed to communicate loading,
-  success, or failure without changing the report layout.
-- **Optional HTML cleanup:** removes static content that JavaScript already
-  replaces; it is not required for the refactored behavior to work.
-- **No structural HTML change:** preserve the existing element, ID, section, or
-  layout. This classification does not mean that no line in `index.html` changes.
+| Area | Required change | Files | Scope |
+| --- | --- | --- | --- |
+| Type of Submission filter | Build options from `NSAs.NSA_Status` | `app.js` | Preserve the existing select and ID |
+| Organization Type filter | Build options from `NSA Profiles.NSAOrganizationType` | `app.js` | Preserve the existing select and ID |
+| Collaboration Period filter | Continue building options from `NSAs.CollaborationPeriod` | `app.js` | Preserve the existing select and ID |
+| Search results | Show organization name, `NSA_Status`, and `CollaborationPeriod`; retain `NSAs.ID` as the selected value | `app.js` | Preserve the existing results list and ID |
+| Filter labels | Point Type of Submission and Organization Type labels to their corresponding select IDs | `index.html` | Markup correction only |
+| Initial loading | Show a localized status until JSON loading, normalization, option building, and the first render finish | `index.html`, `assets/css/styles.css`, `app.js`, `ui-language.js` | Add `role="status"`, `aria-live="polite"`, and an `aria-busy` state |
+| Load failure | Replace loading with a localized, actionable error instead of treating failed resources as empty data | `app.js`, `ui-language.js` | Preserve a usable visible state |
+| Static select options | Keep only **All** after JavaScript owns each option list | `index.html` | Optional source cleanup |
+| Cards, sidebar, navigation, language controls, disclaimers, and footer | Preserve existing sections, controls, and IDs | None | No layout change |
 
-### HTML conclusion
-
-The current HTML already contains the report controls and content targets needed
-by the DEV data refactor. The following edits to `index.html` should be made:
-
-1. Change the Type of Submission label to
-   `for="typeOfSubmission-type-input"`.
-2. Change the Organization Type label to
-   `for="organization-type-input"`.
-3. Add an initially visible loading-status element with `role="status"` and
-   `aria-live="polite"`.
-
-Removing the obsolete hard-coded select options is optional cleanup because the
-refactored JavaScript rebuilds those option lists at startup. The loading element
-is a UI state, not a new report section. Thus, the accurate conclusion is
-**preserve the report structure and layout**, not **make no HTML changes**.
-
-## Current frontend use vs. HTML change
-
-| Location in `index.html` | Current frontend use | Behavior priority | Direct `index.html` impact | Implementation location |
-| --- | --- | --- | --- | --- |
-| `#typeOfSubmission-type-input` | Displays the Type of Submission filter | **Critical behavior**: populate from `NSAs.NSA_Status` | **No structural change**; optionally keep only **All** in the source markup | `app.js`; preserve the existing `<select>` and ID |
-| `#organization-type-input` | Contains hard-coded Organization Type options | **Critical behavior**: populate from `NSA Profiles.NSAOrganizationType` | **No structural change**; optionally keep only **All** in the source markup after the JavaScript builder is implemented | `app.js`; preserve the existing `<select>` and ID |
-| `#period-select` | Displays Collaboration Period options | **Critical verification**: continue using `NSAs.CollaborationPeriod` | **No structural change** | `app.js`; preserve the existing `<select>` and ID |
-| `#search-results` | Displays organization names returned by the search | **Critical behavior**: distinguish cycles using organization name, `NSA_Status`, and `CollaborationPeriod` | **No structural change** | `app.js`; preserve the existing `<ul>` and ID |
-| Type of Submission label | Incorrectly uses `for="period-select"` | Accessibility correction | **Direct HTML correction**: use `for="typeOfSubmission-type-input"` | `index.html` |
-| Organization Type label | Incorrectly uses `for="period-select"` | Accessibility correction | **Direct HTML correction**: use `for="organization-type-input"` | `index.html` |
-| Loading status | No visible state exists while JSON files are fetched and the initial view is rendered | **UI state addition** | Add a status element visible on initial HTML paint; mark the application content `aria-busy="true"` while loading | `index.html`, `styles.css`, and `app.js` |
-| Hard-coded Type of Submission options | Replaced by JavaScript at startup | Cleanup only | **Optional HTML cleanup**: remove obsolete options and keep only **All** | `index.html` |
-| Hard-coded Organization Type options | Must be replaced by the new JavaScript option builder | Cleanup only after the builder exists | **Optional HTML cleanup**: remove static values and keep only **All** | `index.html`, after the `app.js` change |
-| Profile, financial, collaboration, and workplan cards | Receive content rendered by `app.js` | Preserve behavior | **No structural change**: preserve the existing sections and IDs | None |
-| Sidebar, navigation, language controls, disclaimers, and footer | Existing page structure | Preserve behavior | **No structural change**: preserve the existing markup | None |
+The loading state must follow application readiness, not only
+`DOMContentLoaded`, because the DOM can be ready before the data and initial
+render.
 
 ## JavaScript refactoring map
 
-Start with pure functions inside the existing `app.js`. Converting the code to ES
-modules is a separate, optional modularization step, not a requirement of the DEV
-data refactor. If that later step is approved, document and test its additional
-`index.html` impact because the current page loads `app.js` as a classic script.
+| Current issue | Refactoring target | Required verification |
+| --- | --- | --- |
+| Failed JSON requests become empty arrays | A loader with loading, success, partial-failure, and failure states | Loading appears on initial paint, clears after the first complete render, and becomes an error state when required data fails |
+| Profile/submission merging and public eligibility are handled inline | `buildPublicCycles(profiles, submissions)` | Use Profile fields for organization details, `NSA_Status` for current submission type, `CollaborationPeriod` for period, and `GovBodies_Status = Approved` or `Pending` for eligibility |
+| IDs are compared with repeated string and numeric conversions | `normalizeId(value)` and a cycle-selection function | Select with `NSAs.ID`; include children only when `ParentID` matches that cycle and `NSAProfileID` confirms ownership |
+| Language fallbacks vary across renderers | One localized-value resolver | Test English, Spanish, blank translations, base-field fallback, and Year 3 Workplan values |
+| Search and filtering are duplicated | One filter/search function, one option builder, and one cycle-label formatter | Test each filter, combined filters, search, sorting, no results, dynamic options, and multiple cycles for one organization |
+| Exported values are inserted through multiple `innerHTML` templates | Shared safe text and line-break helpers | Test markup-like values in Profile, Activity, Workplan, yearly results, focal points, and website fields |
+| `render()` and control listeners coordinate state independently | Card renderers plus centralized selection, reset, and UI state updates | Verify submission-type visibility, selection, reset, navigation, and loading/error transitions |
+| Messages and document language are inconsistent | Localized status lookup and document-language update | Verify visible messages and `<html lang>` in English and Spanish |
 
-| Current responsibility in `app.js` | Refactoring target | How it helps implementation | Required verification |
-| --- | --- | --- | --- |
-| Top-level JSON loading and conversion of failures to empty arrays | A data-loading function that returns explicit loading, success, partial-failure, and failure states | Keeps the loading state visible until JSON fetching, normalization, option building, and the first render finish; prevents a failed export from appearing as an organization with no data | Confirm the loading state is visible immediately, is removed only after the first complete render, and becomes a visible error state when a required request fails |
-| Inline Profile/submission merge used to create `nasas` | A pure `buildPublicCycles(profiles, submissions)` function | Centralizes public eligibility and authoritative field selection instead of scattering aliases through renderers | Include `Approved` and `Pending`; take organization name/type from `NSA Profiles`, current type from `NSAs.NSA_Status`, and period from `NSAs.CollaborationPeriod` |
-| Normalized `TypeOfSubmission` alias | Rename it to `currentSubmissionType` | Makes `NSAs.NSA_Status` explicit and avoids confusion with legacy `TypeOfSubmission` | Confirm filters, labels, and submission-type visibility rules use the renamed property |
-| Repeated string and numeric ID conversions | A shared `normalizeId(value)` function | Keeps Profile, cycle, and child comparisons consistent | Test numeric, string, whitespace, null, and empty IDs |
-| Global `currentId` plus Activity and Workplan filtering inside `render()` | A pure cycle-selection function using `NSAs.ID` and child `ParentID` | Preserves cycle-specific records and isolates invalid relationships | Return children only when `child.ParentID = selected NSAs.ID`; validate ownership with `NSAProfileID`; exclude missing-parent or mismatched records |
-| Language-specific ternaries repeated across renderers | A localized-value resolver with an explicit fallback order | Prevents blank translated fields from hiding populated base fields and gives all cards the same language behavior | Test English, Spanish, blank translation, base-field fallback, and Year 3 Workplan values |
-| `applyFilters()`, `handleSearchInput()`, and `showSearchResults()` | One pure filter/search function and one search-results renderer | Removes divergent limits, sorting, and filter combinations and allows all controls to use the same result set | Test search alone, every select alone, combined filters, no results, and sorting in the active language |
-| Period and submission-type option builders plus hard-coded Organization Type options | One option builder based on the normalized public-cycle collection | Keeps filters aligned with export values and removes the mismatched hard-coded organization type | Confirm unique values come from `CollaborationPeriod`, `NSA_Status`, and `NSA Profiles.NSAOrganizationType` |
-| Search results containing only the organization title | A cycle-label formatter | Lets a user distinguish multiple cycles belonging to the same organization | Render organization name, current type, and collaboration period while retaining `NSAs.ID` in `data-id` |
-| Exported values interpolated by multiple `innerHTML` renderers | Shared safe text/line-break helpers used by every renderer | Establishes one output boundary and reduces stored-XSS risk during later changes | Test markup-like input in Profile, Activity, Workplan, yearly-result, focal-point, and website fields |
-| The large `render()` function | A small coordinator calling profile, collaboration, financial, Activity, and Workplan renderers | Makes changes to one card less likely to regress other cards and clarifies which sections depend on submission type | Regression-test New Application, Renewal, and Progress Report visibility rules |
-| Filter listeners and the Clear Filters listener updating state independently | Central state-update and reset functions | Keeps control values, search text, results, navigation, and selected cycle synchronized | Confirm a reset clears all visible and internal filter state and leaves a defined selected-cycle state |
-| Hard-coded messages and language changes that update text only | Localized status/message lookup plus document-language update | Keeps errors, empty states, and assistive-technology language consistent with the selected UI language | Confirm messages and `<html lang>` change for English and Spanish |
+Keep the extracted functions in the existing `app.js` during this refactor. An
+ES-module conversion is optional and would require a separate change to how
+`index.html` loads the application script.
 
 ## `ui-language.js` impact
 
-Update `ui-language.js`; do not rewrite its structure. The English and Spanish
-objects currently have matching keys, and all keys used by `app.js` exist.
+| Change | Priority |
+| --- | --- |
+| Add `year3` in English and Spanish | Critical |
+| Reuse `searchNoResults`, `noCollab`, and `noWorkplan` instead of hard-coded English | Critical |
+| Add loading, load failure, partial failure, retry, not-found, missing financial data, Health Agenda, and Strategic Plan messages | Critical when the corresponding state is displayed |
+| Add a localized untitled-cycle fallback if it remains visible | Critical |
+| Rename `collabSubtitleProgresReport` to `collabSubtitleProgressReport` in the language file and caller | Maintenance |
+| Correct visible Spanish wording, including `Selecione NSA` and `governanza` | Content review |
+| Review duplicate concepts such as `period`/`collabPeriod` and `orgType`/`orgTypeLabel` before removing unused keys | Maintenance |
 
-| Change | Reason | Priority |
-| --- | --- | --- |
-| Add `year3` in English and Spanish | `renderYearlyResults()` must display existing Year 3 Workplan data | Critical |
-| Reuse the existing `searchNoResults`, `noCollab`, and `noWorkplan` keys instead of hard-coded English messages | Equivalent translations already exist but are not used by the current renderers | Critical |
-| Add localized keys for loading, load failure, partial-data failure, retry, NSA not found, no financial data, no Health Agenda, and no Strategic Plan | These messages are hard-coded, absent, or not visible in the current application | Critical for any state introduced or rendered by this refactor |
-| Add a localized fallback for an untitled organization/cycle if that fallback remains visible | Search currently falls back to the English word `Untitled` | Critical |
-| Rename `collabSubtitleProgresReport` to `collabSubtitleProgressReport` in both the language file and its caller | Corrects an internal typo while the language API is being touched | Maintenance |
-| Set `document.documentElement.lang` to `en` or `es` when the language changes | The translated content and the document-language metadata must remain synchronized | Accessibility; no new translation key required |
-| Review duplicate concepts such as `period`/`collabPeriod` and `orgType`/`orgTypeLabel` | Reduces ambiguity before removing unused keys | Maintenance |
-| Correct visible Spanish wording such as `selectInput: "Selecione NSA"` and `governanza` | The current strings contain terminology/spelling issues | Content review |
-
-Do not delete unused keys until both HTML and JavaScript consumers are checked;
-some can replace current hard-coded messages. The source is valid UTF-8 and
-does not require re-encoding.
+Do not delete language keys until their HTML and JavaScript consumers have been
+checked. The file is valid UTF-8 and does not require re-encoding.
 
 ## Recommended implementation sequence
 
-1. Add focused tests around the current data normalization, cycle joins, and
-   filtering before moving code.
-2. Extract the pure Profile/submission normalization and cycle-selection rules.
-   Keep `NSA Profiles.ID` as organization identity and `NSAs.ID` as selected UI
-   identity.
-3. Replace the three filtering/search paths with one pure function, then build
-   all three select controls from the normalized public cycles.
-4. Extend `ui-language.js`, introduce the localized-field resolver and safe
-   rendering helpers, and apply them to every Profile, Activity, Workplan, and
-   yearly-result output.
-5. Split the large render flow by card and make `app.js` coordinate state,
-   events, and those renderers.
-6. Add visible loading/error states and complete reset and language behavior.
-   Keep the loading state active until data loading, normalization, filter-option
-   creation, and the first render have completed; do not tie it only to
-   `DOMContentLoaded`.
-7. Run a browser smoke test for loading, selection, combined filtering,
-   language switching, card navigation, and empty/error states.
+1. Add focused tests for normalization, joins, eligibility, and filtering.
+2. Extract public-cycle normalization, ID handling, and cycle selection.
+3. Consolidate filtering, search, option building, and cycle labels.
+4. Add localized fallbacks, Year 3 output, safe rendering, and messages.
+5. Split rendering by card and centralize UI state.
+6. Add loading and error presentation, then run a browser smoke test covering
+   selection, combined filtering, language switching, navigation, and empty or
+   failed data.
 
-## Data-refactor regression contract
+## Regression contract
 
-The JavaScript refactor is complete only when the following rules remain true:
+The refactor is complete only when:
 
 - `NSA Profiles.ID -> NSAs.NSAProfileID` supplies stable organization details.
 - `NSAs.ID -> Activity.ParentID` and `NSAs.ID -> Workplan.ParentID` supplies the
-  exact selected cycle's children.
+  selected cycle's children.
 - `NSA_Status`, not legacy `TypeOfSubmission`, supplies the current Type of
   Submission.
 - `GovBodies_Status = Approved` or `Pending` determines public eligibility.
-- Missing parents and mismatched children are isolated or excluded, never
-  reassigned to a valid cycle.
-- Multiple cycles with the same organization name remain independently
-  selectable and visibly distinguishable.
+- Missing parents and mismatched children are excluded, never reassigned.
+- Multiple cycles for one organization remain independently selectable and
+  visibly distinguishable.
 - Blank localized fields fall back to available source content, including Year
   3 Workplan results.
-- All plain exported text is escaped before insertion into HTML.
-- The loading state appears on the initial paint, remains active until the first
-  complete render, and is replaced by an actionable error state if loading
-  fails. The main application content must expose the matching `aria-busy`
-  state.
-- Test `Pending` eligibility with a controlled fixture because the supplied
+- Exported text is escaped before insertion into HTML.
+- Loading remains active until the first complete render and changes to an
+  actionable error state on failure; `aria-busy` matches the visible state.
+- `Pending` eligibility is tested with a controlled fixture because the supplied
   export contains no Pending cycle.
-- Re-run the validated scenarios for Profiles 43, 44, and 46. Profiles 44 and
-  46 must pass; Profile 43 must remain **Pass with source-data exceptions**, with
-  orphan children excluded from valid cycles.
+- Profiles 44 and 46 pass validation. Profile 43 remains **Pass with source-data
+  exceptions**, with orphan children excluded from valid cycles.
 
-## Final assessment
-
-Refactor `app.js` incrementally and preserve the current report structure and
-layout. Update `ui-language.js` for new and existing messages. Add the loading
-status and apply the two `label for` corrections in `index.html`; treat removal
-of hard-coded select options as optional source cleanup after JavaScript owns all
-three option lists. Add only the CSS required to present the loading state; the
-broader responsive-layout remediation remains a separate task. A future
-ES-module conversion would require its own documented script-loading change in
-`index.html` and is outside this refactor.
+Only loading-state styles are required for this data refactor. Responsive-layout
+work and ES-module conversion remain separate tasks.
