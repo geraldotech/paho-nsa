@@ -5,7 +5,7 @@
 | Application        | PAHO NSA public report viewer                                    |
 | Environment        | Current public frontend using the DEV data structure             |
 | Documentation date | 2026-08-05                                                       |
-| Result             | **Preserve the HTML/CSS structure and layout; apply two label corrections in `index.html`; implement critical data behavior in `app.js`** |
+| Result             | **Preserve the report layout; add a loading state and two label corrections; implement critical data behavior in `app.js`** |
 
 ## Contents
 
@@ -21,9 +21,9 @@
 ## Objective
 
 Define the changes required in `app.js`, `ui-language.js`, and `index.html` to
-support the DEV data model without redesigning the existing interface. In this
-report, preserving the HTML means preserving its structure, controls, sections,
-and layout. It does not mean that `index.html` receives no edits.
+support the DEV data model without redesigning the existing interface. The
+report structure and layout remain unchanged, but `index.html` requires minor
+markup corrections and a loading-status element.
 
 ## Classification
 
@@ -33,6 +33,8 @@ and layout. It does not mean that `index.html` receives no edits.
   an HTML edit.
 - **Direct HTML correction:** an edit to existing markup that should be applied,
   but does not add controls, sections, or layout changes.
+- **UI state addition:** a small element or style needed to communicate loading,
+  success, or failure without changing the report layout.
 - **Optional HTML cleanup:** removes static content that JavaScript already
   replaces; it is not required for the refactored behavior to work.
 - **No structural HTML change:** preserve the existing element, ID, section, or
@@ -40,18 +42,20 @@ and layout. It does not mean that `index.html` receives no edits.
 
 ### HTML conclusion
 
-The current HTML already contains the controls and content targets needed by the
-DEV data refactor, so no new page structure is required. However, the following
-direct edits to `index.html` should be made:
+The current HTML already contains the report controls and content targets needed
+by the DEV data refactor. The following edits to `index.html` should be made:
 
 1. Change the Type of Submission label to
    `for="typeOfSubmission-type-input"`.
 2. Change the Organization Type label to
    `for="organization-type-input"`.
+3. Add an initially visible loading-status element with `role="status"` and
+   `aria-live="polite"`.
 
 Removing the obsolete hard-coded select options is optional cleanup because the
-refactored JavaScript rebuilds those option lists at startup. Thus, the accurate
-conclusion is **no structural or layout change**, not **no HTML change**.
+refactored JavaScript rebuilds those option lists at startup. The loading element
+is a UI state, not a new report section. Thus, the accurate conclusion is
+**preserve the report structure and layout**, not **make no HTML changes**.
 
 ## Current frontend use vs. HTML change
 
@@ -63,6 +67,7 @@ conclusion is **no structural or layout change**, not **no HTML change**.
 | `#search-results` | Displays organization names returned by the search | **Critical behavior**: distinguish cycles using organization name, `NSA_Status`, and `CollaborationPeriod` | **No structural change** | `app.js`; preserve the existing `<ul>` and ID |
 | Type of Submission label | Incorrectly uses `for="period-select"` | Accessibility correction | **Direct HTML correction**: use `for="typeOfSubmission-type-input"` | `index.html` |
 | Organization Type label | Incorrectly uses `for="period-select"` | Accessibility correction | **Direct HTML correction**: use `for="organization-type-input"` | `index.html` |
+| Loading status | No visible state exists while JSON files are fetched and the initial view is rendered | **UI state addition** | Add a status element visible on initial HTML paint; mark the application content `aria-busy="true"` while loading | `index.html`, `styles.css`, and `app.js` |
 | Hard-coded Type of Submission options | Replaced by JavaScript at startup | Cleanup only | **Optional HTML cleanup**: remove obsolete options and keep only **All** | `index.html` |
 | Hard-coded Organization Type options | Must be replaced by the new JavaScript option builder | Cleanup only after the builder exists | **Optional HTML cleanup**: remove static values and keep only **All** | `index.html`, after the `app.js` change |
 | Profile, financial, collaboration, and workplan cards | Receive content rendered by `app.js` | Preserve behavior | **No structural change**: preserve the existing sections and IDs | None |
@@ -77,7 +82,7 @@ data refactor. If that later step is approved, document and test its additional
 
 | Current responsibility in `app.js` | Refactoring target | How it helps implementation | Required verification |
 | --- | --- | --- | --- |
-| Top-level JSON loading and conversion of failures to empty arrays | A data-loading function that returns explicit loading, success, partial-failure, and failure states | Prevents a failed export from appearing to the user as an organization with no data | Simulate one failed JSON request and confirm that the failed resource produces a visible error state |
+| Top-level JSON loading and conversion of failures to empty arrays | A data-loading function that returns explicit loading, success, partial-failure, and failure states | Keeps the loading state visible until JSON fetching, normalization, option building, and the first render finish; prevents a failed export from appearing as an organization with no data | Confirm the loading state is visible immediately, is removed only after the first complete render, and becomes a visible error state when a required request fails |
 | Inline Profile/submission merge used to create `nasas` | A pure `buildPublicCycles(profiles, submissions)` function | Centralizes public eligibility and authoritative field selection instead of scattering aliases through renderers | Include `Approved` and `Pending`; take organization name/type from `NSA Profiles`, current type from `NSAs.NSA_Status`, and period from `NSAs.CollaborationPeriod` |
 | Normalized `TypeOfSubmission` alias | Rename it to `currentSubmissionType` | Makes `NSAs.NSA_Status` explicit and avoids confusion with legacy `TypeOfSubmission` | Confirm filters, labels, and submission-type visibility rules use the renamed property |
 | Repeated string and numeric ID conversions | A shared `normalizeId(value)` function | Keeps Profile, cycle, and child comparisons consistent | Test numeric, string, whitespace, null, and empty IDs |
@@ -126,6 +131,9 @@ does not require re-encoding.
 5. Split the large render flow by card and make `app.js` coordinate state,
    events, and those renderers.
 6. Add visible loading/error states and complete reset and language behavior.
+   Keep the loading state active until data loading, normalization, filter-option
+   creation, and the first render have completed; do not tie it only to
+   `DOMContentLoaded`.
 7. Run a browser smoke test for loading, selection, combined filtering,
    language switching, card navigation, and empty/error states.
 
@@ -146,6 +154,10 @@ The JavaScript refactor is complete only when the following rules remain true:
 - Blank localized fields fall back to available source content, including Year
   3 Workplan results.
 - All plain exported text is escaped before insertion into HTML.
+- The loading state appears on the initial paint, remains active until the first
+  complete render, and is replaced by an actionable error state if loading
+  fails. The main application content must expose the matching `aria-busy`
+  state.
 - Test `Pending` eligibility with a controlled fixture because the supplied
   export contains no Pending cycle.
 - Re-run the validated scenarios for Profiles 43, 44, and 46. Profiles 44 and
@@ -154,11 +166,11 @@ The JavaScript refactor is complete only when the following rules remain true:
 
 ## Final assessment
 
-Refactor `app.js` incrementally and preserve the current HTML structure and
-layout. Update `ui-language.js` for new and existing messages. Apply the two
-`label for` corrections in `index.html`; treat removal of hard-coded select
-options as optional source cleanup after JavaScript owns all three option lists.
-No CSS change is required for the DEV data refactor; responsive-layout
-remediation remains a separate task. A future ES-module conversion would require
-its own documented script-loading change in `index.html` and is outside this
-refactor.
+Refactor `app.js` incrementally and preserve the current report structure and
+layout. Update `ui-language.js` for new and existing messages. Add the loading
+status and apply the two `label for` corrections in `index.html`; treat removal
+of hard-coded select options as optional source cleanup after JavaScript owns all
+three option lists. Add only the CSS required to present the loading state; the
+broader responsive-layout remediation remains a separate task. A future
+ES-module conversion would require its own documented script-loading change in
+`index.html` and is outside this refactor.
