@@ -38,7 +38,6 @@ render.
 | --- | --- | --- |
 | `assets/js/app.js` | Loads data, builds cycles, filters records, manages selection, and renders the report | Refactor data loading, joins, filtering, localized fallbacks, safe output, loading/error states, and rendering coordination |
 | `assets/js/ui-language.js` | Stores English and Spanish interface strings | Add missing states and Year 3 labels; reuse translations instead of hard-coded messages; correct identified wording and key issues |
-| `assets/js/vendors/chart.js` | Provides chart rendering | No change required for the DEV data refactor |
 
 ### `app.js` refactoring map
 
