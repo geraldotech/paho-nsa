@@ -12,25 +12,35 @@
 Document the frontend changes required to support the DEV data model without
 redesigning the interface.
 
-## Frontend impact
+## Current frontend use vs. HTML change
 
-| Area | Required change | Files | Scope |
-| --- | --- | --- | --- |
-| Type of Submission filter | Build options from `NSAs.NSA_Status` | `app.js` | Preserve the existing select and ID |
-| Organization Type filter | Build options from `NSA Profiles.NSAOrganizationType` | `app.js` | Preserve the existing select and ID |
-| Collaboration Period filter | Continue building options from `NSAs.CollaborationPeriod` | `app.js` | Preserve the existing select and ID |
-| Search results | Show organization name, `NSA_Status`, and `CollaborationPeriod`; retain `NSAs.ID` as the selected value | `app.js` | Preserve the existing results list and ID |
-| Filter labels | Point Type of Submission and Organization Type labels to their corresponding select IDs | `index.html` | Markup correction only |
-| Initial loading | Show a localized status until JSON loading, normalization, option building, and the first render finish | `index.html`, `assets/css/styles.css`, `app.js`, `ui-language.js` | Add `role="status"`, `aria-live="polite"`, and an `aria-busy` state |
-| Load failure | Replace loading with a localized, actionable error instead of treating failed resources as empty data | `app.js`, `ui-language.js` | Preserve a usable visible state |
-| Static select options | Keep only **All** after JavaScript owns each option list | `index.html` | Optional source cleanup |
-| Cards, sidebar, navigation, language controls, disclaimers, and footer | Preserve existing sections, controls, and IDs | None | No layout change |
+| Location in `index.html` | Current frontend use | Behavior priority | Direct `index.html` impact | Implementation location |
+| --- | --- | --- | --- | --- |
+| `#typeOfSubmission-type-input` | Displays the Type of Submission filter | **Critical behavior**: populate from `NSAs.NSA_Status` | **No structural change**; optionally keep only **All** in the source markup | `app.js`; preserve the existing `<select>` and ID |
+| `#organization-type-input` | Contains hard-coded Organization Type options | **Critical behavior**: populate from `NSA Profiles.NSAOrganizationType` | **No structural change**; optionally keep only **All** in the source markup after the JavaScript builder is implemented | `app.js`; preserve the existing `<select>` and ID |
+| `#period-select` | Displays Collaboration Period options | **Critical verification**: continue using `NSAs.CollaborationPeriod` | **No structural change** | `app.js`; preserve the existing `<select>` and ID |
+| `#search-results` | Displays organization names returned by the search | **Critical behavior**: distinguish cycles using organization name, `NSA_Status`, and `CollaborationPeriod` | **No structural change** | `app.js`; preserve the existing `<ul>` and ID |
+| Type of Submission label | Incorrectly uses `for="period-select"` | Accessibility correction | **Direct HTML correction**: use `for="typeOfSubmission-type-input"` | `index.html` |
+| Organization Type label | Incorrectly uses `for="period-select"` | Accessibility correction | **Direct HTML correction**: use `for="organization-type-input"` | `index.html` |
+| Loading status | No visible state exists while data is loaded and the initial view is rendered | UI feedback | Add a status element with `role="status"`; expose `aria-busy` on the application content | `index.html`, `assets/css/styles.css`, `app.js`, and `ui-language.js` |
+| Hard-coded Type of Submission options | Replaced by JavaScript at startup | Cleanup only | **Optional HTML cleanup**: remove obsolete options and keep only **All** | `index.html` |
+| Hard-coded Organization Type options | Must be replaced by the new JavaScript option builder | Cleanup only after the builder exists | **Optional HTML cleanup**: remove static values and keep only **All** | `index.html`, after the `app.js` change |
+| Profile, financial, collaboration, and workplan cards | Receive content rendered by `app.js` | Preserve behavior | **No structural change**: preserve the existing sections and IDs | None |
+| Sidebar, navigation, language controls, disclaimers, and footer | Existing page structure | Preserve behavior | **No structural change**: preserve the existing markup | None |
 
 The loading state must follow application readiness, not only
 `DOMContentLoaded`, because the DOM can be ready before the data and initial
 render.
 
-## JavaScript refactoring map
+## JavaScript files
+
+| File | Current role | Required impact |
+| --- | --- | --- |
+| `assets/js/app.js` | Loads data, builds cycles, filters records, manages selection, and renders the report | Refactor data loading, joins, filtering, localized fallbacks, safe output, loading/error states, and rendering coordination |
+| `assets/js/ui-language.js` | Stores English and Spanish interface strings | Add missing states and Year 3 labels; reuse translations instead of hard-coded messages; correct identified wording and key issues |
+| `assets/js/vendors/chart.js` | Provides chart rendering | No change required for the DEV data refactor |
+
+### `app.js` refactoring map
 
 | Current issue | Refactoring target | Required verification |
 | --- | --- | --- |
@@ -47,7 +57,7 @@ Keep the extracted functions in the existing `app.js` during this refactor. An
 ES-module conversion is optional and would require a separate change to how
 `index.html` loads the application script.
 
-## `ui-language.js` impact
+### `ui-language.js` impact
 
 | Change | Priority |
 | --- | --- |
