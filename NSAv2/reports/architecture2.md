@@ -1,4 +1,4 @@
-# Data Architecture and UI Integration — Refactored Target
+# Data Architecture and UI Integration — DEV Data Refactor
 
 ## Table of Contents
 
@@ -30,21 +30,22 @@ collaboration, financial, Activity, and Workplan cards.
 
 The main architectural change is the separation of data rules from DOM
 rendering. `app.js` coordinates startup, state, events, and rendering, while
-pure modules handle loading, normalization, joins, filtering, localization, and
-safe formatting.
+focused functions in the same file handle loading, normalization, joins,
+filtering, localization, and safe formatting.
 
 ## Status
 
 - Branch reviewed: `main`
-- Architecture status: target after refactoring
+- Architecture status: planned behavior for the incremental refactor
 - Current production controller: `assets/js/app.js`
 - Data source type: four static JSON exports
 - Runtime database: none
-- Document date: 2026-08-04
+- Document date: 2026-08-05
 - Layout decision: preserve the current HTML/CSS structure
 
-This document describes the intended post-refactor architecture. It must not be
-used as evidence that all modules and tests already exist.
+This document describes the intended behavior after the refactor. It does not
+require new JavaScript module files and must not be used as evidence that the
+changes or tests already exist.
 
 ## Scope and Purpose
 
@@ -58,7 +59,7 @@ The scope includes:
 - public eligibility and authoritative report fields;
 - application state, filtering, and cycle selection;
 - rendering, localization, and safe output;
-- module boundaries and regression testing.
+- function responsibilities and regression testing.
 
 The scope does not include a framework migration, backend API, database,
 SharePoint persistence, physical indexing, performance certification, or visual
@@ -101,21 +102,16 @@ After loading:
 Search, filters, language changes, reset, and cycle selection all use the same
 state-update and render path.
 
-### 4. JavaScript responsibilities
+### 4. Current JavaScript files and responsibilities
 
-| Target module | Responsibility |
+| Existing file | Responsibility after refactoring |
 | --- | --- |
-| `app.js` | Bootstrap, application state, events, and render coordination |
-| `data-loader.js` | Load four JSON resources and return explicit resource states |
-| `data-model.js` | Normalize IDs, apply eligibility, build cycles, join children, and validate ownership |
-| `filtering.js` | Build filter options, filter and sort cycles, and format cycle labels |
-| `localization.js` | Resolve localized source fields and fallbacks |
-| `formatting.js` | Escape text, handle line breaks, validate URLs, and format numbers |
-| `renderers.js` or `renderers/` | Render status, search, Profile, collaboration, financial, Activity, and Workplan views |
-| `ui-language.js` | Store English and Spanish UI labels and messages |
+| `assets/js/app.js` | Load data, normalize IDs, build public cycles, validate relationships, manage state and filters, resolve source-field fallbacks, format safe output, handle events, and coordinate rendering |
+| `assets/js/ui-language.js` | Store English and Spanish UI labels and messages |
+| `assets/js/vendors/chart.js` | Provide the existing financial chart dependency; no refactor required |
 
-These are responsibility boundaries. They may be extracted incrementally and
-do not require a framework or build system.
+The refactor can introduce focused, testable functions inside `app.js`. No
+additional internal JavaScript files are currently planned.
 
 ### 5. Main state
 
@@ -146,7 +142,9 @@ destroy the previous chart before creating a replacement.
 
 Each row represents a stable organization.
 
-Primary fields used by the public viewer:
+<details>
+<summary>Required fields used by the public viewer</summary>
+
 
 - `ID`
 - `Title`
@@ -159,20 +157,42 @@ Primary fields used by the public viewer:
 - `NSAYearOfEstablishment`
 - `PAHO_Focal_Point`
 
+</details>
+
 ### 2. `nsa.json`
 
 Each row represents one submission or collaboration cycle.
 
-Primary fields used by the public viewer:
+<details>
+<summary>Required fields used by the public viewer</summary>
 
-- `ID`
-- `NSAProfileID`
-- `NSA_Status`
-- `GovBodies_Status`
-- `CollaborationPeriod`
-- financial fields
-- collaboration summary fields
-- focal-point role fields
+
+```text
+ID
+NSAProfileID
+NSA_Status
+GovBodies_Status
+CollaborationPeriod
+NSAFocalpointRole
+FinAnnualIncome
+FinAnnualExpenses
+FinAssets
+FinAnnualIncomeYear
+CollabActHealthAgenda
+CollabActHealthAgenda_txtENG
+CollabActHealthAgenda_txtSPA
+CollabActStrategicPlan
+CollabActStrategicPlan_txtENG
+CollabActStrategicPlan_txtSPA
+CollabWPActHealthAgenda
+CollabWPActHealthAgenda_txtENG
+CollabWPActHealthAgenda_txtSPA
+CollabWPActStrategicPlan
+CollabWPActStrategicPlan_txtENG
+CollabWPActStrategicPlan_txtSPA
+```
+
+</details>
 
 `NSA_Status` supplies the current Type of Submission.
 `GovBodies_Status` supplies public eligibility.
@@ -180,24 +200,85 @@ Primary fields used by the public viewer:
 Legacy `TypeOfSubmission`, workflow `Status`, and `GovBodies_Outcome` do not
 replace these authoritative fields.
 
+The current `assets/database/nsa.json` export does not contain the financial or
+collaboration fields listed above. They remain part of the required frontend
+contract and must be supplied by the export before those report sections can be
+validated end to end.
+
 ### 3. `activity.json`
 
-Activity rows contain:
+<details>
+<summary>Required fields used by the public viewer</summary>
 
-- `ParentID` for the cycle relationship;
-- `NSAProfileID` for organization ownership validation;
-- localized description and direct-result fields;
-- responsible entity and focal-point values.
+
+```text
+ID
+ActivityID
+ParentID
+NSAProfileID
+Description
+DescriptionENG
+DescriptionSPA
+DirectResults
+DirectResultsENG
+DirectResultsSPA
+Entity
+NSAFocalpoint
+```
+
+</details>
+
+`ParentID` supplies the cycle relationship, and `NSAProfileID` validates
+organization ownership. The base `Description` and `DirectResults` fields are
+required fallbacks when localized values are blank.
 
 ### 4. `workplan.json`
 
-Workplan rows contain:
+<details>
+<summary>Required fields used by the public viewer</summary>
 
-- `ParentID` for the cycle relationship;
-- `NSAProfileID` for organization ownership validation;
-- localized descriptions and expected results;
-- responsible entity, collaboration, and progress-report values;
-- Year 1, Year 2, and Year 3 dates and results.
+
+```text
+ID
+Reference
+ParentID
+NSAProfileID
+Description
+DescriptionENG
+DescriptionSPA
+ExpectedResults
+ExpectedResultsENG
+ExpectedResultsSPA
+ResponsibleEntity
+HealthAgenda
+HealthAgendaENG
+HealthAgendaSPA
+StrategicPlan
+StrategicPlanENG
+StrategicPlanSPA
+ProgressReport
+ProgressReportENG
+ProgressReportSPA
+Year1_Date
+Year1_Results
+Year1_ResultsENG
+Year1_ResultsSPA
+Year2_Date
+Year2_Results
+Year2_ResultsENG
+Year2_ResultsSPA
+Year3_Date
+Year3_Results
+Year3_ResultsENG
+Year3_ResultsSPA
+NSAFocalpoint
+```
+
+</details>
+
+`ParentID` supplies the cycle relationship, and `NSAProfileID` validates
+organization ownership. Base text and result fields provide fallbacks for blank
+localized values.
 
 ### 5. Normalized public cycle
 
@@ -532,8 +613,8 @@ The target frontend depends on:
 - four static JSON files under `assets/database/`;
 - a static HTTP server for local and deployed use.
 
-Native ES modules provide internal separation. No framework, runtime database,
-or new backend service is required.
+No new JavaScript module files, framework, build system, runtime database, or
+backend service is required.
 
 ## Maintenance Notes
 
@@ -552,7 +633,7 @@ or new backend service is required.
 | Localized fallback repeated in renderers | One localized-value resolver |
 | Partial escaping | One safe-output boundary |
 | Year 1 and Year 2 results | Year 1, Year 2, and Year 3 results |
-| Monolithic controller | Coordinator plus testable pure modules |
+| Monolithic controller | Existing controller organized around focused, testable functions |
 
 ### Implementation order
 
@@ -587,9 +668,9 @@ or new backend service is required.
 
 ## Short Summary
 
-The refactored viewer keeps the current page and deployment model but uses four
-datasets and separate organization and cycle identities. `app.js` becomes a
-coordinator; pure modules handle loading, normalization, relationships,
+The refactored viewer keeps the current page, JavaScript files, and deployment
+model but uses four datasets and separate organization and cycle identities.
+Focused functions inside `app.js` handle loading, normalization, relationships,
 filtering, localization, formatting, and rendering. Children remain specific to
 `NSAs.ID`, public eligibility uses `GovBodies_Status`, current type uses
 `NSA_Status`, and all exported content crosses one safe rendering boundary.
