@@ -40,14 +40,17 @@ from the validated JavaScript and JSON files.
 The validation confirmed that:
 
 - NSAs were related to the selected organization by `NSAProfileID`.
-- Activities and Workplans were related to the exact NSA cycle by `ParentID`.
-- The current implementation kept children from different cycles separate.
-- The expected cycles and children reached the interface.
+- Activities and Workplans were related to the exact `NSAs` object by matching
+  their `ParentID` to `NSAs.ID`.
+- The current implementation kept children belonging to different `NSAs.ID`
+  values separate.
+- The expected `NSAs` objects and their children reached the interface.
 - No duplicate IDs, duplicate references, or cross-organization mismatches were
   found.
 
-Incomplete source records were isolated instead of being assigned to valid
-cycles. Details are documented in [Source-data exceptions](#source-data-exceptions).
+Incomplete source records were isolated instead of being assigned to a valid
+`NSAs.ID`. Details are documented in
+[Source-data exceptions](#source-data-exceptions).
 
 ## Validated data flow
 
@@ -55,8 +58,8 @@ cycles. Details are documented in [Source-data exceptions](#source-data-exceptio
 flowchart TD
     J["4 JSON files"] --> L["Load data"]
     L --> P["Select NSA Profile"]
-    P --> N["Match cycles by NSAProfileID"]
-    N --> C["Match Activities and Workplans by ParentID"]
+    P --> N["Match NSAs objects by NSAProfileID"]
+    N --> C["Match child ParentID to NSAs.ID"]
     C --> V["Validate organization ownership"]
     V --> U["Render valid records"]
     C --> O["Isolate missing-parent records"]
@@ -67,9 +70,10 @@ flowchart TD
 ### Profile selection rationale
 
 Profiles 43, 44, and 46 were selected because they are the profiles in the
-current dataset with at least one cycle approved for the public report. They
-also provide representative multi-cycle data, valid Activity and Workplan
-relationships, and, through Profile 43, a missing-parent exception.
+current dataset with at least one eligible `NSAs` object. They also provide
+representative profiles associated with multiple `NSAs.ID` values, valid
+Activity and Workplan relationships, and, through Profile 43, a missing-parent
+exception.
 
 ### Scenario coverage
 
@@ -77,14 +81,14 @@ The reference document defines `NSAs.NSA_Status` as the report field for the
 current submission type: New Application, Renewal, or Progress Report. The
 application follows this guidance instead of using `TypeOfSubmission`.
 
-| Current cycle type | Profile 43 | Profile 44 | Profile 46 | Result |
+| Current submission type (`NSAs.NSA_Status`) | Profile 43 | Profile 44 | Profile 46 | Result |
 | --- | --- | --- | --- | --- |
-| Progress report | Cycle 96 | Cycle 100 | Cycles 94, 95, and 99 | Pass |
-| Renewal | Cycle 97 | Cycle 101 | Cycle 98 | Pass |
+| Progress report | `NSAs.ID = 96` | `NSAs.ID = 100` | `NSAs.ID = 94`, `95`, and `99` | Pass |
+| Renewal | `NSAs.ID = 97` | `NSAs.ID = 101` | `NSAs.ID = 98` | Pass |
 
 ### Profile-to-interface results
 
-| Profile | Cycles rendered | Activities rendered with a parent | Workplans rendered with a parent | Orphans shown separately | Result                          |
+| Profile | `NSAs` objects rendered | Activities rendered with a parent | Workplans rendered with a parent | Orphans shown separately | Result                          |
 | ------: | --------------: | --------------------------------: | -------------------------------: | -----------------------: | ------------------------------- |
 |      43 |               2 |                                 2 |                                2 |                        4 | Pass with source-data exceptions |
 |      44 |               2 |                                 2 |                                2 |                        0 | Pass                            |
@@ -92,30 +96,35 @@ application follows this guidance instead of using `TypeOfSubmission`.
 
 #### Profile 43
 
-- Cycles 96 and 97 reached the cycle table.
-- Activities 42 and 43 and Workplans 73 and 74 reached cycle 96.
-- Activities 38 and 39 and Workplans 60 and 61 did not enter cycle 96 because
-  their `ParentID` is 60.
+- `NSAs.ID = 96` and `NSAs.ID = 97` reached the `NSAs` table.
+- Activities 42 and 43 and Workplans 73 and 74 were associated with
+  `NSAs.ID = 96` through `ParentID`.
+- Activities 38 and 39 and Workplans 60 and 61 were not associated with
+  `NSAs.ID = 96` because their `ParentID` is 60.
 - The four records were preserved and displayed in the missing-parent section.
 
 #### Profile 44
 
-- Cycles 100 and 101 reached the cycle table.
-- Activities 45 and 46 and Workplans 79 and 80 reached cycle 100.
+- `NSAs.ID = 100` and `NSAs.ID = 101` reached the `NSAs` table.
+- Activities 45 and 46 and Workplans 79 and 80 were associated with
+  `NSAs.ID = 100` through `ParentID`.
 
 #### Profile 46
 
-- Cycles 94, 95, 98, and 99 reached the cycle table.
-- Activities 41 and 44 reached their respective cycles.
-- Workplans 71, 72, 75, 76, 77, and 78 reached their respective cycles.
+- `NSAs.ID = 94`, `95`, `98`, and `99` reached the `NSAs` table.
+- Activities 41 and 44 were associated with their respective `NSAs.ID` values
+  through `ParentID`.
+- Workplans 71, 72, 75, 76, 77, and 78 were associated with their respective
+  `NSAs.ID` values through `ParentID`.
 
 ## NSA indexing/association regression
 
-The application selects cycles by `NSAProfileID`, relates Activities and
-Workplans by `ParentID`, and isolates missing-parent records. This prevents
-organization and cycle IDs from being confused or records from different
-cycles from being mixed. The regression passed for Profiles 43, 44, and 46
-within the application/PoC scope.
+The application selects `NSAs` objects by `NSAProfileID`, relates Activities
+and Workplans by matching their `ParentID` to `NSAs.ID`, and isolates
+missing-parent records. This prevents `NSA Profiles.ID` and `NSAs.ID` from
+being confused and prevents records belonging to different `NSAs.ID` values
+from being mixed. The regression passed for Profiles 43, 44, and 46 within the
+application/PoC scope.
 
 ```mermaid
 erDiagram
@@ -153,7 +162,7 @@ erDiagram
 
 The JavaScript follows the PDF guidance for the report-facing fields:
 
-- The cycle table displays the current type from `NSA_Status`.
+- The `NSAs` table displays the current type from `NSAs.NSA_Status`.
 - `TypeOfSubmission` is not used as the current type filter.
 - Eligibility is calculated only from `GovBodies_Status`, accepting Pending or
   Approved.
@@ -166,7 +175,7 @@ The JavaScript follows the PDF guidance for the report-facing fields:
 | --- | --- | --- |
 | Duplicate IDs or references | Pass | No duplicates in the four datasets |
 | Parent/child organization integrity | Pass | No mismatches where both IDs are available |
-| Cycle assignment and rendering | Pass | Valid records reached the interface; missing parents were isolated |
+| `NSAs.ID` assignment and rendering | Pass | Valid records reached the interface; missing parents were isolated |
 
 ## Source-data exceptions
 
@@ -182,7 +191,7 @@ affected records without creating incorrect associations.
 
 The application demo provides a successful **Proof of Concept
 (PoC)** for the corrected end-to-end relationships. Profiles 44 and 46 passed
-100% of the application checks, and Profile 43 passed for its valid cycle. The
-overall result is **Pass with source-data exceptions** within the
+100% of the application checks, and Profile 43 passed for its valid `NSAs`
+object. The overall result is **Pass with source-data exceptions** within the
 application/PoC scope. This does not certify SharePoint's physical index
 configuration or internal write operations.
