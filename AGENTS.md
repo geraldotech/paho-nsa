@@ -75,12 +75,57 @@ NSA Profiles.ID
 Interpretation:
 
 - `NSA Profiles.ID` is the stable organization identity.
-- `NSAs.ID` is a specific submission/collaboration cycle.
-- Use child `ParentID` to retrieve records for the exact cycle.
+- `NSAs.ID` is the key of a specific submission/collaboration record in
+  `NSAs`.
+- Use child `ParentID` to retrieve records for the exact `NSAs.ID`.
 - Use child `NSAProfileID` only for organization ownership validation or a
   direct organization-level join.
 - Never replace `ParentID` with `NSAProfileID`; one organization may have
-  multiple cycles.
+  multiple records in `NSAs`.
+
+## PDF terminology fidelity and prohibited AI behavior
+
+`NSAv2/files/NSA.Tool.Data.Structure.for.Public.Report.pdf` is authoritative
+for object names, field names, keys, and relationships. Reports must describe
+the actual data structure rather than introduce a simplified conceptual model.
+
+The AI must not:
+
+- Invent aliases, business concepts, or intermediate terms that are absent
+  from the PDF.
+- Call a record in `NSAs` a "cycle" or identify it as "Cycle 96". Write
+  `NSAs.ID = 96`.
+- Replace exact object names with informal plurals. Use `Activity.ID = 42`,
+  not "Activities 42"; use `Workplan.ID = 73`, not "Workplans 73".
+- Mention an ambiguous field without its source object when more than one
+  object could contain a similarly named field. Prefer fully qualified names
+  such as `NSAs.NSAProfileID`, `Activity.ParentID`, and
+  `Workplan.ParentID`.
+- Rename objects in prose or diagrams. Preserve `NSA Profiles`, `NSAs`,
+  `Activity`, and `Workplan` exactly as defined by the PDF.
+- Infer a relationship, field purpose, status value, or application behavior
+  that is not supported by the PDF or by inspected implementation evidence.
+- Present application/JSON test evidence as proof of SharePoint persistence,
+  physical indexing, internal write behavior, or query performance.
+- Silently resolve uncertainty. If the PDF and implementation differ, report
+  the difference and identify the source of each claim.
+
+Required relationship notation:
+
+```text
+NSA Profiles.ID -> NSAs.NSAProfileID
+NSAs.ID -> Activity.ParentID
+NSAs.ID -> Workplan.ParentID
+NSA Profiles.ID -> Activity.NSAProfileID
+NSA Profiles.ID -> Workplan.NSAProfileID
+```
+
+Before finalizing a technical report, verify that every object, key, field,
+relationship, and status value is traceable to the PDF or clearly labeled as
+implementation/test evidence. Search the report for invented terminology such
+as "cycle" and replace it with the exact object and key. Do not make that
+replacement mechanically when the sentence needs to distinguish the object,
+its record, its key, or its relationship.
 
 ## Authoritative report fields
 
@@ -91,8 +136,8 @@ Interpretation:
 | Current Type of Submission | `NSAs.NSA_Status` |
 | Collaboration period | `NSAs.CollaborationPeriod` |
 | Final Governing Bodies decision | `NSAs.GovBodies_Status` |
-| Public eligibility | `GovBodies_Status = Pending` or `Approved` |
-| Activity/Workplan cycle | child `ParentID = NSAs.ID` |
+| Public eligibility | `NSAs.GovBodies_Status = Pending` or `Approved` |
+| Activity/Workplan parent record | `Activity.ParentID = NSAs.ID` or `Workplan.ParentID = NSAs.ID` |
 
 Important rules:
 
@@ -106,15 +151,15 @@ Important rules:
 
 ## Validated examples and source-data exceptions
 
-- Profiles 44 and 46 passed 100% of the application-level relationship and
-  rendering checks in the PoC.
-- Profile 43 passed for its valid cycle but has source-data exceptions:
-  Activities 38 and 39 and Workplans 60 and 61 reference missing
-  `NSAs.ID = 60`.
-- `NSAs.ID = 41` and Workplan 44 form a cycle chain but have no
+- `NSA Profiles.ID = 44` and `NSA Profiles.ID = 46` passed 100% of the
+  application-level relationship and rendering checks in the PoC.
+- `NSA Profiles.ID = 43` passed for its valid `NSAs` record but has source-data
+  exceptions: `Activity.ID = 38`, `Activity.ID = 39`, `Workplan.ID = 60`, and
+  `Workplan.ID = 61` reference missing `NSAs.ID = 60`.
+- `NSAs.ID = 41` and `Workplan.ID = 44` form a parent/child chain but have no
   `NSAProfileID`, so they cannot be assigned to an organization.
 - Missing or mismatched children must be isolated or excluded, never assigned
-  to another valid cycle.
+  to another valid `NSAs.ID`.
 - Use the standard result wording: **Pass with source-data exceptions**.
 
 ## Confirmed frontend direction
@@ -128,9 +173,9 @@ Important rules:
 - Populate Organization Type from `NSA Profiles.NSAOrganizationType`.
 - Populate Collaboration Period from `NSAs.CollaborationPeriod`.
 - Keep the selected UI identity as `NSAs.ID` so child `ParentID` joins remain
-  cycle-specific.
-- Make cycles with the same organization name distinguishable by current type
-  and collaboration period.
+  specific to the correct `NSAs` record.
+- Make `NSAs` records with the same organization name distinguishable by
+  current type and collaboration period.
 
 ## Current code review findings
 
@@ -143,7 +188,8 @@ features. Its primary findings are:
    translated fields are blank.
 3. The fixed `320px` sidebar/main layout does not adapt correctly to mobile
    widths or short screens.
-4. Eligibility, Organization Type options, and multiple-cycle search labels
+4. Eligibility, Organization Type options, and search labels for organizations
+   with multiple `NSAs` records
    require correction.
 5. Search results and language controls are not fully keyboard-accessible.
 6. JSON loading failures have no useful visible error state.
@@ -159,14 +205,15 @@ incremental hardening and modularization.
 2. Refactor `assets/js/app.js` against the authoritative data rules above.
 3. Protect all exported content rendered through `innerHTML`.
 4. Add localized-field fallbacks and Year 3 rendering.
-5. Correct public eligibility, dynamic filter values, and cycle labels.
+5. Correct public eligibility, dynamic filter values, and `NSAs` record labels.
 6. Add visible loading/error states and consolidate filtering.
 7. Validate mobile and keyboard behavior.
 8. Add focused unit tests plus an end-to-end browser smoke test.
 9. Re-run the relationship validation for Profiles 43, 44, and 46.
 
-The current exports contain no Pending cycle. Test Pending eligibility with a
-controlled fixture or a future export containing that value.
+The current exports contain no `NSAs` record with
+`NSAs.GovBodies_Status = Pending`. Test Pending eligibility with a controlled
+fixture or a future export containing that value.
 
 ## Working procedure for future AI sessions
 
