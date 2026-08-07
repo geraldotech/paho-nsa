@@ -2,48 +2,26 @@
 
 ## Table of Contents
 
-- [Status and evidence](#status-and-evidence)
-- [Architecture overview](#architecture-overview)
-- [Scope](#scope)
-- [Runtime flow](#runtime-flow)
-- [Data structure](#data-structure)
+- [Quick Architecture Overview](#quick-architecture-overview)
+- [Status](#status)
+- [Scope and Purpose](#scope-and-purpose)
+- [Runtime Flow](#runtime-flow)
+- [Data Model](#data-model)
 - [Relationships](#relationships)
-- [Confirmed data behavior](#confirmed-data-behavior)
-- [Sidebar behavior](#sidebar-behavior)
-- [Rendering behavior](#rendering-behavior)
-- [Collaboration data resolution](#collaboration-data-resolution)
-- [Activity and Workplan rendering](#activity-and-workplan-rendering)
-- [Financial chart](#financial-chart)
-- [Language behavior](#language-behavior)
-- [DOM dependencies](#dom-dependencies)
-- [Implementation and regression coverage](#implementation-and-regression-coverage)
-- [Evidence limits](#evidence-limits)
-- [Summary](#summary)
+- [Relationship Diagram](#relationship-diagram)
+- [Behavioral Relationships Derived From Code](#behavioral-relationships-derived-from-code)
+- [Sidebar Behavior](#sidebar-behavior)
+- [Rendering Rules](#rendering-rules)
+- [Collaboration Data Resolution](#collaboration-data-resolution)
+- [Activity and Workplan](#activity-and-workplan)
+- [Financial Chart](#financial-chart)
+- [Language Behavior](#language-behavior)
+- [DOM Dependencies](#dom-dependencies)
+- [External Dependencies](#external-dependencies)
+- [Maintenance Notes](#maintenance-notes)
+- [Short Summary](#short-summary)
 
-## Status and evidence
-
-| Item | Value |
-| --- | --- |
-| Branch reviewed | `main` |
-| Architecture status | Planned behavior for the incremental refactor |
-| Current controller | `assets/js/app.js` |
-| Data sources | Four static JSON exports |
-| Runtime database | None |
-| Document date | 2026-08-07 |
-| Layout decision | Preserve the current HTML/CSS layout |
-
-This report uses the following evidence:
-
-- `NSAv2/files/NSA.Tool.Data.Structure.for.Public.Report.pdf` for authoritative
-  object names, fields, keys, and relationships;
-- `NSAv2/files/*.csv` and `assets/database/*.json` for supplied export evidence;
-- `assets/js/app.js`, `assets/js/ui-language.js`, and `index.html` for current
-  implementation evidence.
-
-Planned changes are identified as such. They are not evidence that the behavior
-or tests already exist.
-
-## Architecture overview
+## Quick Architecture Overview
 
 The viewer remains a static client-side application. It loads `NSA Profiles`,
 `NSAs`, `Activity`, and `Workplan` JSON exports, applies the confirmed
@@ -56,7 +34,32 @@ fallbacks, safe formatting, and rendering coordination. No additional internal
 JavaScript files, framework, build system, backend service, or runtime database
 is required.
 
-## Scope
+## Status
+
+| Item | Value |
+| --- | --- |
+| Branch reviewed | `main` |
+| Architecture status | Planned behavior for the incremental refactor |
+| Current controller | `assets/js/app.js` |
+| Data sources | Four static JSON exports |
+| Runtime database | None |
+| Document date | 2026-08-07 |
+| Layout decision | Preserve the current HTML/CSS layout |
+
+### Evidence sources
+
+This report uses:
+
+- `NSAv2/files/NSA.Tool.Data.Structure.for.Public.Report.pdf` for authoritative
+  object names, fields, keys, and relationships;
+- `NSAv2/files/*.csv` and `assets/database/*.json` for supplied export evidence;
+- `assets/js/app.js`, `assets/js/ui-language.js`, and `index.html` for current
+  implementation evidence.
+
+Planned changes are identified as such. They are not evidence that the behavior
+or tests already exist.
+
+## Scope and Purpose
 
 Included:
 
@@ -74,7 +77,7 @@ Excluded:
 - physical indexing or query-performance claims;
 - visual redesign and broader responsive-layout work.
 
-## Runtime flow
+## Runtime Flow
 
 ### 1. Loading
 
@@ -125,7 +128,7 @@ one coordinated update path.
 `assets/js/app.js` is already loaded with `type="module"` and imports
 `assets/js/ui-language.js`.
 
-## Data structure
+## Data Model
 
 ### 1. `NSA Profiles`
 
@@ -289,7 +292,7 @@ Interpretation:
   ownership; they never replace `Activity.ParentID` or `Workplan.ParentID`.
 - More than one `NSAs` record may reference the same `NSA Profiles.ID`.
 
-### Relationship diagram
+## Relationship Diagram
 
 ```text
 NSA Profiles
@@ -308,7 +311,7 @@ NSA Profiles.ID -> Activity.NSAProfileID
 NSA Profiles.ID -> Workplan.NSAProfileID
 ```
 
-## Confirmed data behavior
+## Behavioral Relationships Derived From Code
 
 ### Public eligibility
 
@@ -352,7 +355,7 @@ labels must distinguish them with `NSA Profiles.Title`, `NSAs.NSA_Status`, and
 `NSAs.CollaborationPeriod`. Selection and relationship checks continue to use
 `NSAs.ID`.
 
-## Sidebar behavior
+## Sidebar Behavior
 
 ### Search and filters
 
@@ -373,7 +376,7 @@ result set and ordering.
 Reset must clear search text and results, all select values, navigation state,
 and the selected `NSAs.ID` according to one defined rule.
 
-## Rendering behavior
+## Rendering Rules
 
 ### Source ownership
 
@@ -406,7 +409,7 @@ Loading failures must not appear as valid empty data. The loading state remains
 active until relationship checks, filter option creation, and the first render
 finish.
 
-## Collaboration data resolution
+## Collaboration Data Resolution
 
 The following precedence reflects the current `assets/js/app.js`
 implementation and must retain the exact source fields.
@@ -452,7 +455,7 @@ Strategic Plan:
 Current implementation evidence: `normalizeObjects()` converts the selected
 value into the list shape expected by the existing render functions.
 
-## Activity and Workplan rendering
+## Activity and Workplan
 
 ### `NSAs.NSA_Status = New Application` or `Renewal`
 
@@ -486,7 +489,7 @@ The Activity display uses validated `Workplan` records:
 The prospective Workplan card is hidden. No Extension behavior is added without
 new source evidence.
 
-## Financial chart
+## Financial Chart
 
 The financial renderer uses these fields from the selected `NSAs` record:
 
@@ -503,7 +506,7 @@ Required behavior:
 - hide the financial card and navigation when
   `NSAs.NSA_Status = Progress Report`.
 
-## Language behavior
+## Language Behavior
 
 `assets/js/ui-language.js` remains the source for English and Spanish interface
 text.
@@ -518,7 +521,7 @@ text.
 
 Remove a translation key only after checking its HTML and JavaScript consumers.
 
-## DOM dependencies
+## DOM Dependencies
 
 Preserve the existing `index.html` report structure and IDs, including:
 
@@ -551,7 +554,19 @@ Direct HTML changes are limited to:
 Only loading-state styles are part of this data refactor. Broader responsive
 layout work remains separate.
 
-## Implementation and regression coverage
+## External Dependencies
+
+- `assets/js/ui-language.js` for translated interface text;
+- `assets/js/vendors/chart.js` for the financial chart;
+- the four JSON exports under `assets/database/`;
+- a static HTTP server for local and deployed use.
+
+No additional framework, build system, runtime database, or backend service is
+required.
+
+## Maintenance Notes
+
+### Implementation order
 
 1. Add tests for the five relationships, eligibility, localized fallbacks, and
    filters.
@@ -565,7 +580,7 @@ layout work remains separate.
 7. Run a browser smoke test for selection by `NSAs.ID`, filters, language,
    navigation, chart replacement, loading failure, and empty results.
 
-Required regression evidence:
+### Regression coverage
 
 - Test `NSAs.GovBodies_Status = Pending` with a controlled fixture.
 - `NSA Profiles.ID = 44` and `NSA Profiles.ID = 46` must pass.
@@ -575,7 +590,7 @@ Required regression evidence:
 - Keep `NSAs.ID = 41` and `Workplan.ID = 44` unassigned because
   `NSAs.NSAProfileID` is missing.
 
-## Evidence limits
+### Deployment and evidence limits
 
 - Keep the static deployment model.
 - Do not claim SharePoint persistence, physical indexing, internal write
@@ -583,7 +598,7 @@ Required regression evidence:
 - Report differences between the PDF, supplied exports, and implementation
   instead of silently resolving them.
 
-## Summary
+## Short Summary
 
 The refactor preserves the current page, JavaScript files, and deployment model.
 `NSA Profiles.ID` identifies the organization, `NSAs.ID` identifies the selected
