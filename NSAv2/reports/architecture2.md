@@ -1,171 +1,161 @@
-# Data Architecture and UI Integration — DEV Data Refactor
+# Data Architecture and UI Integration - DEV Data Refactor
 
 ## Table of Contents
 
-- [Quick Architecture Overview](#quick-architecture-overview)
-- [Status](#status)
-- [Scope and Purpose](#scope-and-purpose)
-- [Runtime Flow](#runtime-flow)
-- [Data Model](#data-model)
+- [Status and evidence](#status-and-evidence)
+- [Architecture overview](#architecture-overview)
+- [Scope](#scope)
+- [Runtime flow](#runtime-flow)
+- [Data structure](#data-structure)
 - [Relationships](#relationships)
-- [Relationship Diagram](#relationship-diagram)
-- [Behavioral Relationships Derived From Code](#behavioral-relationships-derived-from-code)
-- [Sidebar Behavior](#sidebar-behavior)
-- [Rendering Rules](#rendering-rules)
-- [Collaboration Data Resolution](#collaboration-data-resolution)
-- [Activities and Workplans](#activities-and-workplans)
-- [Financial Chart](#financial-chart)
-- [Language Behavior](#language-behavior)
-- [DOM Dependencies](#dom-dependencies)
-- [External Dependencies](#external-dependencies)
-- [Maintenance Notes](#maintenance-notes)
-- [Short Summary](#short-summary)
+- [Confirmed data behavior](#confirmed-data-behavior)
+- [Sidebar behavior](#sidebar-behavior)
+- [Rendering behavior](#rendering-behavior)
+- [Collaboration data resolution](#collaboration-data-resolution)
+- [Activity and Workplan rendering](#activity-and-workplan-rendering)
+- [Financial chart](#financial-chart)
+- [Language behavior](#language-behavior)
+- [DOM dependencies](#dom-dependencies)
+- [Implementation and regression coverage](#implementation-and-regression-coverage)
+- [Evidence limits](#evidence-limits)
+- [Summary](#summary)
 
-## Quick Architecture Overview
+## Status and evidence
 
-The refactored NSA viewer remains a static client-side application. It loads
-four JSON files, builds one normalized public record per eligible NSA cycle,
-applies filters, selects a cycle by `NSAs.ID`, and renders the existing Profile,
-collaboration, financial, Activity, and Workplan cards.
+| Item | Value |
+| --- | --- |
+| Branch reviewed | `main` |
+| Architecture status | Planned behavior for the incremental refactor |
+| Current controller | `assets/js/app.js` |
+| Data sources | Four static JSON exports |
+| Runtime database | None |
+| Document date | 2026-08-07 |
+| Layout decision | Preserve the current HTML/CSS layout |
 
-The main architectural change is the separation of data rules from DOM
-rendering. `app.js` coordinates startup, state, events, and rendering, while
-focused functions in the same file handle loading, normalization, joins,
-filtering, localization, and safe formatting.
+This report uses the following evidence:
 
-## Status
+- `NSAv2/files/NSA.Tool.Data.Structure.for.Public.Report.pdf` for authoritative
+  object names, fields, keys, and relationships;
+- `NSAv2/files/*.csv` and `assets/database/*.json` for supplied export evidence;
+- `assets/js/app.js`, `assets/js/ui-language.js`, and `index.html` for current
+  implementation evidence.
 
-- Branch reviewed: `main`
-- Architecture status: planned behavior for the incremental refactor
-- Current production controller: `assets/js/app.js`
-- Data source type: four static JSON exports
-- Runtime database: none
-- Document date: 2026-08-05
-- Layout decision: preserve the current HTML/CSS structure
+Planned changes are identified as such. They are not evidence that the behavior
+or tests already exist.
 
-This document describes the intended behavior after the refactor. It does not
-require new JavaScript module files and must not be used as evidence that the
-changes or tests already exist.
+## Architecture overview
 
-## Scope and Purpose
+The viewer remains a static client-side application. It loads `NSA Profiles`,
+`NSAs`, `Activity`, and `Workplan` JSON exports, applies the confirmed
+relationships, filters eligible `NSAs` records, selects by `NSAs.ID`, and
+renders the existing report cards.
 
-This document defines how the public viewer will use the DEV data structure
-after the JavaScript refactor.
+The refactor remains inside the current frontend stack. Focused functions in
+`assets/js/app.js` will separate relationship checks, filtering, localized
+fallbacks, safe formatting, and rendering coordination. No additional internal
+JavaScript files, framework, build system, backend service, or runtime database
+is required.
 
-The scope includes:
+## Scope
 
-- four-file loading and error handling;
-- Profile, cycle, Activity, and Workplan relationships;
-- public eligibility and authoritative report fields;
-- application state, filtering, and cycle selection;
-- rendering, localization, and safe output;
-- function responsibilities and regression testing.
+Included:
 
-The scope does not include a framework migration, backend API, database,
-SharePoint persistence, physical indexing, performance certification, or visual
-redesign.
+- loading the four JSON exports and reporting failures;
+- the five authoritative relationships;
+- public eligibility and report field sources;
+- filtering and selection by `NSAs.ID`;
+- rendering, localization, safe output, and loading/error feedback;
+- focused tests and browser regression coverage.
 
-## Runtime Flow
+Excluded:
 
-### 1. Bootstrap
+- framework or backend migration;
+- SharePoint persistence or internal write behavior;
+- physical indexing or query-performance claims;
+- visual redesign and broader responsive-layout work.
 
-At startup, `app.js` sets the page to `loading` and requests these files in
-parallel:
+## Runtime flow
+
+### 1. Loading
+
+`assets/js/app.js` requests these resources in parallel:
 
 - `assets/database/nsa-profiles.json`
 - `assets/database/nsa.json`
 - `assets/database/activity.json`
 - `assets/database/workplan.json`
 
-The loader reports success or failure for each resource. A failed request is
-not silently converted into an empty array.
+Current implementation evidence: `fetchJson()` returns `null` after a failed
+request, and startup converts a non-array response into an empty array. The
+planned behavior must instead distinguish loading, resource failure, and valid
+empty data in the visible interface.
 
-### 2. Data preparation
+### 2. Relationship preparation
 
 After loading:
 
-1. IDs are normalized as trimmed strings.
-2. Profiles are indexed by `NSA Profiles.ID`.
-3. Submissions are filtered by `GovBodies_Status`.
-4. Eligible submissions are joined to Profiles through `NSAProfileID`.
-5. One normalized public-cycle object is created per valid submission.
-6. Filter options are derived from the normalized cycle collection.
+1. Compare source IDs consistently without renaming their keys.
+2. Match `NSA Profiles.ID -> NSAs.NSAProfileID`.
+3. Include only `NSAs` records where `NSAs.GovBodies_Status` is `Approved` or
+   `Pending`.
+4. Build filter values from `NSAs.NSA_Status`,
+   `NSA Profiles.NSAOrganizationType`, and `NSAs.CollaborationPeriod`.
 
 ### 3. Selection and rendering
 
-1. The selected value is `NSAs.ID`.
-2. Activities and Workplans are selected with `ParentID = NSAs.ID`.
-3. Child `NSAProfileID` validates organization ownership.
-4. Localized fields and fallbacks are resolved before rendering.
-5. Renderers update the existing DOM and Chart.js target.
+1. Store the selected `NSAs.ID`.
+2. Retrieve `Activity` through `NSAs.ID -> Activity.ParentID`.
+3. Retrieve `Workplan` through `NSAs.ID -> Workplan.ParentID`.
+4. Validate ownership through `Activity.NSAProfileID` and
+   `Workplan.NSAProfileID` against `NSA Profiles.ID`.
+5. Resolve localized values and fallbacks before rendering.
+6. Update the existing DOM targets and Chart.js canvas.
 
-Search, filters, language changes, reset, and cycle selection all use the same
-state-update and render path.
+Search, select filters, reset, language changes, and record selection should use
+one coordinated update path.
 
-### 4. Current JavaScript files and responsibilities
+### 4. Current JavaScript files
 
 | Existing file | Responsibility after refactoring |
 | --- | --- |
-| `assets/js/app.js` | Load data, normalize IDs, build public cycles, validate relationships, manage state and filters, resolve source-field fallbacks, format safe output, handle events, and coordinate rendering |
-| `assets/js/ui-language.js` | Store English and Spanish UI labels and messages |
+| `assets/js/app.js` | Load the four resources, apply relationships and eligibility, manage filters and `NSAs.ID` selection, resolve fallbacks, protect output, handle events, and coordinate rendering |
+| `assets/js/ui-language.js` | Store English and Spanish labels and messages |
 | `assets/js/vendors/chart.js` | Provide the existing financial chart dependency; no refactor required |
 
-The refactor can introduce focused, testable functions inside `app.js`. No
-additional internal JavaScript files are currently planned.
+`assets/js/app.js` is already loaded with `type="module"` and imports
+`assets/js/ui-language.js`.
 
-### 5. Main state
+## Data structure
 
-The application uses one explicit state object:
+### 1. `NSA Profiles`
 
-```js
-{
-  status: 'loading' | 'ready' | 'partial' | 'error',
-  language: 'en' | 'es',
-  selectedCycleId: string | null,
-  filters: {
-    term: '',
-    currentSubmissionType: '',
-    organizationType: '',
-    collaborationPeriod: ''
-  },
-  publicCycles: [],
-  resourceErrors: []
-}
-```
-
-The financial renderer may keep its Chart.js instance privately so it can
-destroy the previous chart before creating a replacement.
-
-## Data Model
-
-### 1. `nsa-profiles.json`
-
-Each row represents a stable organization.
+Each `NSA Profiles` record represents one organization.
 
 <details>
-<summary>Required fields used by the public viewer</summary>
+<summary>Required fields used by the public report</summary>
 
-
-- `ID`
-- `Title`
-- `NSAOrganizationType`
-- `NSAObjectives`
-- `NSAWorkFields`
-- `NSABoardMembers`
-- `NSAOrganizationBodies`
-- `NSAWebsite`
-- `NSAYearOfEstablishment`
-- `PAHO_Focal_Point`
+```text
+ID
+Title
+NSAOrganizationType
+NSAObjectives
+NSAWorkFields
+NSABoardMembers
+NSAOrganizationBodies
+NSAWebsite
+NSAYearOfEstablishment
+PAHO_Focal_Point
+```
 
 </details>
 
-### 2. `nsa.json`
+### 2. `NSAs`
 
-Each row represents one submission or collaboration cycle.
+Each `NSAs` record is identified by `NSAs.ID` and links to `NSA Profiles`
+through `NSAs.NSAProfileID`.
 
 <details>
-<summary>Required fields used by the public viewer</summary>
-
+<summary>Required fields used by the public report</summary>
 
 ```text
 ID
@@ -194,22 +184,19 @@ CollabWPActStrategicPlan_txtSPA
 
 </details>
 
-`NSA_Status` supplies the current Type of Submission.
-`GovBodies_Status` supplies public eligibility.
+`NSAs.NSA_Status` supplies the current Type of Submission.
+`NSAs.GovBodies_Status` supplies public eligibility. Legacy
+`NSAs.TypeOfSubmission`, workflow `NSAs.Status`, and
+`NSAs.GovBodies_Outcome` do not replace these authoritative fields.
 
-Legacy `TypeOfSubmission`, workflow `Status`, and `GovBodies_Outcome` do not
-replace these authoritative fields.
+Current export evidence: `assets/database/nsa.json` does not contain the
+financial and collaboration fields listed above. Those report sections cannot
+be validated end to end until the export supplies the required fields.
 
-The current `assets/database/nsa.json` export does not contain the financial or
-collaboration fields listed above. They remain part of the required frontend
-contract and must be supplied by the export before those report sections can be
-validated end to end.
-
-### 3. `activity.json`
+### 3. `Activity`
 
 <details>
-<summary>Required fields used by the public viewer</summary>
-
+<summary>Required fields used by the public report</summary>
 
 ```text
 ID
@@ -228,15 +215,15 @@ NSAFocalpoint
 
 </details>
 
-`ParentID` supplies the cycle relationship, and `NSAProfileID` validates
-organization ownership. The base `Description` and `DirectResults` fields are
-required fallbacks when localized values are blank.
+`Activity.ParentID` identifies the related `NSAs.ID`.
+`Activity.NSAProfileID` validates ownership against `NSA Profiles.ID`. Base
+`Activity.Description` and `Activity.DirectResults` provide fallbacks when the
+requested localized values are blank.
 
-### 4. `workplan.json`
+### 4. `Workplan`
 
 <details>
-<summary>Required fields used by the public viewer</summary>
-
+<summary>Required fields used by the public report</summary>
 
 ```text
 ID
@@ -276,307 +263,264 @@ NSAFocalpoint
 
 </details>
 
-`ParentID` supplies the cycle relationship, and `NSAProfileID` validates
-organization ownership. Base text and result fields provide fallbacks for blank
-localized values.
-
-### 5. Normalized public cycle
-
-Filters and renderers operate on one object per eligible cycle:
-
-```js
-{
-  cycleId,                 // NSAs.ID
-  profileId,               // NSA Profiles.ID / NSAs.NSAProfileID
-  organizationName,        // NSA Profiles.Title
-  organizationType,        // NSA Profiles.NSAOrganizationType
-  currentSubmissionType,   // NSAs.NSA_Status
-  collaborationPeriod,     // NSAs.CollaborationPeriod
-  profile,
-  cycle
-}
-```
-
-The normalized model does not expose the current type as
-`TypeOfSubmission`; `currentSubmissionType` prevents confusion with the legacy
-field.
+`Workplan.ParentID` identifies the related `NSAs.ID`.
+`Workplan.NSAProfileID` validates ownership against `NSA Profiles.ID`. Base
+text and result fields provide fallbacks when localized values are blank.
 
 ## Relationships
 
-### 1. Profile to cycles
+Use these relationships exactly:
 
 ```text
-NSA Profiles.ID = NSAs.NSAProfileID
+NSA Profiles.ID -> NSAs.NSAProfileID
+NSAs.ID -> Activity.ParentID
+NSAs.ID -> Workplan.ParentID
+NSA Profiles.ID -> Activity.NSAProfileID
+NSA Profiles.ID -> Workplan.NSAProfileID
 ```
 
-One organization may have multiple submission/collaboration cycles.
+Interpretation:
 
-### 2. Cycle to Activities
+- `NSA Profiles.ID` identifies the organization.
+- `NSAs.ID` identifies the selected `NSAs` record.
+- `Activity.ParentID` and `Workplan.ParentID` retrieve records for that exact
+  `NSAs.ID`.
+- `Activity.NSAProfileID` and `Workplan.NSAProfileID` validate organization
+  ownership; they never replace `Activity.ParentID` or `Workplan.ParentID`.
+- More than one `NSAs` record may reference the same `NSA Profiles.ID`.
+
+### Relationship diagram
 
 ```text
-NSAs.ID = Activity.ParentID
+NSA Profiles
+  NSA Profiles.ID
+      |
+      | NSA Profiles.ID -> NSAs.NSAProfileID
+      v
+NSAs
+  NSAs.ID
+      |
+      +---- NSAs.ID -> Activity.ParentID ----> Activity
+      |
+      +---- NSAs.ID -> Workplan.ParentID ----> Workplan
+
+NSA Profiles.ID -> Activity.NSAProfileID
+NSA Profiles.ID -> Workplan.NSAProfileID
 ```
 
-### 3. Cycle to Workplans
+## Confirmed data behavior
+
+### Public eligibility
+
+Include an `NSAs` record only when:
 
 ```text
-NSAs.ID = Workplan.ParentID
+NSAs.GovBodies_Status = Approved
+NSAs.GovBodies_Status = Pending
 ```
 
-### 4. Ownership validation
+Current implementation difference: `assets/js/app.js` currently includes only
+`NSAs.GovBodies_Status = Approved`. The supplied export contains no `NSAs`
+record with `NSAs.GovBodies_Status = Pending`, so Pending requires a controlled
+fixture or a future export.
 
-```text
-NSA Profiles.ID = Activity.NSAProfileID
-NSA Profiles.ID = Workplan.NSAProfileID
-```
+### Required `NSA Profiles` match
 
-`ParentID` selects the exact cycle. Child `NSAProfileID` only validates that the
-child belongs to the same organization; it never replaces `ParentID`.
+An eligible `NSAs` record must match `NSA Profiles.ID` through
+`NSAs.NSAProfileID`. An `NSAs` record without that match remains unassigned and
+is excluded from the public result set.
 
-## Relationship Diagram
+### Activity and Workplan integrity
 
-```mermaid
-erDiagram
-    NSA_PROFILES ||--o{ NSAS : "NSAProfileID"
-    NSAS ||--o{ ACTIVITY : "ParentID"
-    NSAS ||--o{ WORKPLAN : "ParentID"
-    NSA_PROFILES ||--o{ ACTIVITY : "ownership validation"
-    NSA_PROFILES ||--o{ WORKPLAN : "ownership validation"
-```
+Render an `Activity` record only when:
 
-```text
-                 +-------------------------+
-                 |      NSA Profiles       |
-                 | PK: ID                  |
-                 | Title                   |
-                 | NSAOrganizationType     |
-                 +------------+------------+
-                              |
-                              | 1:N through NSAProfileID
-                              v
-                 +-------------------------+
-                 |          NSAs           |
-                 | PK: ID                  |
-                 | FK: NSAProfileID        |
-                 | NSA_Status              |
-                 | GovBodies_Status        |
-                 | CollaborationPeriod     |
-                 +------------+------------+
-                              |
-                    1:N through ParentID
-                   +----------+----------+
-                   |                     |
-                   v                     v
-          +----------------+    +----------------+
-          |    Activity    |    |    Workplan    |
-          | FK: ParentID   |    | FK: ParentID   |
-          | NSAProfileID   |    | NSAProfileID   |
-          +----------------+    +----------------+
-```
+- `Activity.ParentID = NSAs.ID` for the selected `NSAs` record; and
+- `Activity.NSAProfileID = NSA Profiles.ID` for the matched organization.
 
-## Behavioral Relationships Derived From Code
+Render a `Workplan` record only when:
 
-### 1. Public eligibility
+- `Workplan.ParentID = NSAs.ID` for the selected `NSAs` record; and
+- `Workplan.NSAProfileID = NSA Profiles.ID` for the matched organization.
 
-Only cycles with either of these durable values enter the public model:
+Missing or mismatched `Activity` and `Workplan` records are excluded. They are
+never reassigned to another `NSAs.ID`.
 
-```text
-GovBodies_Status = Approved
-GovBodies_Status = Pending
-```
+### Multiple `NSAs` records
 
-The current exports contain no Pending cycle, so this path requires a controlled
-test fixture.
+`NSAs` records linked to the same `NSA Profiles.ID` remain separate. Search
+labels must distinguish them with `NSA Profiles.Title`, `NSAs.NSA_Status`, and
+`NSAs.CollaborationPeriod`. Selection and relationship checks continue to use
+`NSAs.ID`.
 
-### 2. Valid organization requirement
+## Sidebar behavior
 
-An eligible cycle must have a matching `NSA Profiles` record. A cycle without a
-valid `NSAProfileID` remains unassigned and is excluded from the public model.
+### Search and filters
 
-### 3. Child integrity
+Consolidate the current overlapping search and filter paths so they use the same
+result set and ordering.
 
-A child is rendered only when:
-
-- its `ParentID` matches the selected `NSAs.ID`; and
-- its `NSAProfileID`, when available, matches the selected cycle's Profile.
-
-Missing-parent and mismatched children are isolated or excluded. They are never
-assigned to another valid cycle.
-
-### 4. Multiple cycles
-
-Cycles that share the same organization remain separate. Selection, child
-joins, card visibility, and labels use the selected `NSAs.ID`.
-
-## Sidebar Behavior
-
-### Search
-
-One pure filtering function handles text search and all select filters.
-
-- Search uses the active-language organization label.
-- Results are sorted using that same label.
-- A result identifies the organization, current submission type, and
-  collaboration period.
-- The result value is `cycleId` (`NSAs.ID`).
-- Search results and select filters use the same ordering and result limit.
-
-### Filter options
-
-Options are unique and generated from eligible normalized cycles:
-
-- Type of Submission: `currentSubmissionType` from `NSAs.NSA_Status`;
-- Organization Type: `NSA Profiles.NSAOrganizationType`;
-- Collaboration Period: `NSAs.CollaborationPeriod`.
+- Search and sorting use `NSA Profiles.Title`.
+- Each result shows `NSA Profiles.Title`, `NSAs.NSA_Status`, and
+  `NSAs.CollaborationPeriod`.
+- Each result retains `NSAs.ID` for selection.
+- Type of Submission options come from `NSAs.NSA_Status`.
+- Organization Type options come from
+  `NSA Profiles.NSAOrganizationType`.
+- Collaboration Period options come from `NSAs.CollaborationPeriod`.
 
 ### Clear Filters
 
-Reset clears:
+Reset must clear search text and results, all select values, navigation state,
+and the selected `NSAs.ID` according to one defined rule.
 
-- internal filter state;
-- search text and results;
-- all select values;
-- navigation visibility;
-- selected-cycle state according to one defined reset rule.
+## Rendering behavior
 
-## Rendering Rules
+### Source ownership
 
-### 1. Render coordination
+- Stable organization details come from `NSA Profiles`.
+- Current Type of Submission comes from `NSAs.NSA_Status`.
+- Collaboration Period comes from `NSAs.CollaborationPeriod`.
+- Financial and collaboration values come from the selected `NSAs` record.
+- Activity content comes from validated `Activity` records.
+- Workplan and progress content comes from validated `Workplan` records.
 
-`app.js` selects the normalized cycle and validated children, then calls the
-renderers. Renderers do not perform joins or maintain independent filters.
+### Safe output
 
-### 2. Profile rendering
-
-Stable organization fields come from `NSA Profiles`. Current type,
-collaboration period, financial values, and cycle-specific collaboration fields
-come from the selected `NSAs` record.
-
-### 3. Safe output
-
-- Escape all exported plain text before inserting it into HTML.
+- Escape exported plain text before inserting it into HTML.
 - Convert line breaks only after escaping.
 - Use `textContent` where markup is unnecessary.
-- Accept only supported website protocols such as HTTP and HTTPS.
-- Sanitize supported rich text with an explicit allowlist; do not insert raw
-  exported HTML directly.
+- Allow only supported website protocols such as HTTP and HTTPS.
+- Do not insert exported rich text without an explicit sanitization rule.
 
-### 4. Visible UI states
+### Visible application states
 
-| State | Rendering behavior |
+| Condition | Required behavior |
 | --- | --- |
-| `loading` | Disable dependent controls and show a localized loading message |
-| `ready` | Enable controls and render the selected cycle |
-| `partial` | Identify unavailable content and show a localized partial-data message |
-| `error` | Show a localized load error and retry action |
-| valid empty result | Show the relevant localized empty-state message |
+| Initial load | Disable dependent controls and show a localized loading message |
+| All required resources loaded | Enable controls and render the selected `NSAs.ID` |
+| One resource unavailable | Identify the unavailable content and show a localized partial-data message |
+| Required loading failed | Show a localized error and retry action |
+| Valid query with no records | Show the corresponding localized empty message |
 
-Loading failures must not look like valid empty data.
+Loading failures must not appear as valid empty data. The loading state remains
+active until relationship checks, filter option creation, and the first render
+finish.
 
-## Collaboration Data Resolution
+## Collaboration data resolution
 
-Collaboration values are resolved before rendering through one localized-value
-helper.
+The following precedence reflects the current `assets/js/app.js`
+implementation and must retain the exact source fields.
 
-### Progress Report
+### `NSAs.NSA_Status = Progress Report`
 
-Health Agenda precedence:
+Health Agenda:
 
-1. cycle Workplan collaboration value;
-2. localized cycle Workplan text;
-3. related Workplan localized value.
+1. `NSAs.CollabWPActHealthAgenda`
+2. `NSAs.CollabWPActHealthAgenda_txtENG` or
+   `NSAs.CollabWPActHealthAgenda_txtSPA`
+3. `Workplan.HealthAgendaENG` or `Workplan.HealthAgendaSPA` where
+   `Workplan.ParentID = NSAs.ID`
 
-Strategic Plan precedence:
+Strategic Plan:
 
-1. cycle Workplan strategic value;
-2. localized cycle Workplan strategic text;
-3. related Workplan localized value.
+1. `NSAs.CollabWPActStrategicPlan`
+2. `NSAs.CollabWPActStrategicPlan_txtENG` or
+   `NSAs.CollabWPActStrategicPlan_txtSPA`
+3. `Workplan.StrategicPlanENG` or `Workplan.StrategicPlanSPA` where
+   `Workplan.ParentID = NSAs.ID`
 
-### New Application and Renewal
+### `NSAs.NSA_Status = New Application` or `Renewal`
 
-Health Agenda precedence:
+Health Agenda:
 
-1. cycle Activity collaboration value;
-2. localized cycle Activity text;
-3. cycle Workplan collaboration value;
-4. related Workplan localized value.
+1. `NSAs.CollabActHealthAgenda`
+2. `NSAs.CollabActHealthAgenda_txtENG` or
+   `NSAs.CollabActHealthAgenda_txtSPA`
+3. `NSAs.CollabWPActHealthAgenda`
+4. `Workplan.HealthAgendaENG` or `Workplan.HealthAgendaSPA` where
+   `Workplan.ParentID = NSAs.ID`
 
-Strategic Plan precedence:
+Strategic Plan:
 
-1. cycle Activity strategic value;
-2. localized cycle Activity strategic text;
-3. cycle Workplan strategic value;
-4. related Workplan localized value.
+1. `NSAs.CollabActStrategicPlan`
+2. `NSAs.CollabActStrategicPlan_txtENG` or
+   `NSAs.CollabActStrategicPlan_txtSPA`
+3. `NSAs.CollabWPActStrategicPlan`
+4. `Workplan.StrategicPlanENG` or `Workplan.StrategicPlanSPA` where
+   `Workplan.ParentID = NSAs.ID`
 
-Selected strings, arrays, and lookup objects are normalized to one list shape
-before rendering.
+Current implementation evidence: `normalizeObjects()` converts the selected
+value into the list shape expected by the existing render functions.
 
-## Activities and Workplans
+## Activity and Workplan rendering
 
-### Standard Activities
+### `NSAs.NSA_Status = New Application` or `Renewal`
 
-New Application and Renewal cycles render validated `activity.json` rows:
+The Activity card uses validated `Activity` records:
 
-- localized description with base-field fallback;
-- localized direct results with base-field fallback;
-- responsible entity.
+- `Activity.DescriptionENG` or `Activity.DescriptionSPA`, with
+  `Activity.Description` as fallback;
+- `Activity.DirectResultsENG` or `Activity.DirectResultsSPA`, with
+  `Activity.DirectResults` as fallback;
+- `Activity.Entity`.
 
-### Progress Report Activities
+The Workplan card uses validated `Workplan` records:
 
-Progress Report cycles use validated `workplan.json` rows for current progress:
+- `Workplan.DescriptionENG` or `Workplan.DescriptionSPA`, with
+  `Workplan.Description` as fallback;
+- `Workplan.ExpectedResultsENG` or `Workplan.ExpectedResultsSPA`, with
+  `Workplan.ExpectedResults` as fallback;
+- `Workplan.ResponsibleEntity`.
 
-- localized description;
-- localized progress-report result;
-- responsible entity;
-- available Year 1, Year 2, and Year 3 results.
+### `NSAs.NSA_Status = Progress Report`
 
-### Workplans
+The Activity display uses validated `Workplan` records:
 
-New Application and Renewal cycles render validated `workplan.json` rows:
+- `Workplan.DescriptionENG` or `Workplan.DescriptionSPA`, with
+  `Workplan.Description` as fallback;
+- `Workplan.ProgressReportENG` or `Workplan.ProgressReportSPA`, with
+  `Workplan.ProgressReport` as fallback;
+- `Workplan.ResponsibleEntity`;
+- available Year 1, Year 2, and Year 3 dates and results.
 
-- localized description with fallback;
-- localized expected results with fallback;
-- responsible entity.
+The prospective Workplan card is hidden. No Extension behavior is added without
+new source evidence.
 
-The prospective Workplan card is hidden for Progress Report cycles. No
-Extension scenario is added without new source evidence.
+## Financial chart
 
-## Financial Chart
+The financial renderer uses these fields from the selected `NSAs` record:
 
-The financial renderer uses the selected cycle's:
+- `NSAs.FinAnnualIncome`
+- `NSAs.FinAnnualExpenses`
+- `NSAs.FinAssets`
+- `NSAs.FinAnnualIncomeYear`
 
-- `FinAnnualIncome`;
-- `FinAnnualExpenses`;
-- `FinAssets`;
-- `FinAnnualIncomeYear`.
+Required behavior:
 
-Behavior:
-
-- normalize and format numeric values through shared helpers;
-- destroy the previous Chart.js instance before replacement;
+- format numeric values consistently;
+- destroy the previous Chart.js instance before creating a replacement;
 - show a localized empty message when all financial values are absent;
-- hide the financial card and navigation for Progress Report cycles.
+- hide the financial card and navigation when
+  `NSAs.NSA_Status = Progress Report`.
 
-## Language Behavior
+## Language behavior
 
-`ui-language.js` remains the source for English and Spanish UI text.
+`assets/js/ui-language.js` remains the source for English and Spanish interface
+text.
 
-- Both language objects keep matching key sets.
-- Loading, error, empty, no-result, and fallback messages are translated.
-- `year3` is added in both languages.
-- `document.documentElement.lang` follows the selected language.
-- Source fields use one fallback order: requested localized field,
-  authoritative base field, alternate localized field, then `-`.
-- Language changes re-render labels, values, sorting, result labels, messages,
-  and the brand logo.
+- Keep matching keys in both language objects.
+- Translate loading, error, empty, no-result, and fallback messages.
+- Add `year3` in both languages.
+- Set `document.documentElement.lang` to the selected language.
+- Apply the same localized-field fallback order across render functions.
+- Re-render labels, values, sorting, results, messages, and the brand logo after
+  a language change.
 
-Unused translation keys are removed only after checking both HTML and
-JavaScript consumers.
+Remove a translation key only after checking its HTML and JavaScript consumers.
 
-## DOM Dependencies
+## DOM dependencies
 
-The refactor preserves the current `index.html` structure and existing IDs,
-including:
+Preserve the existing `index.html` report structure and IDs, including:
 
 - `searchInput`
 - `search-results`
@@ -600,77 +544,50 @@ including:
 
 Direct HTML changes are limited to:
 
-- correcting label `for` attributes;
-- retaining only **All** where JavaScript creates dynamic options;
-- adding a status/error target if no existing element is suitable.
+- correcting the two filter label `for` attributes;
+- optionally retaining only **All** where JavaScript generates select options;
+- adding the loading/error status target requested for the interface.
 
-## External Dependencies
+Only loading-state styles are part of this data refactor. Broader responsive
+layout work remains separate.
 
-The target frontend depends on:
+## Implementation and regression coverage
 
-- `ui-language.js` for translated UI text;
-- Chart.js for the financial chart;
-- four static JSON files under `assets/database/`;
-- a static HTTP server for local and deployed use.
+1. Add tests for the five relationships, eligibility, localized fallbacks, and
+   filters.
+2. Centralize ID comparison and relationship checks within
+   `assets/js/app.js`.
+3. Consolidate search, filters, sorting, option generation, and reset behavior.
+4. Add safe output, base-field fallbacks, Workplan Year 3 output, and localized
+   messages.
+5. Split rendering into focused functions within `assets/js/app.js`.
+6. Add loading, partial failure, error, retry, and valid empty states.
+7. Run a browser smoke test for selection by `NSAs.ID`, filters, language,
+   navigation, chart replacement, loading failure, and empty results.
 
-No new JavaScript module files, framework, build system, runtime database, or
-backend service is required.
+Required regression evidence:
 
-## Maintenance Notes
+- Test `NSAs.GovBodies_Status = Pending` with a controlled fixture.
+- `NSA Profiles.ID = 44` and `NSA Profiles.ID = 46` must pass.
+- `NSA Profiles.ID = 43` must remain **Pass with source-data exceptions**.
+- Exclude `Activity.ID = 38`, `Activity.ID = 39`, `Workplan.ID = 60`, and
+  `Workplan.ID = 61` because they reference missing `NSAs.ID = 60`.
+- Keep `NSAs.ID = 41` and `Workplan.ID = 44` unassigned because
+  `NSAs.NSAProfileID` is missing.
 
-### Changes from V1
-
-| V1 | Refactored target |
-| --- | --- |
-| Three JSON datasets | Four datasets, including `NSA Profiles` |
-| NSA record used as organization and submission | Separate Profile and cycle identities |
-| `Status === Completed` entry rule | Public eligibility from `GovBodies_Status` |
-| Current type from `TypeOfSubmission` | Current type from `NSAs.NSA_Status` |
-| Children joined to the old NSA identifier | Children joined by `ParentID = NSAs.ID` |
-| Hard-coded or partial filter options | Options generated from normalized public cycles |
-| Multiple filter/search paths | One filtering pipeline |
-| Failed JSON treated as empty | Explicit loading, partial, error, and empty states |
-| Localized fallback repeated in renderers | One localized-value resolver |
-| Partial escaping | One safe-output boundary |
-| Year 1 and Year 2 results | Year 1, Year 2, and Year 3 results |
-| Monolithic controller | Existing controller organized around focused, testable functions |
-
-### Implementation order
-
-1. Add unit tests for joins, eligibility, filters, and localized values.
-2. Extract ID normalization, eligibility, Profile/cycle normalization, and
-   child selection.
-3. Consolidate search and filtering.
-4. Add localization, formatting, Year 3, and safe-output helpers.
-5. Move card rendering behind renderer functions that receive prepared data.
-6. Reduce `app.js` to bootstrap, state, events, and render coordination.
-7. Add loading, partial, error, retry, and complete reset behavior.
-8. Run unit tests and a browser smoke test.
-
-### Regression coverage
-
-- Test Pending eligibility with a controlled fixture.
-- Re-run Profiles 43, 44, and 46.
-- Profiles 44 and 46 must pass.
-- Profile 43 must remain **Pass with source-data exceptions**, with orphan
-  children excluded from valid cycles.
-- Keep the cycle with missing `NSAProfileID` unassigned.
-- Test search, combined filters, cycle selection, language switching, reset,
-  card visibility, chart replacement, loading failures, and empty states.
-
-### Deployment and evidence limits
+## Evidence limits
 
 - Keep the static deployment model.
-- Do not add a build system unless a concrete implementation need appears.
-- Do not claim SharePoint persistence, physical indexing, or performance from
-  frontend or JSON tests.
-- Keep mobile/sidebar remediation separate from the data refactor.
+- Do not claim SharePoint persistence, physical indexing, internal write
+  behavior, or query performance from JSON/frontend tests.
+- Report differences between the PDF, supplied exports, and implementation
+  instead of silently resolving them.
 
-## Short Summary
+## Summary
 
-The refactored viewer keeps the current page, JavaScript files, and deployment
-model but uses four datasets and separate organization and cycle identities.
-Focused functions inside `app.js` handle loading, normalization, relationships,
-filtering, localization, formatting, and rendering. Children remain specific to
-`NSAs.ID`, public eligibility uses `GovBodies_Status`, current type uses
-`NSA_Status`, and all exported content crosses one safe rendering boundary.
+The refactor preserves the current page, JavaScript files, and deployment model.
+`NSA Profiles.ID` identifies the organization, `NSAs.ID` identifies the selected
+`NSAs` record, `Activity.ParentID` and `Workplan.ParentID` retrieve related
+records, and `Activity.NSAProfileID` and `Workplan.NSAProfileID` validate
+ownership. Public eligibility uses `NSAs.GovBodies_Status`, and current Type of
+Submission uses `NSAs.NSA_Status`.
