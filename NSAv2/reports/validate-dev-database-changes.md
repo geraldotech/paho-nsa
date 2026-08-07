@@ -58,8 +58,8 @@ NSA Profiles.ID
 ```
 
 `NSA Profiles.ID` identifies the organization. `NSAs.ID` identifies a specific
-submission/cycle. This separation prevents a submission ID from being treated
-as the permanent organization identifier.
+`NSAs` record. This separation prevents `NSAs.ID` from being treated as the
+permanent organization identifier.
 
 ```mermaid
 graph LR
@@ -80,14 +80,16 @@ graph LR
 The PDF defines both relationships, with different purposes:
 
 - Use `Activity.ParentID = NSAs.ID` and `Workplan.ParentID = NSAs.ID` to
-  retrieve records for a specific submission/cycle.
-- Use child `NSAProfileID = NSA Profiles.ID` only for a direct
-  organization-level join, such as grouping records across cycles or validating
-  organization ownership.
+  retrieve records for a specific `NSAs.ID`.
+- Use `Activity.NSAProfileID = NSA Profiles.ID` and
+  `Workplan.NSAProfileID = NSA Profiles.ID` only for a direct
+  organization-level join, such as grouping records linked to the same
+  `NSA Profiles.ID` or validating organization ownership.
 
-When the submission/cycle matters, `ParentID` is the primary relationship.
-`NSAProfileID` does not replace it because one organization may have multiple
-NSAs records.
+When the exact `NSAs` record matters, `Activity.ParentID` and
+`Workplan.ParentID` are the primary relationships. `Activity.NSAProfileID` and
+`Workplan.NSAProfileID` do not replace them because one `NSA Profiles.ID` may be
+referenced by multiple `NSAs` records.
 
 [Back to top](#top)
 
@@ -114,8 +116,10 @@ Exceptions:
    - `NSA-2026-60-WPA_1`
    - `NSA-2026-60-WPA_2`
 
-The four child records contain `NSAProfileID = 43`, but their submission/cycle
-relationship cannot be confirmed without the parent record.
+The four `Activity` and `Workplan` records contain
+`Activity.NSAProfileID = 43` or `Workplan.NSAProfileID = 43`, but their
+relationship through `Activity.ParentID` or `Workplan.ParentID` cannot be
+confirmed because `NSAs.ID = 60` is missing.
 
 ### Functional fields
 
